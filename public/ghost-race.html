@@ -78,14 +78,6 @@
            box-shadow: 0 0 15px var(--accent-glow);
            transform: translateY(-1px);
        }
-       #chat-toggle-btn {
-           border-color: rgba(34,211,238,0.3);
-           color: #22d3ee;
-           padding: 10px;
-           font-family: 'Inter', sans-serif;
-           text-transform: none;
-           letter-spacing: normal;
-       }
        .diff-selector {
            display: flex; background: rgba(255,255,255,0.03);
            border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.05);
@@ -192,14 +184,6 @@
            cursor: pointer; transition: all 0.25s; text-transform: uppercase;
        }
        .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
-       .chat-input {
-           width: 100%; background: rgba(7,10,18,0.8);
-           border: 1px solid rgba(255,255,255,0.08);
-           border-radius: 12px; padding: 12px 16px;
-           color: var(--text-main); outline: none;
-           font-family: 'Inter', sans-serif;
-       }
-       .chat-input:focus { border-color: var(--accent); }
        .btn-ghost-select {
            background: rgba(255,255,255,0.03);
            border: 1px solid rgba(255,255,255,0.1);
@@ -213,133 +197,7 @@
            background: rgba(244,114,182,0.08);
            transform: translateX(4px);
        }
-       .credit-pill {
-           background: rgba(34,211,238,0.1);
-           border: 1px solid rgba(34,211,238,0.2);
-           color: #22d3ee;
-           padding: 4px 10px;
-           border-radius: 999px;
-           font-size: 0.65rem;
-           font-weight: 700;
-       }
-       .credit-pill.zero {
-           background: rgba(248,113,113,0.1);
-           border-color: rgba(248,113,113,0.2);
-           color: #f87171;
-       }
-       .chat-card {
-           max-width: 600px;
-           height: 80vh;
-           max-height: 700px;
-       }
-       .chat-messages {
-           flex: 1;
-           overflow-y: auto;
-           display: flex;
-           flex-direction: column;
-           gap: 14px;
-           padding: 8px;
-           scrollbar-width: thin;
-           scrollbar-color: #22d3ee transparent;
-       }
-       .chat-messages::-webkit-scrollbar { width: 5px; }
-       .chat-messages::-webkit-scrollbar-thumb { background: #22d3ee; border-radius: 10px; }
-       .msg-bubble {
-           max-width: 82%;
-           padding: 14px 18px;
-           border-radius: 16px;
-           font-size: 0.95rem;
-           line-height: 1.6;
-           animation: msgIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
-           word-break: break-word;
-           position: relative;
-           backdrop-filter: blur(8px);
-       }
-       .msg-user {
-           align-self: flex-end;
-           background: rgba(34,211,238,0.08);
-           border: 1px solid rgba(34,211,238,0.15);
-           color: var(--text-main);
-           border-bottom-right-radius: 4px;
-       }
-       .msg-ai {
-           align-self: flex-start;
-           background: rgba(255,255,255,0.03);
-           border: 1px solid rgba(255,255,255,0.06);
-           color: var(--text-main);
-           border-bottom-left-radius: 4px;
-       }
-       .chat-input-wrap {
-           display: flex;
-           gap: 10px;
-           padding: 12px;
-           background: rgba(7,10,18,0.8);
-           border-radius: 14px;
-           border: 1px solid rgba(255,255,255,0.08);
-       }
-       .chat-send {
-           background: #22d3ee;
-           color: var(--bg-base);
-           border: none;
-           border-radius: 10px;
-           padding: 10px 20px;
-           font-weight: 700;
-           cursor: pointer;
-           transition: all 0.25s;
-       }
-       .chat-send:hover:not(:disabled) {
-           box-shadow: 0 0 20px rgba(34,211,238,0.45);
-           transform: scale(1.05);
-       }
-       .chat-send:disabled {
-           opacity: 0.4;
-           cursor: not-allowed;
-       }
-       .typing-indicator {
-           display: flex;
-           gap: 6px;
-           padding: 14px 18px;
-           align-self: flex-start;
-           background: rgba(255,255,255,0.03);
-           border: 1px solid rgba(255,255,255,0.06);
-           border-radius: 16px;
-           border-bottom-left-radius: 4px;
-       }
-       .typing-dot {
-           width: 7px;
-           height: 7px;
-           background: #22d3ee;
-           border-radius: 50%;
-           animation: typingBounce 1.4s infinite ease-in-out both;
-       }
-       .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-       .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-       .ad-gate { text-align: center; padding: 20px; }
-       .ad-gate h3 { font-size: 1.1rem; margin-bottom: 8px; color: #22d3ee; }
-       .ad-gate p { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 16px; }
-       .ad-container {
-           min-height: 120px;
-           background: rgba(0,0,0,0.3);
-           border-radius: 12px;
-           margin-bottom: 16px;
-           display: flex;
-           align-items: center;
-           justify-content: center;
-           border: 1px dashed rgba(255,255,255,0.1);
-       }
-       .btn-secondary {
-           background: rgba(255,255,255,0.05);
-           color: var(--text-main);
-           padding: 12px;
-           border-radius: 12px;
-           border: 1px solid rgba(255,255,255,0.1);
-           cursor: pointer;
-           width: 100%;
-       }
-       #ad-modal .btn-primary { background: #22d3ee; }
        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-       @keyframes msgIn { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-       @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
    </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
@@ -364,12 +222,6 @@
    </div>
 
    <div class="fixed top-4 right-4 z-50 flex items-center gap-3">
-       <span id="chat-credit-pill-main" class="credit-pill">3 Credits</span>
-       <button id="chat-toggle-btn" class="corner-btn chat">
-           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
-           </svg>
-       </button>
        <a href="index.html" class="corner-btn hover:border-red-400">
            <span>✕ EXIT</span>
        </a>
@@ -419,8 +271,6 @@
            </button>
        </div>
    </main>
-
-
 
    <div class="modal-overlay" id="ghost-select-modal">
        <div class="modal-card">
@@ -492,21 +342,6 @@
            ghostSelectModal: document.getElementById('ghost-select-modal'),
            ghostOptionsList: document.getElementById('ghost-options-list'),
            restartBtn: document.getElementById('restart-btn')
-       };
-
-       const chatState = { credits: 3 };
-       const chatEls = {
-           chatToggleBtn: document.getElementById('chat-toggle-btn'),
-           chatModal: document.getElementById('chat-modal'),
-           chatMessages: document.getElementById('chat-messages'),
-           chatInput: document.getElementById('chat-input'),
-           chatSend: document.getElementById('chat-send'),
-           closeChatBtn: document.getElementById('close-chat-btn'),
-           creditPillMain: document.getElementById('chat-credit-pill-main'),
-           chatCreditPill: document.getElementById('chat-credit-pill'),
-           adModal: document.getElementById('ad-modal'),
-           watchAdBtn: document.getElementById('watch-ad-btn'),
-           adCloseBtn: document.getElementById('ad-close-btn')
        };
 
        els.thunderToggleBtn.addEventListener('click', () => {
@@ -904,130 +739,8 @@
            requestAnimationFrame(thunderLoop);
        })();
 
-       function updateCreditDisplay() {
-           const text = chatState.credits + ' Credit' + (chatState.credits !== 1 ? 's' : '');
-           if(chatEls.creditPillMain) chatEls.creditPillMain.textContent = text;
-           if(chatEls.chatCreditPill) chatEls.chatCreditPill.textContent = text;
-           if (chatState.credits === 0) {
-               chatEls.creditPillMain?.classList.add('zero');
-               chatEls.chatCreditPill?.classList.add('zero');
-           } else {
-               chatEls.creditPillMain?.classList.remove('zero');
-               chatEls.chatCreditPill?.classList.remove('zero');
-           }
-       }
-
-       function useCredit() {
-           if (chatState.credits <= 0) {
-               chatEls.adModal.classList.add('active');
-               return false;
-           }
-           chatState.credits--;
-           updateCreditDisplay();
-           return true;
-       }
-
-       chatEls.chatToggleBtn.addEventListener('click', () => {
-           chatEls.chatModal.classList.add('active');
-           chatEls.chatInput.focus();
-       });
-
-       chatEls.closeChatBtn.addEventListener('click', () => {
-           chatEls.chatModal.classList.remove('active');
-       });
-
-       chatEls.adCloseBtn.addEventListener('click', () => {
-           chatEls.adModal.classList.remove('active');
-       });
-
-       chatEls.watchAdBtn.addEventListener('click', () => {
-           chatState.credits = 3;
-           updateCreditDisplay();
-           chatEls.adModal.classList.remove('active');
-       });
-
-       function addMessage(text, role) {
-           const bubble = document.createElement('div');
-           bubble.className = `msg-bubble msg-${role}`;
-           if (role === 'ai') {
-               bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
-           } else {
-               bubble.textContent = text;
-           }
-           chatEls.chatMessages.appendChild(bubble);
-           chatEls.chatMessages.scrollTop = chatEls.chatMessages.scrollHeight;
-       }
-
-       function escapeHtml(str) {
-           const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
-       }
-
-       function showTypingIndicator() {
-           const id = 'typing-' + Date.now();
-           const div = document.createElement('div');
-           div.id = id; div.className = 'typing-indicator';
-           div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-           chatEls.chatMessages.appendChild(div);
-           chatEls.chatMessages.scrollTop = chatEls.chatMessages.scrollHeight;
-           return id;
-       }
-
-       function removeTypingIndicator(id) {
-           const el = document.getElementById(id);
-           if (el) el.remove();
-       }
-
-       function sanitizeText(text) {
-           if (!text) return '';
-           return text.replace(/[—–]/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[^ -~]/g, '').replace(/\s+/g, ' ').trim();
-       }
-
-       async function sendChatMessage() {
-           const text = chatEls.chatInput.value.trim();
-           if (!text) return;
-           if (!useCredit()) return;
-
-           addMessage(text, 'user');
-           chatEls.chatInput.value = '';
-           chatEls.chatSend.disabled = true;
-           const typingId = showTypingIndicator();
-
-           try {
-               const res = await fetch('/api/chat', {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ message: text })
-               });
-
-               removeTypingIndicator(typingId);
-
-               if (!res.ok) {
-                   const errData = await res.json().catch(() => ({}));
-                   throw new Error(errData.error || 'Server error');
-               }
-
-               const data = await res.json();
-               const cleanText = sanitizeText(data.text);
-               addMessage(cleanText, 'ai');
-
-           } catch (err) {
-               removeTypingIndicator(typingId);
-               addMessage('Sorry, I could not connect to the AI. Please try again later.', 'ai');
-               chatState.credits++;
-               updateCreditDisplay();
-           } finally {
-               chatEls.chatSend.disabled = false;
-           }
-       }
-
-       chatEls.chatSend.addEventListener('click', sendChatMessage);
-       chatEls.chatInput.addEventListener('keydown', (e) => {
-           if (e.key === 'Enter') sendChatMessage();
-       });
-
        document.addEventListener('DOMContentLoaded', () => {
            loadRandomParagraph();
-           updateCreditDisplay();
            updateCaretColor();
        });
    </script>
