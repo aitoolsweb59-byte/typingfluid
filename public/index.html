@@ -1,0 +1,1015 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>FluidType | AI Learning Engine</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        :root {
+            --bg-base: #070a12;
+            --bg-surface: #0f1525;
+            --text-main: #e2e8f0;
+            --text-dim: #64748b;
+            --error-color: #f87171;
+            --error-bg: rgba(248,113,113,0.15);
+            --accent: #22d3ee;
+            --accent-glow: rgba(34,211,238,0.45);
+            --accent-dim: #0891b2;
+            --caret-color: #22d3ee;
+            --caret-glow: rgba(34,211,238,0.45);
+        }
+        * { box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: 'Inter', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        .ambient-bg {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none;
+            background:
+                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34,211,238,0.08), transparent),
+                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.06), transparent);
+        }
+        .dot-grid {
+            position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
+            background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .scanline {
+            position: fixed; inset: 0; pointer-events: none; z-index: 1;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34,211,238,0.008) 2px, rgba(34,211,238,0.008) 4px);
+        }
+        #thunder-canvas {
+            position: fixed; inset: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 999;
+        }
+        .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 2px; }
+        .gradient-text {
+            background: linear-gradient(135deg, #22d3ee, #a78bfa);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .corner-btn {
+            background: rgba(15,21,37,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s;
+            display: flex; align-items: center; gap: 6px;
+            backdrop-filter: blur(8px);
+            text-decoration: none;
+        }
+        .corner-btn:hover {
+            border-color: var(--accent);
+            box-shadow: 0 0 15px var(--accent-glow);
+            transform: translateY(-1px);
+        }
+        .corner-btn.race { border-color: rgba(252,211,77,0.3); color: #fcd34d; }
+        .corner-btn.race:hover { border-color: #fcd34d; box-shadow: 0 0 15px rgba(252,211,77,0.25); }
+        .corner-btn.ghost { border-color: rgba(192,132,252,0.3); color: #c084fc; }
+        .corner-btn.ghost:hover { border-color: #c084fc; box-shadow: 0 0 15px rgba(192,132,252,0.25); }
+        .corner-btn.chat { border-color: rgba(34,211,238,0.3); color: var(--accent); padding: 10px; }
+        .corner-btn.chat:hover { box-shadow: 0 0 20px var(--accent-glow); }
+        .metric-label {
+            font-size: 0.65rem; color: var(--text-dim); font-weight: 700;
+            text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px;
+        }
+        .metric-value {
+            font-family: 'Orbitron', sans-serif; font-size: 2.8rem; font-weight: 900;
+            line-height: 1; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.08);
+        }
+        .metric-suffix { font-size: 1.4rem; color: var(--text-dim); margin-left: 2px; }
+        #typing-container {
+            font-family: 'Fira Code', monospace; line-height: 1.6;
+            --line-height: calc(1.65rem * 2.2);
+            height: calc(5 * var(--line-height));
+            overflow-y: auto; overflow-x: hidden;
+            padding: 1.25rem; border-radius: 18px;
+            background: rgba(15,21,37,0.55);
+            border: 1px solid rgba(255,255,255,0.06);
+            scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+            scroll-behavior: auto; overscroll-behavior: contain;
+            position: relative; outline: none;
+            transition: border-color 0.3s, box-shadow 0.3s;
+            font-size: 1.65rem;
+        }
+        #typing-container:focus, #typing-container:focus-within {
+            border-color: rgba(34,211,238,0.2);
+            box-shadow: inset 0 0 30px rgba(34,211,238,0.03), 0 0 30px rgba(34,211,238,0.04);
+        }
+        #typing-container::-webkit-scrollbar { width: 5px; }
+        #typing-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .char {
+            white-space: pre; border-radius: 4px;
+            transition: color 0.08s ease, background-color 0.08s ease;
+            display: inline-block;
+        }
+        .char.untyped { color: var(--text-dim); }
+        .char.correct { color: #f8fafc; text-shadow: 0 0 10px rgba(248,250,252,0.15); }
+        .char.incorrect { color: var(--error-color); background-color: var(--error-bg); }
+        .caret {
+            border-left: 2.5px solid var(--caret-color);
+            box-shadow: -3px 0 12px var(--caret-glow), -1px 0 4px var(--caret-glow);
+            animation: blink 1.1s infinite cubic-bezier(0.4,0,0.2,1);
+            margin-left: -1px;
+        }
+        .caret-static {
+            border-left: 2.5px solid var(--caret-color);
+            box-shadow: -3px 0 12px var(--caret-glow), -1px 0 4px var(--caret-glow);
+            margin-left: -1px;
+        }
+        @keyframes blink { 0%,100%{border-color:transparent;box-shadow:none;} 50%{border-color:var(--caret-color);box-shadow:-3px 0 12px var(--caret-glow);} }
+        #mobile-input-target {
+            position: absolute; opacity: 0; top: 0; left: 0;
+            height: 100%; width: 100%; z-index: -1; pointer-events: none;
+        }
+        #focus-overlay {
+            position: absolute; inset: 0;
+            background: rgba(7,10,18,0.7); backdrop-filter: blur(6px);
+            border-radius: 18px; display: flex; align-items: center; justify-content: center;
+            transition: opacity 0.3s; pointer-events: none;
+        }
+        #focus-overlay.hidden { opacity: 0; }
+        .focus-pill {
+            display: flex; align-items: center; gap: 10px;
+            padding: 12px 24px; border-radius: 999px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+            font-size: 0.9rem; color: var(--text-main); pointer-events: auto; cursor: text;
+            transition: all 0.3s;
+        }
+        .focus-pill:hover { border-color: rgba(34,211,238,0.2); background: rgba(34,211,238,0.04); }
+        .diff-selector {
+            display: flex; background: rgba(255,255,255,0.03);
+            border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.05);
+        }
+        .diff-btn {
+            padding: 10px 22px; border-radius: 10px; font-size: 0.85rem; font-weight: 600;
+            transition: all 0.25s; cursor: pointer; border: none; background: transparent;
+            color: var(--text-dim); font-family: 'Inter', sans-serif;
+        }
+        .diff-btn:hover { color: var(--text-main); }
+        .diff-btn.active {
+            color: var(--accent); background: rgba(34,211,238,0.1);
+            box-shadow: 0 2px 12px rgba(34,211,238,0.08);
+        }
+        .restart-btn {
+            color: var(--text-dim); transition: all 0.3s; padding: 14px; border-radius: 50%;
+            background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
+        }
+        .restart-btn:hover { color: var(--accent); background: rgba(34,211,238,0.08); transform: rotate(-180deg) scale(1.1); }
+        .modal-overlay {
+            position: fixed; inset: 0; z-index: 300;
+            background: rgba(7,10,18,0.85); backdrop-filter: blur(12px);
+            display: none; align-items: center; justify-content: center;
+            padding: 16px; opacity: 0; transition: opacity 0.3s ease;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-card {
+            background: rgba(15,21,37,0.95);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 24px;
+            width: 100%; max-width: 480px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            display: flex; flex-direction: column; gap: 16px;
+        }
+        .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
+        .chat-messages {
+            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
+            scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+        }
+        .chat-messages::-webkit-scrollbar { width: 5px; }
+        .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+        .msg-bubble {
+            max-width: 82%; padding: 14px 18px; border-radius: 16px;
+            font-size: 0.95rem; line-height: 1.6; animation: msgIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+            word-break: break-word; position: relative;
+            backdrop-filter: blur(8px);
+        }
+        @keyframes msgIn { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .msg-user {
+            align-self: flex-end;
+            background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15);
+            color: var(--text-main); border-bottom-right-radius: 4px;
+        }
+        .msg-ai {
+            align-self: flex-start;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            color: var(--text-main); border-bottom-left-radius: 4px;
+        }
+        .chat-input-wrap {
+            display: flex; gap: 10px; padding: 12px;
+            background: rgba(7,10,18,0.8); border-radius: 14px;
+            border: 1px solid rgba(255,255,255,0.08);
+        }
+        .chat-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text-main); font-family: 'Inter', sans-serif;
+            font-size: 0.95rem; padding: 8px 12px;
+        }
+        .chat-input::placeholder { color: var(--text-dim); }
+        .chat-send {
+            background: var(--accent); color: var(--bg-base); border: none;
+            border-radius: 10px; padding: 10px 20px; font-weight: 700;
+            font-size: 0.8rem; cursor: pointer; transition: all 0.25s;
+            font-family: 'Orbitron', sans-serif; letter-spacing: 1px;
+        }
+        .chat-send:hover:not(:disabled) { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.05); }
+        .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+        .typing-indicator {
+            display: flex; gap: 6px; padding: 14px 18px; align-self: flex-start;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px; border-bottom-left-radius: 4px;
+        }
+        .typing-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
+        .ad-gate { text-align: center; padding: 20px; }
+        .ad-gate h3 { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; margin-bottom: 8px; color: var(--accent); }
+        .ad-gate p { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 16px; }
+        .ad-container { min-height: 120px; background: rgba(0,0,0,0.3); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; border: 1px dashed rgba(255,255,255,0.1); }
+        .btn-primary {
+            background: var(--accent); color: var(--bg-base);
+            font-family: 'Orbitron', sans-serif; font-weight: 700;
+            padding: 12px; border-radius: 12px; border: none;
+            cursor: pointer; transition: all 0.25s; text-transform: uppercase;
+            width: 100%;
+        }
+        .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+        .btn-secondary {
+            background: rgba(255,255,255,0.05); color: var(--text-main);
+            font-family: 'Orbitron', sans-serif; font-weight: 700;
+            padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);
+            cursor: pointer; transition: all 0.25s; text-transform: uppercase;
+            width: 100%;
+        }
+        .btn-secondary:hover { border-color: var(--accent); background: rgba(34,211,238,0.08); }
+        .thunder-select {
+            background: rgba(15,21,37,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: var(--text-main);
+            padding: 6px 12px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-family: 'Orbitron', sans-serif;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            outline: none;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+        }
+        .thunder-select:focus { border-color: var(--accent); }
+        .msg-limit-badge {
+            position: absolute; top: -8px; right: -8px;
+            background: var(--accent); color: var(--bg-base);
+            font-size: 0.6rem; font-weight: 800; font-family: 'Orbitron', sans-serif;
+            width: 20px; height: 20px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--bg-base);
+        }
+        .credit-pill {
+            background: rgba(34,211,238,0.1);
+            border: 1px solid rgba(34,211,238,0.2);
+            color: var(--accent);
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.65rem;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
+    <div class="ambient-bg"></div>
+    <div class="dot-grid"></div>
+    <div class="scanline"></div>
+    <canvas id="thunder-canvas"></canvas>
+
+    <div class="fixed top-4 left-4 z-50 flex items-center gap-2 flex-wrap">
+        <button id="init-btn" class="corner-btn">INIT</button>
+        <a href="Race.html" class="corner-btn race">RACE</a>
+        <a href="ghost-race.html" class="corner-btn ghost">GHOST</a>
+    </div>
+
+    <div class="fixed top-4 right-4 z-50 flex items-center gap-3">
+        <span id="credit-pill" class="credit-pill">3 Credits</span>
+        <button id="chat-toggle-btn" class="corner-btn chat relative">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+        </button>
+    </div>
+
+    <main class="w-full max-w-4xl flex flex-col gap-5 z-10 my-auto pt-20">
+        <div class="flex justify-between items-center border-b border-white/10 pb-4">
+            <div>
+                <h1 class="text-3xl font-black tracking-tight brand">FLUID<span class="gradient-text">TYPE</span></h1>
+                <p class="text-xs text-[#475569] tracking-widest uppercase font-bold mt-1" id="topic-label">Random Practice</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <span class="text-xs text-[#475569] uppercase tracking-widest font-bold">Thunder</span>
+                <select id="thunder-color-select" class="thunder-select">
+                    <option value="none">None</option>
+                    <option value="purple" selected>Purple</option>
+                    <option value="green">Green</option>
+                    <option value="blue">Blue</option>
+                    <option value="yellow">Yellow</option>
+                    <option value="red">Red</option>
+                    <option value="orange">Orange</option>
+                    <option value="disco">Disco</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="flex justify-center">
+            <div class="diff-selector" id="difficulty-selector">
+                <button data-level="1" class="diff-btn active">a-z</button>
+                <button data-level="2" class="diff-btn">A-Z</button>
+                <button data-level="3" class="diff-btn">A-Z + !?</button>
+            </div>
+        </div>
+
+        <div class="flex justify-between items-end px-2 flex-wrap gap-4">
+            <div class="flex gap-8 sm:gap-10">
+                <div class="flex flex-col"><span class="metric-label">WPM</span><span class="metric-value" id="wpm">0</span></div>
+                <div class="flex flex-col"><span class="metric-label">Accuracy</span><span class="metric-value"><span id="accuracy">100</span><span class="metric-suffix">%</span></span></div>
+                <div class="flex flex-col"><span class="metric-label">Progress</span><span class="metric-value"><span id="progress">0</span><span class="metric-suffix">%</span></span></div>
+            </div>
+        </div>
+
+        <div id="typing-container" class="relative w-full cursor-text select-none" tabindex="0">
+            <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+            <div id="text-display" class="flex flex-wrap pointer-events-none"></div>
+            <div id="focus-overlay" class="hidden">
+                <div class="focus-pill" id="focus-pill">
+                    <svg class="w-5 h-5 text-[#22d3ee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                    Tap to engage
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center">
+            <button id="restart-btn" class="restart-btn" aria-label="Restart Drill">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+            </button>
+        </div>
+    </main>
+
+    <div class="modal-overlay" id="chat-modal">
+        <div class="modal-card chat-card">
+            <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                <h3 class="font-bold text-lg brand">AI <span class="gradient-text">CHAT</span></h3>
+                <div class="flex items-center gap-3">
+                    <span class="credit-pill" id="chat-credit-pill">3 Credits</span>
+                    <button class="text-sm text-[#64748b] hover:text-white transition-colors" id="close-chat-btn">✕</button>
+                </div>
+            </div>
+            <div class="chat-messages" id="chat-messages">
+                <div class="msg-bubble msg-ai">Welcome to FluidType AI. Ask me anything and I will generate a typing paragraph for you.</div>
+            </div>
+            <div class="chat-input-wrap">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off">
+                <button class="chat-send" id="chat-send">Send</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal-overlay" id="ad-modal">
+        <div class="modal-card ad-gate">
+            <h3>Out of Credits</h3>
+            <p>You have used all your free AI messages. Watch one ad to get 3 more credits.</p>
+            <div class="ad-container" id="monetag-ad-container">
+                <span class="text-xs text-[#475569]">Ad will appear here</span>
+            </div>
+            <button class="btn-primary" id="watch-ad-btn">Watch Ad for 3 Credits</button>
+            <button class="btn-secondary mt-2" id="ad-close-btn">Close</button>
+        </div>
+    </div>
+
+    <script>
+        const PARAGRAPHS = [
+            "The journey of self-improvement begins with a single keystroke. Every great typist was once a beginner who refused to give up. Your fingers are learning a new language, and patience is the only teacher that matters.",
+            "Discipline is the bridge between goals and accomplishment. When you sit down to practice typing today, you are not just moving your fingers. You are building neural pathways that will serve you for a lifetime.",
+            "Speed comes from accuracy, not the other way around. Focus on hitting the right keys first, and the velocity will follow naturally. Trust the process and celebrate small victories every day.",
+            "Consistency beats intensity every single time. Twenty minutes of focused typing practice daily will transform you faster than three hours once a week. Show up for yourself even when motivation is low.",
+            "Your comfort zone is a beautiful place, but nothing ever grows there. Push through the awkward phase of learning home row keys. Soon your hands will dance across the keyboard without conscious thought.",
+            "Mistakes are proof that you are trying. Every incorrect keystroke is data for your brain to adjust. Do not fear the red highlights; embrace them as stepping stones toward mastery.",
+            "The professional typist and the amateur both feel the same urge to look at the keyboard. The difference is that the professional has trained their muscle memory to resist that urge through thousands of repetitions.",
+            "Focus on progress, not perfection. You do not need to type at one hundred words per minute today. You only need to be better than you were yesterday. That is the only competition that truly matters.",
+            "Your typing speed is a reflection of your thinking speed. As you eliminate the friction between thought and screen, your ideas will flow more freely. The keyboard becomes an extension of your mind.",
+            "Greatness is a lot of small things done well. Each correct keystroke is a vote for the person you want to become. Stack those votes daily and watch your skills compound over time.",
+            "The most successful people in any field share one trait: deliberate practice. They do not just type; they analyze their weaknesses and target them specifically. Identify your problem keys and conquer them.",
+            "Rest is part of training. Your fingers and mind need recovery to solidify new skills. Take breaks, stretch your hands, and return with fresh eyes. Sustainable growth always outlasts burnout.",
+            "Comparison is the thief of joy. Someone else might type faster today, but they are not on your journey. Your only benchmark is your previous self, and every session is a chance to surpass that version.",
+            "Technology rewards those who can communicate quickly and clearly. By mastering touch typing, you are investing in the most fundamental skill of the digital age. The time you spend practicing pays dividends forever.",
+            "Believe you can and you are halfway there. The physical act of typing is simple; the mental barrier of doubt is what stops most people. Commit to the practice and let your results speak for themselves."
+        ];
+
+        const CARET_COLORS = {
+            purple: { color: '#c084fc', glow: 'rgba(192,132,252,0.45)' },
+            green:  { color: '#4ade80', glow: 'rgba(74,222,128,0.45)' },
+            blue:   { color: '#22d3ee', glow: 'rgba(34,211,238,0.45)' },
+            yellow: { color: '#facc15', glow: 'rgba(250,204,21,0.45)' },
+            red:    { color: '#f87171', glow: 'rgba(248,113,113,0.45)' },
+            orange: { color: '#fb923c', glow: 'rgba(251,146,60,0.45)' },
+            disco:  { color: '#22d3ee', glow: 'rgba(34,211,238,0.45)' },
+            none:   { color: '#22d3ee', glow: 'rgba(34,211,238,0.45)' }
+        };
+
+        const state = {
+            targetDifficulty: 1,
+            rawText: "",
+            charArray: [],
+            typedArray: [],
+            currentIndex: 0,
+            startTime: null,
+            timerActive: false,
+            totalKeystrokes: 0,
+            correctKeystrokes: 0,
+            isTypingStarted: false,
+            isBlocked: false,
+            thunderColor: "purple",
+            thunderEnabled: true,
+            credits: 3
+        };
+
+        const els = {
+            container: document.getElementById('typing-container'),
+            display: document.getElementById('text-display'),
+            mobileInput: document.getElementById('mobile-input-target'),
+            focusOverlay: document.getElementById('focus-overlay'),
+            wpm: document.getElementById('wpm'),
+            accuracy: document.getElementById('accuracy'),
+            progress: document.getElementById('progress'),
+            restartBtn: document.getElementById('restart-btn'),
+            diffButtons: document.querySelectorAll('.diff-btn'),
+            thunderCanvas: document.getElementById('thunder-canvas'),
+            thunderSelect: document.getElementById('thunder-color-select'),
+            chatToggleBtn: document.getElementById('chat-toggle-btn'),
+            chatModal: document.getElementById('chat-modal'),
+            chatMessages: document.getElementById('chat-messages'),
+            chatInput: document.getElementById('chat-input'),
+            chatSend: document.getElementById('chat-send'),
+            closeChatBtn: document.getElementById('close-chat-btn'),
+            creditPill: document.getElementById('credit-pill'),
+            chatCreditPill: document.getElementById('chat-credit-pill'),
+            adModal: document.getElementById('ad-modal'),
+            watchAdBtn: document.getElementById('watch-ad-btn'),
+            adCloseBtn: document.getElementById('ad-close-btn'),
+            topicLabel: document.getElementById('topic-label'),
+            initBtn: document.getElementById('init-btn')
+        };
+
+        function updateCaretColor() {
+            const c = CARET_COLORS[state.thunderColor] || CARET_COLORS.blue;
+            document.documentElement.style.setProperty('--caret-color', c.color);
+            document.documentElement.style.setProperty('--caret-glow', c.glow);
+        }
+
+        function loadRandomParagraph() {
+            const idx = Math.floor(Math.random() * PARAGRAPHS.length);
+            state.rawText = PARAGRAPHS[idx];
+            processTextForDifficulty(state.rawText);
+            resetDrill();
+        }
+
+        function processTextForDifficulty(text) {
+            let processed = text;
+            if (state.targetDifficulty === 1) {
+                processed = processed.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+            } else if (state.targetDifficulty === 2) {
+                processed = processed.replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+            } else {
+                processed = processed.replace(/\s+/g, ' ').trim();
+            }
+            state.charArray = processed.split('');
+        }
+
+        function renderTextUI() {
+            els.display.innerHTML = '';
+            state.charArray.forEach((char, index) => {
+                const span = document.createElement('span');
+                span.innerText = char;
+                span.className = 'char untyped';
+                span.id = `char-${index}`;
+                els.display.appendChild(span);
+            });
+            updateCursorUI();
+        }
+
+        function updateCursorUI() {
+            document.querySelectorAll('.char').forEach(el => el.classList.remove('caret', 'caret-static'));
+            if (state.currentIndex < state.charArray.length) {
+                const active = document.getElementById(`char-${state.currentIndex}`);
+                if (active) active.classList.add(state.timerActive ? 'caret-static' : 'caret');
+            }
+        }
+
+        function removeCursorUI() {
+            document.querySelectorAll('.char').forEach(el => el.classList.remove('caret', 'caret-static'));
+        }
+
+        function resetDrill() {
+            state.typedArray = [];
+            state.currentIndex = 0;
+            state.startTime = null;
+            state.timerActive = false;
+            state.totalKeystrokes = 0;
+            state.correctKeystrokes = 0;
+            state.isBlocked = false;
+            state.isTypingStarted = false;
+            els.mobileInput.value = '';
+            els.wpm.textContent = '0';
+            els.accuracy.textContent = '100';
+            els.progress.textContent = '0';
+            els.container.scrollTop = 0;
+            renderTextUI();
+            els.mobileInput.focus();
+        }
+
+        els.initBtn.addEventListener('click', loadRandomParagraph);
+        els.restartBtn.addEventListener('click', resetDrill);
+        els.container.addEventListener('click', () => els.mobileInput.focus());
+        els.mobileInput.addEventListener('focus', () => {
+            els.focusOverlay.classList.add('hidden');
+            updateCursorUI();
+        });
+        els.mobileInput.addEventListener('blur', () => {
+            if (state.currentIndex < state.charArray.length) {
+                els.focusOverlay.classList.remove('hidden');
+                removeCursorUI();
+            }
+        });
+
+        els.diffButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                els.diffButtons.forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                state.targetDifficulty = parseInt(e.target.getAttribute('data-level'));
+                if (state.rawText) {
+                    processTextForDifficulty(state.rawText);
+                    resetDrill();
+                }
+            });
+        });
+
+        els.thunderSelect.addEventListener('change', (e) => {
+            state.thunderColor = e.target.value;
+            state.thunderEnabled = e.target.value !== 'none';
+            updateCaretColor();
+            updateCursorUI();
+        });
+
+        function getLineHeight() {
+            const c0 = document.getElementById('char-0');
+            if (!c0) {
+                const fs = parseFloat(window.getComputedStyle(els.container).fontSize) || 26.4;
+                return fs * 2.2;
+            }
+            for (let i = 1; i < state.charArray.length; i++) {
+                const c = document.getElementById(`char-${i}`);
+                if (c && c.offsetTop > c0.offsetTop + 2) return c.offsetTop - c0.offsetTop;
+            }
+            const style = window.getComputedStyle(els.container);
+            const lh = style.lineHeight;
+            if (lh === 'normal') { const fs = parseFloat(style.fontSize); return fs * 1.6; }
+            return parseFloat(lh) || 58;
+        }
+
+        function autoScroll() {
+            if (!state.isTypingStarted || state.charArray.length === 0) return;
+            const activeChar = document.getElementById(`char-${state.currentIndex}`);
+            if (!activeChar) return;
+            const container = els.container;
+            const charTop = activeChar.offsetTop;
+            const charHeight = activeChar.offsetHeight || 20;
+            const lineHeight = getLineHeight();
+            const visibleTop = container.scrollTop;
+            const visibleHeight = container.clientHeight;
+            if (charTop + charHeight > visibleTop + visibleHeight - lineHeight * 0.3) {
+                container.scrollTop = charTop - lineHeight * 3;
+            } else if (charTop < visibleTop + lineHeight * 0.3) {
+                container.scrollTop = Math.max(0, charTop - lineHeight);
+            }
+        }
+
+        els.mobileInput.addEventListener('input', handleTypingInput);
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && e.target === document.body) {
+                e.preventDefault(); els.mobileInput.focus();
+            }
+        });
+
+        function handleTypingInput() {
+            const inputValue = els.mobileInput.value;
+            const inputLength = inputValue.length;
+
+            if (!state.timerActive && inputLength > 0 && !state.isBlocked) {
+                state.timerActive = true;
+                state.startTime = performance.now();
+                requestAnimationFrame(calculateMetricsLoop);
+            }
+            if (!state.isTypingStarted && inputLength > 0) {
+                state.isTypingStarted = true;
+            }
+
+            if (inputLength < state.currentIndex) {
+                const diff = state.currentIndex - inputLength;
+                for (let i = 0; i < diff; i++) {
+                    if (state.currentIndex > 0) {
+                        state.currentIndex--;
+                        state.typedArray.pop();
+                        const span = document.getElementById(`char-${state.currentIndex}`);
+                        if (span) span.className = 'char untyped';
+                    }
+                }
+                state.isBlocked = false;
+                updateCursorUI();
+                updateProgress();
+                autoScroll();
+                return;
+            }
+
+            if (state.isBlocked) {
+                if (inputLength > state.currentIndex) {
+                    const typedChar = inputValue[state.currentIndex];
+                    const expectedChar = state.charArray[state.currentIndex];
+                    if (typedChar === expectedChar) {
+                        state.isBlocked = false;
+                        state.typedArray.push(typedChar);
+                        state.correctKeystrokes++; state.totalKeystrokes++;
+                        const span = document.getElementById(`char-${state.currentIndex}`);
+                        span.className = 'char correct';
+                        state.currentIndex++;
+                        updateCursorUI(); updateProgress(); autoScroll();
+                        spawnThunderBolt(state.currentIndex - 1, 'correct');
+                        if (state.currentIndex >= state.charArray.length) {
+                            state.timerActive = false; els.mobileInput.blur();
+                        }
+                    } else {
+                        state.totalKeystrokes++;
+                        els.mobileInput.value = state.typedArray.join('');
+                        const span = document.getElementById(`char-${state.currentIndex}`);
+                        if (span) { span.classList.remove('shake'); void span.offsetWidth; span.classList.add('shake'); }
+                    }
+                }
+                return;
+            }
+
+            if (state.currentIndex < state.charArray.length && inputLength > state.currentIndex) {
+                const typedChar = inputValue[state.currentIndex];
+                const expectedChar = state.charArray[state.currentIndex];
+                const span = document.getElementById(`char-${state.currentIndex}`);
+                state.totalKeystrokes++;
+
+                if (typedChar === expectedChar) {
+                    state.typedArray.push(typedChar);
+                    state.correctKeystrokes++;
+                    span.className = 'char correct';
+                    state.currentIndex++;
+                    updateCursorUI(); updateProgress(); autoScroll();
+                    spawnThunderBolt(state.currentIndex - 1, 'correct');
+                    if (state.currentIndex >= state.charArray.length) {
+                        state.timerActive = false; els.mobileInput.blur();
+                    }
+                } else {
+                    span.classList.remove('untyped'); span.classList.add('incorrect');
+                    void span.offsetWidth; span.classList.add('shake');
+                    state.isBlocked = true;
+                    els.mobileInput.value = state.typedArray.join('');
+                    spawnThunderBolt(state.currentIndex, 'wrong');
+                    playThunderRumble();
+                }
+            }
+        }
+
+        function updateProgress() {
+            const pct = state.charArray.length > 0 ? Math.round((state.currentIndex / state.charArray.length) * 100) : 0;
+            els.progress.textContent = pct;
+        }
+
+        function calculateMetricsLoop() {
+            if (!state.timerActive && state.currentIndex === 0) return;
+            const timeElapsedMin = (performance.now() - state.startTime) / 60000;
+            let wpmVal = (state.correctKeystrokes / 5) / timeElapsedMin;
+            let accVal = state.totalKeystrokes > 0 ? (state.correctKeystrokes / state.totalKeystrokes) * 100 : 100;
+            if (!isFinite(wpmVal) || isNaN(wpmVal)) wpmVal = 0;
+            if (accVal < 0 || isNaN(accVal)) accVal = 100;
+            els.wpm.innerText = Math.round(wpmVal);
+            els.accuracy.innerText = Math.round(accVal);
+            if (state.timerActive) requestAnimationFrame(calculateMetricsLoop);
+        }
+
+        const canvas = els.thunderCanvas;
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let charW = 9.6;
+
+        function resizeThunderCanvas() {
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            const fsize = parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4;
+            charW = fsize * 0.601;
+        }
+        resizeThunderCanvas();
+        window.addEventListener('resize', resizeThunderCanvas);
+
+        const COLOR_MAP = {
+            purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' },
+            green:  { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' },
+            blue:   { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' },
+            yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' },
+            red:    { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' },
+            orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' }
+        };
+
+        function getDiscoColors() {
+            const hues = ['purple', 'green', 'blue', 'yellow', 'red', 'orange'];
+            const rand = hues[Math.floor(Math.random() * hues.length)];
+            return COLOR_MAP[rand];
+        }
+
+        class LightningBolt {
+            constructor(x, y, type) {
+                this.startX = x; this.y = y + (Math.random() - 0.5) * 10;
+                this.life = 1; this.type = type; this.totalLen = charW;
+                this.decay = 0.055 + Math.random() * 0.03;
+                let theme = state.thunderColor === 'disco' ? getDiscoColors() : COLOR_MAP[state.thunderColor];
+                if (!theme) theme = COLOR_MAP.blue;
+                if (type === 'correct') {
+                    this.dir = 1;
+                    this.colTip = theme.tip; this.colMid = theme.mid; this.colGlow = theme.glow;
+                    this.w = 2.6 + Math.random() * 1.2;
+                } else {
+                    this.dir = -1;
+                    this.colTip = COLOR_MAP.red.tip; this.colMid = COLOR_MAP.red.mid; this.colGlow = COLOR_MAP.red.glow;
+                    this.w = 3.0 + Math.random() * 1.5;
+                }
+                this.buildPath();
+            }
+            buildPath() {
+                const segs = Math.max(3, Math.round(this.totalLen / 3));
+                const segLen = this.totalLen / segs;
+                this.pts = [{ x: 0, y: 0 }];
+                let cx = 0, cy = 0; this.branches = [];
+                for (let i = 1; i <= segs; i++) {
+                    cx += segLen + (Math.random() - 0.3) * segLen * 0.3;
+                    cy += (Math.random() - 0.5) * 6;
+                    this.pts.push({ x: cx, y: cy });
+                    if (i > 0 && i < segs && Math.random() < 0.45) {
+                        const bLen = charW * (0.2 + Math.random() * 0.4);
+                        const bDir = Math.random() < 0.5 ? -1 : 1;
+                        const bAngle = bDir * (0.3 + Math.random() * 0.5);
+                        const bSegs = 2 + Math.floor(Math.random() * 2);
+                        const branch = [{ x: cx, y: cy }];
+                        let bx = cx, by = cy;
+                        for (let j = 1; j <= bSegs; j++) {
+                            bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4;
+                            by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4;
+                            branch.push({ x: bx, y: by });
+                        }
+                        this.branches.push(branch);
+                    }
+                }
+            }
+            strokePath(pts, offX, offY, color, width, blur, alpha) {
+                if (pts.length < 2) return;
+                ctx.save();
+                ctx.globalAlpha = alpha; ctx.shadowBlur = blur; ctx.shadowColor = color;
+                ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+                ctx.translate(offX, offY);
+                ctx.beginPath(); ctx.moveTo(pts[0].x * this.dir, pts[0].y);
+                for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y);
+                ctx.stroke(); ctx.restore();
+            }
+            drawPoly(pts, ox, oy, a) {
+                this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28);
+                this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9);
+                this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a);
+            }
+            update() { this.life -= this.decay; }
+            draw() {
+                const a = Math.max(0, this.life);
+                this.drawPoly(this.pts, this.startX, this.y, a);
+                for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55);
+            }
+        }
+
+        function spawnThunderBolt(charIndex, type) {
+            if (!state.thunderEnabled || !state.isTypingStarted) return;
+            const span = document.getElementById(`char-${charIndex}`);
+            if (!span) return;
+            const rect = span.getBoundingClientRect();
+            const x = rect.left + rect.width / 2;
+            const y = rect.top + rect.height / 2;
+            const count = (type === 'correct') ? 2 : 3;
+            for (let i = 0; i < count; i++) {
+                particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
+            }
+            if (type === 'correct') playThunderCrack();
+        }
+
+        (function thunderLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.life > 0);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(thunderLoop);
+        })();
+
+        let audioCtx = null;
+        function getAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+        function playThunderCrack() {
+            try {
+                const ac = getAudio(); const now = ac.currentTime; const dur = 0.55; const sr = ac.sampleRate;
+                const buf = ac.createBuffer(1, sr * dur, sr); const d = buf.getChannelData(0);
+                for (let i = 0; i < d.length; i++) {
+                    const t = i / sr;
+                    d[i] = (Math.random() * 2 - 1) * ((t < 0.005 ? 1.0 : Math.exp(-t * 9)) * 0.9 + Math.exp(-t * 2.2) * 0.4);
+                }
+                const noise = ac.createBufferSource(); noise.buffer = buf;
+                const bpLow = ac.createBiquadFilter(); bpLow.type = 'bandpass'; bpLow.frequency.setValueAtTime(120, now); bpLow.frequency.exponentialRampToValueAtTime(60, now + dur); bpLow.Q.value = 0.5;
+                const bpCrack = ac.createBiquadFilter(); bpCrack.type = 'bandpass'; bpCrack.frequency.value = 3500; bpCrack.Q.value = 0.8;
+                const gainCrack = ac.createGain(); gainCrack.gain.setValueAtTime(0.55, now); gainCrack.gain.exponentialRampToValueAtTime(0.001, now + 0.08);
+                const gainRumble = ac.createGain(); gainRumble.gain.setValueAtTime(0.0, now); gainRumble.gain.linearRampToValueAtTime(0.35, now + 0.03); gainRumble.gain.exponentialRampToValueAtTime(0.001, now + dur);
+                const master = ac.createGain(); master.gain.value = 0.7;
+                noise.connect(bpCrack); bpCrack.connect(gainCrack); gainCrack.connect(master);
+                noise.connect(bpLow); bpLow.connect(gainRumble); gainRumble.connect(master);
+                master.connect(ac.destination); noise.start(now); noise.stop(now + dur);
+            } catch(e) {}
+        }
+        function playThunderRumble() {
+            try {
+                const ac = getAudio(); const now = ac.currentTime; const dur = 1.1; const sr = ac.sampleRate;
+                const buf = ac.createBuffer(1, sr * dur, sr); const d = buf.getChannelData(0);
+                for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * Math.exp(-(i / sr) * 1.8);
+                const noise = ac.createBufferSource(); noise.buffer = buf;
+                const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(100, now); lp.frequency.exponentialRampToValueAtTime(40, now + dur); lp.Q.value = 1.5;
+                const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 220; bp.Q.value = 0.6;
+                const gainLP = ac.createGain(); gainLP.gain.setValueAtTime(0.0, now); gainLP.gain.linearRampToValueAtTime(0.5, now + 0.05); gainLP.gain.exponentialRampToValueAtTime(0.001, now + dur);
+                const gainBP = ac.createGain(); gainBP.gain.setValueAtTime(0.0, now); gainBP.gain.linearRampToValueAtTime(0.25, now + 0.04); gainBP.gain.exponentialRampToValueAtTime(0.001, now + 0.7);
+                const master = ac.createGain(); master.gain.value = 0.65;
+                noise.connect(lp); lp.connect(gainLP); gainLP.connect(master);
+                noise.connect(bp); bp.connect(gainBP); gainBP.connect(master);
+                master.connect(ac.destination); noise.start(now); noise.stop(now + dur);
+            } catch(e) {}
+        }
+
+        function updateCreditDisplay() {
+            const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
+            els.creditPill.textContent = text;
+            els.chatCreditPill.textContent = text;
+            if (state.credits === 0) {
+                els.creditPill.classList.add('zero');
+                els.chatCreditPill.classList.add('zero');
+            } else {
+                els.creditPill.classList.remove('zero');
+                els.chatCreditPill.classList.remove('zero');
+            }
+        }
+
+        function useCredit() {
+            if (state.credits <= 0) {
+                els.adModal.classList.add('active');
+                return false;
+            }
+            state.credits--;
+            updateCreditDisplay();
+            return true;
+        }
+
+        els.chatToggleBtn.addEventListener('click', () => {
+            els.chatModal.classList.add('active');
+            els.chatInput.focus();
+        });
+        els.closeChatBtn.addEventListener('click', () => {
+            els.chatModal.classList.remove('active');
+        });
+        els.adCloseBtn.addEventListener('click', () => {
+            els.adModal.classList.remove('active');
+        });
+        els.watchAdBtn.addEventListener('click', () => {
+            // TRIGGER MONETAG AD HERE
+            // Replace the line below with your Monetag ad trigger function
+            // Example: show_1234567();
+            // After ad completes, call this:
+            state.credits = 3;
+            updateCreditDisplay();
+            els.adModal.classList.remove('active');
+        });
+
+        function addMessage(text, role) {
+            const bubble = document.createElement('div');
+            bubble.className = `msg-bubble msg-${role}`;
+            if (role === 'ai') {
+                bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
+            } else {
+                bubble.textContent = text;
+            }
+            els.chatMessages.appendChild(bubble);
+            els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+        }
+        function escapeHtml(str) {
+            const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+        }
+        function showTypingIndicator() {
+            const id = 'typing-' + Date.now();
+            const div = document.createElement('div');
+            div.id = id; div.className = 'typing-indicator';
+            div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+            els.chatMessages.appendChild(div);
+            els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+            return id;
+        }
+        function removeTypingIndicator(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+        async function sendChatMessage() {
+            const text = els.chatInput.value.trim();
+            if (!text) return;
+            if (!useCredit()) return;
+
+            addMessage(text, 'user');
+            els.chatInput.value = '';
+            els.chatSend.disabled = true;
+            const typingId = showTypingIndicator();
+
+            try {
+                const res = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: text })
+                });
+                removeTypingIndicator(typingId);
+                if (!res.ok) {
+                    const errData = await res.json().catch(() => ({}));
+                    throw new Error(errData.error || 'Server error');
+                }
+                const data = await res.json();
+                const clean = sanitizeText(data.text);
+                addMessage(clean, 'ai');
+
+                const loadBtn = document.createElement('button');
+                loadBtn.className = 'btn-primary mt-2';
+                loadBtn.textContent = 'Practice This';
+                loadBtn.style.fontSize = '0.7rem';
+                loadBtn.style.padding = '8px';
+                loadBtn.onclick = () => {
+                    state.rawText = clean;
+                    processTextForDifficulty(clean);
+                    resetDrill();
+                    els.topicLabel.textContent = 'AI Generated';
+                    els.chatModal.classList.remove('active');
+                };
+                const lastBubble = els.chatMessages.lastElementChild;
+                if (lastBubble) lastBubble.appendChild(loadBtn);
+                els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+            } catch (err) {
+                removeTypingIndicator(typingId);
+                addMessage('Sorry, I could not connect to the AI. Please try again later.', 'ai');
+                // Refund credit on failure
+                state.credits++;
+                updateCreditDisplay();
+            } finally {
+                els.chatSend.disabled = false;
+            }
+        }
+
+        function sanitizeText(text) {
+            if (!text) return '';
+            return text
+                .replace(/[—–]/g, '-')
+                .replace(/[‘’]/g, "'")
+                .replace(/[“”]/g, '"')
+                .replace(/…/g, '...')
+                .replace(/[^ -~]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim();
+        }
+
+        els.chatSend.addEventListener('click', sendChatMessage);
+        els.chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRandomParagraph();
+            updateCaretColor();
+            updateCreditDisplay();
+        });
+    </script>
+</body>
+</html>
