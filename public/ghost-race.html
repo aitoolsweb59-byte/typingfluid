@@ -320,7 +320,8 @@
            currentRecording: [],
            activeGhostRun: null,
            ghostIndex: 0,
-           ghostTimer: null
+           ghostTimer: null,
+           isCoolingDown: false
        };
 
        const els = {
@@ -456,6 +457,8 @@
        }
 
        function resetDrill() {
+           state.isCoolingDown = true;
+
            state.typedArray = [];
            state.currentIndex = 0;
            state.startTime = null;
@@ -475,6 +478,11 @@
            els.container.scrollTop = 0;
            renderTextUI();
            els.mobileInput.focus();
+
+           setTimeout(() => {
+               state.isCoolingDown = false;
+               els.mobileInput.value = ''; 
+           }, 250);
        }
 
        els.restartBtn.addEventListener('click', resetDrill);
@@ -531,6 +539,8 @@
        els.mobileInput.addEventListener('input', handleTypingInput);
 
        function handleTypingInput() {
+           if (state.isCoolingDown) return;
+
            const inputValue = els.mobileInput.value;
            const inputLength = inputValue.length;
 
