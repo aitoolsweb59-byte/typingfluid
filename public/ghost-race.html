@@ -1,0 +1,1064 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <title>FluidType | Ghost Race Mode</title>
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+   <script src="https://cdn.tailwindcss.com"></script>
+   <style>
+       :root {
+           --bg-base: #070a12;
+           --bg-surface: #0f1525;
+           --text-main: #e2e8f0;
+           --text-dim: #64748b;
+           --error-color: #f87171;
+           --error-bg: rgba(248,113,113,0.15);
+           --accent: #c084fc;
+           --accent-glow: rgba(192,132,252,0.45);
+           --accent-dim: #9333ea;
+           --caret-color: #c084fc;
+           --caret-glow: rgba(192,132,252,0.45);
+           --ghost-cursor-color: #f472b6;
+           --ghost-cursor-glow: rgba(244,114,182,0.45);
+       }
+       * { box-sizing: border-box; }
+       html { scroll-behavior: smooth; }
+       body {
+           background-color: var(--bg-base);
+           color: var(--text-main);
+           font-family: 'Inter', sans-serif;
+           -webkit-tap-highlight-color: transparent;
+           overflow-x: hidden;
+           min-height: 100vh;
+       }
+       .ambient-bg {
+           position: fixed; inset: 0; z-index: 0; pointer-events: none;
+           background:
+               radial-gradient(ellipse 80% 50% at 50% -20%, rgba(192,132,252,0.1), transparent),
+               radial-gradient(ellipse 60% 40% at 80% 80%, rgba(34,211,238,0.06), transparent);
+       }
+       .dot-grid {
+           position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
+           background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+           background-size: 32px 32px;
+       }
+       .scanline {
+           position: fixed; inset: 0; pointer-events: none; z-index: 1;
+           background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(192,132,252,0.01) 2px, rgba(192,132,252,0.01) 4px);
+       }
+       #thunder-canvas {
+           position: fixed; inset: 0; width: 100%; height: 100%;
+           pointer-events: none; z-index: 999;
+       }
+       .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 2px; }
+       .gradient-text {
+           background: linear-gradient(135deg, #c084fc, #22d3ee);
+           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+       }
+       .corner-btn {
+           background: rgba(15,21,37,0.8);
+           border: 1px solid rgba(255,255,255,0.1);
+           color: var(--text-main);
+           padding: 8px 14px;
+           border-radius: 12px;
+           font-size: 0.75rem;
+           font-family: 'Orbitron', sans-serif;
+           letter-spacing: 1px;
+           text-transform: uppercase;
+           cursor: pointer;
+           transition: all 0.25s;
+           display: flex; align-items: center; gap: 6px;
+           backdrop-filter: blur(8px);
+       }
+       .corner-btn:hover {
+           border-color: var(--accent);
+           box-shadow: 0 0 15px var(--accent-glow);
+           transform: translateY(-1px);
+       }
+       #chat-toggle-btn {
+           border-color: rgba(34,211,238,0.3);
+           color: #22d3ee;
+           padding: 10px;
+           font-family: 'Inter', sans-serif;
+           text-transform: none;
+           letter-spacing: normal;
+       }
+       .diff-selector {
+           display: flex; background: rgba(255,255,255,0.03);
+           border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.05);
+       }
+       .diff-btn {
+           padding: 8px 18px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
+           transition: all 0.25s; cursor: pointer; border: none; background: transparent;
+           color: var(--text-dim); font-family: 'Inter', sans-serif;
+       }
+       .diff-btn:hover { color: var(--text-main); }
+       .diff-btn.active {
+           color: var(--accent); background: rgba(192,132,252,0.15);
+           box-shadow: 0 2px 12px rgba(192,132,252,0.1);
+       }
+       .metric-label {
+           font-size: 0.65rem; color: var(--text-dim); font-weight: 700;
+           text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px;
+       }
+       .metric-value {
+           font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900;
+           line-height: 1; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.08);
+       }
+       .metric-suffix { font-size: 1.1rem; color: var(--text-dim); margin-left: 2px; }
+       #typing-container {
+           font-family: 'Fira Code', monospace; line-height: 1.6;
+           --line-height: calc(1.65rem * 2.2);
+           height: calc(5 * var(--line-height));
+           overflow-y: auto; overflow-x: hidden;
+           padding: 1.25rem; border-radius: 18px;
+           background: rgba(15,21,37,0.55);
+           border: 1px solid rgba(255,255,255,0.08);
+           scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+           scroll-behavior: auto; overscroll-behavior: contain;
+           position: relative; outline: none;
+           transition: border-color 0.3s, box-shadow 0.3s;
+       }
+       #typing-container:focus, #typing-container:focus-within {
+           border-color: rgba(192,132,252,0.3);
+           box-shadow: inset 0 0 30px rgba(192,132,252,0.03), 0 0 30px rgba(192,132,252,0.05);
+       }
+       #typing-container::-webkit-scrollbar { width: 5px; }
+       #typing-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+       .char {
+           white-space: pre; border-radius: 4px;
+           transition: color 0.08s ease, background-color 0.08s ease;
+           display: inline-block; position: relative;
+       }
+       .char.untyped { color: var(--text-dim); }
+       .char.correct { color: #f8fafc; text-shadow: 0 0 10px rgba(248,250,252,0.15); }
+       .char.incorrect { color: var(--error-color); background-color: var(--error-bg); }
+       .caret {
+           border-left: 2.5px solid var(--caret-color);
+           box-shadow: -3px 0 12px var(--caret-glow);
+           animation: blink 1.1s infinite cubic-bezier(0.4,0,0.2,1);
+           margin-left: -1px;
+       }
+       .caret-static {
+           border-left: 2.5px solid var(--caret-color);
+           box-shadow: -3px 0 12px var(--caret-glow);
+           margin-left: -1px;
+       }
+       .ghost-caret {
+           border-right: 3px solid var(--ghost-cursor-color) !important;
+           box-shadow: 3px 0 12px var(--ghost-cursor-glow) !important;
+       }
+       #mobile-input-target {
+           position: absolute; opacity: 0; top: 0; left: 0;
+           height: 100%; width: 100%; z-index: 2; cursor: text;
+       }
+       #focus-overlay {
+           position: absolute; inset: 0;
+           background: rgba(7,10,18,0.7); backdrop-filter: blur(6px);
+           border-radius: 18px; display: flex; align-items: center; justify-content: center;
+           transition: opacity 0.3s; pointer-events: none;
+       }
+       #focus-overlay.hidden { opacity: 0; }
+       .focus-pill {
+           display: flex; align-items: center; gap: 10px;
+           padding: 12px 24px; border-radius: 999px;
+           background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+           font-size: 0.9rem; color: var(--text-main); pointer-events: auto; cursor: text;
+           transition: all 0.3s;
+       }
+       .modal-overlay {
+           position: fixed; inset: 0; z-index: 300;
+           background: rgba(7,10,18,0.85); backdrop-filter: blur(12px);
+           display: none; align-items: center; justify-content: center;
+           padding: 16px; opacity: 0; transition: opacity 0.3s ease;
+       }
+       .modal-overlay.active { display: flex; opacity: 1; }
+       .modal-card {
+           background: rgba(15,21,37,0.95);
+           border: 1px solid rgba(255,255,255,0.1);
+           border-radius: 20px;
+           padding: 24px;
+           width: 100%; max-width: 480px;
+           box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+           display: flex; flex-direction: column; gap: 16px;
+       }
+       .btn-primary {
+           background: var(--accent); color: var(--bg-base);
+           font-family: 'Orbitron', sans-serif; font-weight: 700;
+           padding: 12px; border-radius: 12px; border: none;
+           cursor: pointer; transition: all 0.25s; text-transform: uppercase;
+       }
+       .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+       .chat-input {
+           width: 100%; background: rgba(7,10,18,0.8);
+           border: 1px solid rgba(255,255,255,0.08);
+           border-radius: 12px; padding: 12px 16px;
+           color: var(--text-main); outline: none;
+           font-family: 'Inter', sans-serif;
+       }
+       .chat-input:focus { border-color: var(--accent); }
+       .btn-ghost-select {
+           background: rgba(255,255,255,0.03);
+           border: 1px solid rgba(255,255,255,0.1);
+           padding: 14px; border-radius: 14px;
+           display: flex; justify-content: space-between; align-items: center;
+           cursor: pointer; transition: all 0.25s;
+           color: var(--text-main);
+       }
+       .btn-ghost-select:hover {
+           border-color: var(--ghost-cursor-color);
+           background: rgba(244,114,182,0.08);
+           transform: translateX(4px);
+       }
+       .credit-pill {
+           background: rgba(34,211,238,0.1);
+           border: 1px solid rgba(34,211,238,0.2);
+           color: #22d3ee;
+           padding: 4px 10px;
+           border-radius: 999px;
+           font-size: 0.65rem;
+           font-weight: 700;
+       }
+       .credit-pill.zero {
+           background: rgba(248,113,113,0.1);
+           border-color: rgba(248,113,113,0.2);
+           color: #f87171;
+       }
+       .chat-card {
+           max-width: 600px;
+           height: 80vh;
+           max-height: 700px;
+       }
+       .chat-messages {
+           flex: 1;
+           overflow-y: auto;
+           display: flex;
+           flex-direction: column;
+           gap: 14px;
+           padding: 8px;
+           scrollbar-width: thin;
+           scrollbar-color: #22d3ee transparent;
+       }
+       .chat-messages::-webkit-scrollbar { width: 5px; }
+       .chat-messages::-webkit-scrollbar-thumb { background: #22d3ee; border-radius: 10px; }
+       .msg-bubble {
+           max-width: 82%;
+           padding: 14px 18px;
+           border-radius: 16px;
+           font-size: 0.95rem;
+           line-height: 1.6;
+           animation: msgIn 0.35s cubic-bezier(0.34,1.56,0.64,1);
+           word-break: break-word;
+           position: relative;
+           backdrop-filter: blur(8px);
+       }
+       .msg-user {
+           align-self: flex-end;
+           background: rgba(34,211,238,0.08);
+           border: 1px solid rgba(34,211,238,0.15);
+           color: var(--text-main);
+           border-bottom-right-radius: 4px;
+       }
+       .msg-ai {
+           align-self: flex-start;
+           background: rgba(255,255,255,0.03);
+           border: 1px solid rgba(255,255,255,0.06);
+           color: var(--text-main);
+           border-bottom-left-radius: 4px;
+       }
+       .chat-input-wrap {
+           display: flex;
+           gap: 10px;
+           padding: 12px;
+           background: rgba(7,10,18,0.8);
+           border-radius: 14px;
+           border: 1px solid rgba(255,255,255,0.08);
+       }
+       .chat-send {
+           background: #22d3ee;
+           color: var(--bg-base);
+           border: none;
+           border-radius: 10px;
+           padding: 10px 20px;
+           font-weight: 700;
+           cursor: pointer;
+           transition: all 0.25s;
+       }
+       .chat-send:hover:not(:disabled) {
+           box-shadow: 0 0 20px rgba(34,211,238,0.45);
+           transform: scale(1.05);
+       }
+       .chat-send:disabled {
+           opacity: 0.4;
+           cursor: not-allowed;
+       }
+       .typing-indicator {
+           display: flex;
+           gap: 6px;
+           padding: 14px 18px;
+           align-self: flex-start;
+           background: rgba(255,255,255,0.03);
+           border: 1px solid rgba(255,255,255,0.06);
+           border-radius: 16px;
+           border-bottom-left-radius: 4px;
+       }
+       .typing-dot {
+           width: 7px;
+           height: 7px;
+           background: #22d3ee;
+           border-radius: 50%;
+           animation: typingBounce 1.4s infinite ease-in-out both;
+       }
+       .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+       .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+       .ad-gate { text-align: center; padding: 20px; }
+       .ad-gate h3 { font-size: 1.1rem; margin-bottom: 8px; color: #22d3ee; }
+       .ad-gate p { font-size: 0.85rem; color: var(--text-dim); margin-bottom: 16px; }
+       .ad-container {
+           min-height: 120px;
+           background: rgba(0,0,0,0.3);
+           border-radius: 12px;
+           margin-bottom: 16px;
+           display: flex;
+           align-items: center;
+           justify-content: center;
+           border: 1px dashed rgba(255,255,255,0.1);
+       }
+       .btn-secondary {
+           background: rgba(255,255,255,0.05);
+           color: var(--text-main);
+           padding: 12px;
+           border-radius: 12px;
+           border: 1px solid rgba(255,255,255,0.1);
+           cursor: pointer;
+           width: 100%;
+       }
+       #ad-modal .btn-primary { background: #22d3ee; }
+       @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+       @keyframes msgIn { from { opacity: 0; transform: translateY(12px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+       @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
+   </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
+   <div class="ambient-bg"></div>
+   <div class="dot-grid"></div>
+   <div class="scanline"></div>
+   <canvas id="thunder-canvas"></canvas>
+
+   <div class="fixed top-4 left-4 z-50 flex items-center gap-2">
+       <button id="thunder-toggle-btn" class="corner-btn">
+           <span>⚡ THUNDER: ON</span>
+       </button>
+       <select id="thunder-color-select" class="corner-btn bg-[#0f1525] text-xs outline-none">
+           <option value="purple">Color: Purple</option>
+           <option value="green">Color: Green</option>
+           <option value="blue">Color: Blue</option>
+           <option value="yellow">Color: Yellow</option>
+           <option value="red">Color: Red</option>
+           <option value="orange">Color: Orange</option>
+           <option value="disco">Color: DISCO 🪩</option>
+       </select>
+   </div>
+
+   <div class="fixed top-4 right-4 z-50 flex items-center gap-3">
+       <span id="chat-credit-pill-main" class="credit-pill">3 Credits</span>
+       <button id="chat-toggle-btn" class="corner-btn chat">
+           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+           </svg>
+       </button>
+       <a href="index.html" class="corner-btn hover:border-red-400">
+           <span>✕ EXIT</span>
+       </a>
+   </div>
+
+   <main class="w-full max-w-4xl flex flex-col gap-6 z-10 my-auto pt-16">
+       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-white/10 pb-4">
+           <div>
+               <h1 class="text-3xl font-black tracking-tight brand">FLUID<span class="gradient-text">GHOST</span></h1>
+               <p class="text-xs text-[#64748b] tracking-widest uppercase font-bold mt-1" id="ghost-status">
+                   Mode: Initial Solo Run (Setting your Ghost Baseline)
+               </p>
+           </div>
+           <div class="diff-selector">
+               <button data-level="1" class="diff-btn active">a-z</button>
+               <button data-level="2" class="diff-btn">A-Z</button>
+               <button data-level="3" class="diff-btn">A-Z + !?</button>
+           </div>
+       </div>
+
+       <div class="flex justify-between items-end px-2 flex-wrap gap-4">
+           <div class="flex gap-6 sm:gap-10">
+               <div class="flex flex-col"><span class="metric-label">WPM</span><span class="metric-value" id="wpm">0</span></div>
+               <div class="flex flex-col"><span class="metric-label">Accuracy</span><span class="metric-value"><span id="accuracy">100</span><span class="metric-suffix">%</span></span></div>
+               <div class="flex flex-col"><span class="metric-label">Progress</span><span class="metric-value"><span id="progress">0</span><span class="metric-suffix">%</span></span></div>
+           </div>
+           <div class="flex gap-6 border-l border-white/10 pl-6" id="ghost-metrics" style="display: none;">
+               <div class="flex flex-col"><span class="metric-label text-[#f472b6]">Ghost WPM</span><span class="metric-value text-[#f472b6]" id="ghost-wpm">0</span></div>
+               <div class="flex flex-col"><span class="metric-label text-[#f472b6]">Ghost Prog</span><span class="metric-value text-[#f472b6]"><span id="ghost-progress">0</span><span class="metric-suffix">%</span></span></div>
+           </div>
+       </div>
+
+       <div id="typing-container" class="relative w-full text-[1.65rem] leading-[2.2] cursor-text select-none" tabindex="0">
+           <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+           <div id="text-display" class="flex flex-wrap pointer-events-none"></div>
+           <div id="focus-overlay" class="hidden">
+               <div class="focus-pill" id="focus-pill">
+                   <svg class="w-5 h-5 text-[#c084fc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                   Tap to Race Your Past
+               </div>
+           </div>
+       </div>
+
+       <div class="flex justify-center">
+           <button id="restart-btn" class="p-3 text-[#64748b] hover:text-[#c084fc] transition-all transform hover:-rotate-180" title="Restart Drill">
+               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+           </button>
+       </div>
+   </main>
+
+   <div class="modal-overlay" id="chat-modal">
+       <div class="modal-card chat-card">
+           <div class="flex justify-between items-center pb-2 border-b border-white/10">
+               <h3 class="font-bold text-lg brand">AI <span class="gradient-text">CHAT</span></h3>
+               <div class="flex items-center gap-3">
+                   <span class="credit-pill" id="chat-credit-pill">3 Credits</span>
+                   <button class="text-sm text-[#64748b] hover:text-white transition-colors" id="close-chat-btn">✕</button>
+               </div>
+           </div>
+           <div class="chat-messages" id="chat-messages">
+               <div class="msg-bubble msg-ai">Welcome! Ask me anything and I will assist you.</div>
+           </div>
+           <div class="chat-input-wrap">
+               <input type="text" class="chat-input" id="chat-input" placeholder="Ask your question..." autocomplete="off">
+               <button class="chat-send" id="chat-send">Send</button>
+           </div>
+       </div>
+   </div>
+
+   <div class="modal-overlay" id="ad-modal">
+       <div class="modal-card ad-gate">
+           <h3>Out of Credits</h3>
+           <p>You have used all your free AI messages. Watch one ad to get 3 more credits.</p>
+           <div class="ad-container" id="ad-placement-container">
+               <span class="text-xs text-[#475569]">Ad will appear here</span>
+           </div>
+           <button class="btn-primary" id="watch-ad-btn">Watch Ad for 3 Credits</button>
+           <button class="btn-secondary mt-2" id="ad-close-btn">Close</button>
+       </div>
+   </div>
+
+   <div class="modal-overlay" id="ghost-select-modal">
+       <div class="modal-card">
+           <div class="flex justify-between items-center">
+               <h3 class="font-bold text-lg brand text-[#f472b6]">SELECT YOUR GHOST</h3>
+               <button class="text-sm text-[#64748b] hover:text-white" onclick="closeGhostModal()">✕</button>
+           </div>
+           <p class="text-xs text-[#64748b]">Which of your past selves do you want to race?</p>
+           <div id="ghost-options-list" class="flex flex-col gap-3 my-2"></div>
+           <button class="btn-primary" onclick="closeGhostModal()">Continue Solo Run</button>
+       </div>
+   </div>
+
+   <script>
+       const DEFAULT_TOPICS = [
+           "Every expert was once a beginner who refused to give up. Your fingers are learning a language of their own through repetition and patience. Trust that progress is happening even when it feels invisible.",
+           "Speed is a byproduct of accuracy and countless hours of intentional practice. Do not rush the process of becoming great at something new. Celebrate every correct keystroke as a small victory today.",
+           "The keyboard is your instrument and practice is your rehearsal for mastery. Mistakes are simply feedback that guide your fingers toward the right path. Keep showing up and the results will follow naturally.",
+           "Discipline beats motivation every single time you choose to start a new drill. You are building muscle memory that will serve you for years to come. Stay consistent and watch your confidence grow with every session.",
+           "Your past self set the baseline and your present self is breaking that barrier. Racing against who you were yesterday is the purest form of growth. Win or lose against the ghost, you are already improving.",
+           "Focus on the rhythm of your breathing and the flow of your fingers across the keys. When mind and body align in perfect concentration, time seems to slow down. That state of flow is where true speed is born.",
+           "Small daily improvements compound into extraordinary results over time. You do not need to be the fastest today, you only need to be better than yesterday. Progress is the only metric that truly matters in the end.",
+           "Typing is a meditation for the modern mind, requiring presence and calm determination. Let go of the need for perfection and embrace the journey of incremental growth. Each session sharpens both your mind and your craft.",
+           "The ghost on your screen is not your enemy but a mirror reflecting your potential. It shows you exactly what you are capable of achieving with focus. Use it as fuel to push beyond your perceived limits.",
+           "Comfort zones are graveyards where potential goes to rest and die. True growth happens when you challenge yourself to go slightly faster than feels safe. Courage on the keyboard translates to courage in life.",
+           "You have everything you need inside you to become exceptionally skilled. The only thing standing between you and mastery is the willingness to practice daily. Believe in your capacity to learn and adapt quickly.",
+           "Errors are not failures but necessary stepping stones toward fluency. Every time you correct a mistake, your brain rewires itself more efficiently. Welcome the challenge because it is sculpting a better version of you.",
+           "There is no finish line in the journey of self improvement and skill acquisition. The goal is not to arrive but to become someone who never stops refining their craft. Enjoy the process as much as the outcome.",
+           "Your hands are capable of moving faster than your doubts would have you believe. Silence the inner critic by focusing entirely on the next word in front of you. Presence and practice will silence every excuse.",
+           "Excellence is not a single act but a habit that you build one keystroke at a time. The time you invest in yourself today pays dividends for your entire future. Keep typing, keep growing, keep believing in yourself."
+       ];
+
+       const state = {
+           targetDifficulty: 1,
+           rawText: "",
+           charArray: [],
+           typedArray: [],
+           currentIndex: 0,
+           startTime: null,
+           timerActive: false,
+           totalKeystrokes: 0,
+           correctKeystrokes: 0,
+           isTypingStarted: false,
+           thunderEnabled: true,
+           thunderColor: "purple",
+           runHistory: [],
+           currentRecording: [],
+           activeGhostRun: null,
+           ghostIndex: 0,
+           ghostTimer: null
+       };
+
+       const els = {
+           container: document.getElementById('typing-container'),
+           display: document.getElementById('text-display'),
+           mobileInput: document.getElementById('mobile-input-target'),
+           focusOverlay: document.getElementById('focus-overlay'),
+           wpm: document.getElementById('wpm'),
+           accuracy: document.getElementById('accuracy'),
+           progress: document.getElementById('progress'),
+           ghostWpm: document.getElementById('ghost-wpm'),
+           ghostProgress: document.getElementById('ghost-progress'),
+           ghostMetrics: document.getElementById('ghost-metrics'),
+           ghostStatus: document.getElementById('ghost-status'),
+           thunderCanvas: document.getElementById('thunder-canvas'),
+           thunderToggleBtn: document.getElementById('thunder-toggle-btn'),
+           thunderColorSelect: document.getElementById('thunder-color-select'),
+           diffButtons: document.querySelectorAll('.diff-btn'),
+           ghostSelectModal: document.getElementById('ghost-select-modal'),
+           ghostOptionsList: document.getElementById('ghost-options-list'),
+           restartBtn: document.getElementById('restart-btn')
+       };
+
+       const chatState = { credits: 3 };
+       const chatEls = {
+           chatToggleBtn: document.getElementById('chat-toggle-btn'),
+           chatModal: document.getElementById('chat-modal'),
+           chatMessages: document.getElementById('chat-messages'),
+           chatInput: document.getElementById('chat-input'),
+           chatSend: document.getElementById('chat-send'),
+           closeChatBtn: document.getElementById('close-chat-btn'),
+           creditPillMain: document.getElementById('chat-credit-pill-main'),
+           chatCreditPill: document.getElementById('chat-credit-pill'),
+           adModal: document.getElementById('ad-modal'),
+           watchAdBtn: document.getElementById('watch-ad-btn'),
+           adCloseBtn: document.getElementById('ad-close-btn')
+       };
+
+       els.thunderToggleBtn.addEventListener('click', () => {
+           state.thunderEnabled = !state.thunderEnabled;
+           els.thunderToggleBtn.innerHTML = `<span>⚡ THUNDER: ${state.thunderEnabled ? 'ON' : 'OFF'}</span>`;
+       });
+
+       els.thunderColorSelect.addEventListener('change', (e) => {
+           state.thunderColor = e.target.value;
+           updateCaretColor();
+       });
+
+       function updateCaretColor() {
+           const map = {
+               purple: { caret: '#c084fc', glow: 'rgba(192,132,252,0.45)' },
+               green: { caret: '#4ade80', glow: 'rgba(74,222,128,0.45)' },
+               blue: { caret: '#4dcfff', glow: 'rgba(77,207,255,0.45)' },
+               yellow: { caret: '#facc15', glow: 'rgba(250,204,21,0.45)' },
+               red: { caret: '#f87171', glow: 'rgba(248,113,113,0.45)' },
+               orange: { caret: '#fb923c', glow: 'rgba(251,146,60,0.45)' }
+           };
+           const theme = map[state.thunderColor] || map.purple;
+           document.documentElement.style.setProperty('--caret-color', theme.caret);
+           document.documentElement.style.setProperty('--caret-glow', theme.glow);
+       }
+
+       els.diffButtons.forEach(btn => {
+           btn.addEventListener('click', (e) => {
+               els.diffButtons.forEach(b => b.classList.remove('active'));
+               e.target.classList.add('active');
+               state.targetDifficulty = parseInt(e.target.getAttribute('data-level'));
+               if (state.rawText) {
+                   processTextForDifficulty(state.rawText);
+                   resetDrill();
+               }
+           });
+       });
+
+       function processTextForDifficulty(text) {
+           let processed = text;
+           if (state.targetDifficulty === 1) {
+               processed = processed.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+           } else if (state.targetDifficulty === 2) {
+               processed = processed.replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+           } else {
+               processed = processed.replace(/\s+/g, ' ').trim();
+           }
+           state.charArray = processed.split('');
+       }
+
+       function loadRandomParagraph() {
+           const text = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
+           state.rawText = text;
+           processTextForDifficulty(text);
+           resetDrill();
+       }
+
+       function triggerGhostSelectionModal() {
+           els.ghostOptionsList.innerHTML = '';
+           const runsToShow = state.runHistory.slice(-3);
+           runsToShow.forEach((run) => {
+               const btn = document.createElement('button');
+               btn.className = 'btn-ghost-select';
+               btn.innerHTML = `
+                   <div>
+                       <div class="font-bold text-sm">Race Run #${run.id}</div>
+                       <div class="text-xs text-[#64748b]">Accuracy: ${run.accuracy}%</div>
+                   </div>
+                   <div class="text-xl font-black text-[#f472b6] font-['Orbitron']">${run.wpm} WPM</div>
+               `;
+               btn.addEventListener('click', () => {
+                   selectGhostRun(run);
+                   closeGhostModal();
+               });
+               els.ghostOptionsList.appendChild(btn);
+           });
+           els.ghostSelectModal.classList.add('active');
+       }
+
+       function closeGhostModal() { els.ghostSelectModal.classList.remove('active'); }
+
+       function selectGhostRun(run) {
+           state.activeGhostRun = run;
+           els.ghostMetrics.style.display = 'flex';
+           els.ghostWpm.textContent = run.wpm;
+           els.ghostStatus.textContent = `Mode: Racing against Past Self (Run #${run.id} - ${run.wpm} WPM)`;
+           resetDrill();
+       }
+
+       function renderTextUI() {
+           els.display.innerHTML = '';
+           state.charArray.forEach((char, idx) => {
+               const span = document.createElement('span');
+               span.innerText = char;
+               span.className = 'char untyped';
+               span.id = `char-${idx}`;
+               els.display.appendChild(span);
+           });
+           updateCursorUI();
+       }
+
+       function updateCursorUI() {
+           document.querySelectorAll('.char').forEach(el => el.classList.remove('caret', 'caret-static', 'ghost-caret'));
+           if (state.currentIndex < state.charArray.length) {
+               const active = document.getElementById(`char-${state.currentIndex}`);
+               if (active) active.classList.add(state.timerActive ? 'caret-static' : 'caret');
+           }
+           if (state.activeGhostRun && state.ghostIndex < state.charArray.length) {
+               const ghostEl = document.getElementById(`char-${state.ghostIndex}`);
+               if (ghostEl) ghostEl.classList.add('ghost-caret');
+           }
+       }
+
+       function resetDrill() {
+           state.typedArray = [];
+           state.currentIndex = 0;
+           state.startTime = null;
+           state.timerActive = false;
+           state.totalKeystrokes = 0;
+           state.correctKeystrokes = 0;
+           state.isTypingStarted = false;
+           state.currentRecording = [];
+           state.ghostIndex = 0;
+           if (state.ghostTimer) clearInterval(state.ghostTimer);
+
+           els.mobileInput.value = '';
+           els.wpm.textContent = '0';
+           els.accuracy.textContent = '100';
+           els.progress.textContent = '0';
+           els.ghostProgress.textContent = '0';
+           els.container.scrollTop = 0;
+           renderTextUI();
+           els.mobileInput.focus();
+       }
+
+       els.restartBtn.addEventListener('click', resetDrill);
+       els.container.addEventListener('click', () => els.mobileInput.focus());
+       els.container.addEventListener('touchstart', () => els.mobileInput.focus());
+       els.mobileInput.addEventListener('focus', () => els.focusOverlay.classList.add('hidden'));
+       els.mobileInput.addEventListener('blur', () => els.focusOverlay.classList.remove('hidden'));
+
+       function getLineHeight() {
+           const c0 = document.getElementById('char-0');
+           if (!c0) return 58;
+           for (let i = 1; i < state.charArray.length; i++) {
+               const c = document.getElementById(`char-${i}`);
+               if (c && c.offsetTop > c0.offsetTop + 2) return c.offsetTop - c0.offsetTop;
+           }
+           return 58;
+       }
+
+       function autoScroll() {
+           if (!state.isTypingStarted || state.charArray.length === 0) return;
+           const activeChar = document.getElementById(`char-${state.currentIndex}`);
+           if (!activeChar) return;
+           const container = els.container;
+           const charTop = activeChar.offsetTop;
+           const charHeight = activeChar.offsetHeight || 20;
+           const lineHeight = getLineHeight();
+           const visibleTop = container.scrollTop;
+           const visibleHeight = container.clientHeight;
+
+           if (charTop + charHeight > visibleTop + visibleHeight - lineHeight * 0.3) {
+               container.scrollTop = charTop - lineHeight * 3;
+           } else if (charTop < visibleTop + lineHeight * 0.3) {
+               container.scrollTop = Math.max(0, charTop - lineHeight);
+           }
+       }
+
+       function startGhostReplay() {
+           if (!state.activeGhostRun || !state.activeGhostRun.timing || state.activeGhostRun.timing.length === 0) return;
+           const startTime = performance.now();
+           state.ghostTimer = setInterval(() => {
+               const elapsed = performance.now() - startTime;
+               const record = state.activeGhostRun.timing;
+               while (state.ghostIndex < record.length && elapsed >= record[state.ghostIndex].timestamp) {
+                   state.ghostIndex++;
+                   els.ghostProgress.textContent = Math.round((state.ghostIndex / state.charArray.length) * 100);
+                   updateCursorUI();
+               }
+               if (state.ghostIndex >= record.length) {
+                   clearInterval(state.ghostTimer);
+               }
+           }, 16);
+       }
+
+       els.mobileInput.addEventListener('input', handleTypingInput);
+
+       function handleTypingInput() {
+           const inputValue = els.mobileInput.value;
+           const inputLength = inputValue.length;
+
+           if (!state.timerActive && inputLength > 0) {
+               state.timerActive = true;
+               state.startTime = performance.now();
+               requestAnimationFrame(calculateMetricsLoop);
+               startGhostReplay();
+           }
+           if (!state.isTypingStarted && inputLength > 0) {
+               state.isTypingStarted = true;
+           }
+
+           if (inputLength < state.currentIndex) {
+               const diff = state.currentIndex - inputLength;
+               for (let i = 0; i < diff; i++) {
+                   if (state.currentIndex > 0) {
+                       state.currentIndex--;
+                       state.typedArray.pop();
+                       const span = document.getElementById(`char-${state.currentIndex}`);
+                       if (span) span.className = 'char untyped';
+                   }
+               }
+               updateCursorUI();
+               updateProgress();
+               autoScroll();
+               return;
+           }
+
+           while (state.currentIndex < state.charArray.length && inputLength > state.currentIndex) {
+               const typedChar = inputValue[state.currentIndex];
+               const expectedChar = state.charArray[state.currentIndex];
+               const span = document.getElementById(`char-${state.currentIndex}`);
+               state.totalKeystrokes++;
+
+               if (typedChar === expectedChar) {
+                   state.typedArray.push(typedChar);
+                   state.correctKeystrokes++;
+                   span.className = 'char correct';
+                   const timestamp = performance.now() - state.startTime;
+                   state.currentRecording.push({ charIndex: state.currentIndex, timestamp });
+                   state.currentIndex++;
+                   updateCursorUI();
+                   updateProgress();
+                   autoScroll();
+                   spawnThunderBolt(state.currentIndex - 1, 'correct');
+
+                   if (state.currentIndex >= state.charArray.length) {
+                       state.timerActive = false;
+                       els.mobileInput.blur();
+                       if (state.ghostTimer) clearInterval(state.ghostTimer);
+                       const finalWpm = Math.round((state.correctKeystrokes / 5) / ((performance.now() - state.startTime) / 60000));
+                       const finalAcc = Math.round((state.correctKeystrokes / state.totalKeystrokes) * 100);
+                       state.runHistory.push({
+                           id: state.runHistory.length + 1,
+                           wpm: finalWpm,
+                           accuracy: finalAcc,
+                           timing: [...state.currentRecording]
+                       });
+                       if (state.runHistory.length >= 2) {
+                           setTimeout(() => triggerGhostSelectionModal(), 600);
+                       } else {
+                           selectGhostRun(state.runHistory[0]);
+                       }
+                       return;
+                   }
+               } else {
+                   span.classList.remove('untyped');
+                   span.classList.add('incorrect');
+                   els.mobileInput.value = state.typedArray.join('');
+                   spawnThunderBolt(state.currentIndex, 'wrong');
+                   updateCursorUI();
+                   return;
+               }
+           }
+       }
+
+       function updateProgress() {
+           const pct = state.charArray.length > 0 ? Math.round((state.currentIndex / state.charArray.length) * 100) : 0;
+           els.progress.textContent = pct;
+       }
+
+       function calculateMetricsLoop() {
+           if (!state.timerActive && state.currentIndex === 0) return;
+           const timeElapsedMin = (performance.now() - state.startTime) / 60000;
+           let wpmVal = (state.correctKeystrokes / 5) / timeElapsedMin;
+           let accVal = state.totalKeystrokes > 0 ? (state.correctKeystrokes / state.totalKeystrokes) * 100 : 100;
+           if (!isFinite(wpmVal) || isNaN(wpmVal)) wpmVal = 0;
+           if (accVal < 0 || isNaN(accVal)) accVal = 100;
+           els.wpm.innerText = Math.round(wpmVal);
+           els.accuracy.innerText = Math.round(accVal);
+           if (state.timerActive) requestAnimationFrame(calculateMetricsLoop);
+       }
+
+       const canvas = els.thunderCanvas;
+       const ctx = canvas.getContext('2d');
+       let particles = [];
+       let charW = 9.6;
+
+       function resizeThunderCanvas() {
+           canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+           const fsize = parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4;
+           charW = fsize * 0.601;
+       }
+       resizeThunderCanvas();
+       window.addEventListener('resize', resizeThunderCanvas);
+
+       const COLOR_MAP = {
+           purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' },
+           green:  { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' },
+           blue:   { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' },
+           yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' },
+           red:    { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' },
+           orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' }
+       };
+
+       function getDiscoColors() {
+           const hues = ['purple', 'green', 'blue', 'yellow', 'red', 'orange'];
+           const rand = hues[Math.floor(Math.random() * hues.length)];
+           return COLOR_MAP[rand];
+       }
+
+       class LightningBolt {
+           constructor(x, y, type) {
+               this.startX = x; this.y = y + (Math.random() - 0.5) * 10;
+               this.life = 1; this.type = type; this.totalLen = charW;
+               this.decay = 0.055 + Math.random() * 0.03;
+               let theme = state.thunderColor === 'disco' ? getDiscoColors() : COLOR_MAP[state.thunderColor];
+               if (type === 'wrong') {
+                   this.dir = -1;
+                   this.colTip = COLOR_MAP.red.tip; this.colMid = COLOR_MAP.red.mid; this.colGlow = COLOR_MAP.red.glow;
+                   this.w = 3.0 + Math.random() * 1.5;
+               } else {
+                   this.dir = 1;
+                   this.colTip = theme.tip; this.colMid = theme.mid; this.colGlow = theme.glow;
+                   this.w = 2.6 + Math.random() * 1.2;
+               }
+               this.buildPath();
+           }
+           buildPath() {
+               const segs = Math.max(3, Math.round(this.totalLen / 3));
+               const segLen = this.totalLen / segs;
+               this.pts = [{ x: 0, y: 0 }];
+               let cx = 0, cy = 0; this.branches = [];
+               for (let i = 1; i <= segs; i++) {
+                   cx += segLen + (Math.random() - 0.3) * segLen * 0.3;
+                   cy += (Math.random() - 0.5) * 6;
+                   this.pts.push({ x: cx, y: cy });
+                   if (i > 0 && i < segs && Math.random() < 0.45) {
+                       const bLen = charW * (0.2 + Math.random() * 0.4);
+                       const bDir = Math.random() < 0.5 ? -1 : 1;
+                       const bAngle = bDir * (0.3 + Math.random() * 0.5);
+                       const bSegs = 2 + Math.floor(Math.random() * 2);
+                       const branch = [{ x: cx, y: cy }];
+                       let bx = cx, by = cy;
+                       for (let j = 1; j <= bSegs; j++) {
+                           bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4;
+                           by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4;
+                           branch.push({ x: bx, y: by });
+                       }
+                       this.branches.push(branch);
+                   }
+               }
+           }
+           strokePath(pts, offX, offY, color, width, blur, alpha) {
+               if (pts.length < 2) return;
+               ctx.save();
+               ctx.globalAlpha = alpha; ctx.shadowBlur = blur; ctx.shadowColor = color;
+               ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+               ctx.translate(offX, offY);
+               ctx.beginPath(); ctx.moveTo(pts[0].x * this.dir, pts[0].y);
+               for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y);
+               ctx.stroke(); ctx.restore();
+           }
+           drawPoly(pts, ox, oy, a) {
+               this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28);
+               this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9);
+               this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a);
+           }
+           update() { this.life -= this.decay; }
+           draw() {
+               const a = Math.max(0, this.life);
+               this.drawPoly(this.pts, this.startX, this.y, a);
+               for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55);
+           }
+       }
+
+       function spawnThunderBolt(charIndex, type) {
+           if (!state.thunderEnabled || !state.isTypingStarted) return;
+           if (type === 'ghost') return;
+           const span = document.getElementById(`char-${charIndex}`);
+           if (!span) return;
+           const rect = span.getBoundingClientRect();
+           const x = rect.left + rect.width / 2;
+           const y = rect.top + rect.height / 2;
+           const count = type === 'correct' ? 2 : 3;
+           for (let i = 0; i < count; i++) {
+               particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
+           }
+       }
+
+       (function thunderLoop() {
+           ctx.clearRect(0, 0, canvas.width, canvas.height);
+           particles = particles.filter(p => p.life > 0);
+           particles.forEach(p => { p.update(); p.draw(); });
+           requestAnimationFrame(thunderLoop);
+       })();
+
+       function updateCreditDisplay() {
+           const text = chatState.credits + ' Credit' + (chatState.credits !== 1 ? 's' : '');
+           if(chatEls.creditPillMain) chatEls.creditPillMain.textContent = text;
+           if(chatEls.chatCreditPill) chatEls.chatCreditPill.textContent = text;
+           if (chatState.credits === 0) {
+               chatEls.creditPillMain?.classList.add('zero');
+               chatEls.chatCreditPill?.classList.add('zero');
+           } else {
+               chatEls.creditPillMain?.classList.remove('zero');
+               chatEls.chatCreditPill?.classList.remove('zero');
+           }
+       }
+
+       function useCredit() {
+           if (chatState.credits <= 0) {
+               chatEls.adModal.classList.add('active');
+               return false;
+           }
+           chatState.credits--;
+           updateCreditDisplay();
+           return true;
+       }
+
+       chatEls.chatToggleBtn.addEventListener('click', () => {
+           chatEls.chatModal.classList.add('active');
+           chatEls.chatInput.focus();
+       });
+
+       chatEls.closeChatBtn.addEventListener('click', () => {
+           chatEls.chatModal.classList.remove('active');
+       });
+
+       chatEls.adCloseBtn.addEventListener('click', () => {
+           chatEls.adModal.classList.remove('active');
+       });
+
+       chatEls.watchAdBtn.addEventListener('click', () => {
+           chatState.credits = 3;
+           updateCreditDisplay();
+           chatEls.adModal.classList.remove('active');
+       });
+
+       function addMessage(text, role) {
+           const bubble = document.createElement('div');
+           bubble.className = `msg-bubble msg-${role}`;
+           if (role === 'ai') {
+               bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
+           } else {
+               bubble.textContent = text;
+           }
+           chatEls.chatMessages.appendChild(bubble);
+           chatEls.chatMessages.scrollTop = chatEls.chatMessages.scrollHeight;
+       }
+
+       function escapeHtml(str) {
+           const d = document.createElement('div'); d.textContent = str; return d.innerHTML;
+       }
+
+       function showTypingIndicator() {
+           const id = 'typing-' + Date.now();
+           const div = document.createElement('div');
+           div.id = id; div.className = 'typing-indicator';
+           div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+           chatEls.chatMessages.appendChild(div);
+           chatEls.chatMessages.scrollTop = chatEls.chatMessages.scrollHeight;
+           return id;
+       }
+
+       function removeTypingIndicator(id) {
+           const el = document.getElementById(id);
+           if (el) el.remove();
+       }
+
+       function sanitizeText(text) {
+           if (!text) return '';
+           return text.replace(/[—–]/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[^ -~]/g, '').replace(/\s+/g, ' ').trim();
+       }
+
+       async function sendChatMessage() {
+           const text = chatEls.chatInput.value.trim();
+           if (!text) return;
+           if (!useCredit()) return;
+
+           addMessage(text, 'user');
+           chatEls.chatInput.value = '';
+           chatEls.chatSend.disabled = true;
+           const typingId = showTypingIndicator();
+
+           try {
+               const res = await fetch('/api/chat', {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ message: text })
+               });
+
+               removeTypingIndicator(typingId);
+
+               if (!res.ok) {
+                   const errData = await res.json().catch(() => ({}));
+                   throw new Error(errData.error || 'Server error');
+               }
+
+               const data = await res.json();
+               const cleanText = sanitizeText(data.text);
+               addMessage(cleanText, 'ai');
+
+           } catch (err) {
+               removeTypingIndicator(typingId);
+               addMessage('Sorry, I could not connect to the AI. Please try again later.', 'ai');
+               chatState.credits++;
+               updateCreditDisplay();
+           } finally {
+               chatEls.chatSend.disabled = false;
+           }
+       }
+
+       chatEls.chatSend.addEventListener('click', sendChatMessage);
+       chatEls.chatInput.addEventListener('keydown', (e) => {
+           if (e.key === 'Enter') sendChatMessage();
+       });
+
+       document.addEventListener('DOMContentLoaded', () => {
+           loadRandomParagraph();
+           updateCreditDisplay();
+           updateCaretColor();
+       });
+   </script>
+</body>
+</html>
