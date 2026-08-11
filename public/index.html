@@ -1011,5 +1011,114 @@
             updateCreditDisplay();
         });
     </script>
+<!-- Feedback widget: Gmail + Instagram -->
+<div class="ft-feedback" id="ftFeedback">
+  <span class="ft-feedback-label">Feedback</span>
+  <div class="ft-feedback-icons">
+    <a href="mailto:techtrakers@gmail.com" id="ftGmailLink" aria-label="Email us on Gmail" class="ft-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20">
+        <rect x="2" y="4" width="20" height="16" rx="2" fill="#fff"/>
+        <rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="#4285F4" stroke-width="1.4"/>
+        <path d="M2.5 5.5L12 13 21.5 5.5" fill="none" stroke="#EA4335" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <a href="https://www.instagram.com/techtrakers" target="_blank" rel="noopener noreferrer" aria-label="Message us on Instagram" class="ft-icon">
+      <svg viewBox="0 0 24 24" width="20" height="20">
+        <defs>
+          <linearGradient id="ftIgGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#feda75"/>
+            <stop offset="30%" stop-color="#fa7e1e"/>
+            <stop offset="60%" stop-color="#d62976"/>
+            <stop offset="100%" stop-color="#962fbf"/>
+          </linearGradient>
+        </defs>
+        <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#ftIgGrad)"/>
+        <circle cx="12" cy="12" r="5" fill="none" stroke="#fff" stroke-width="1.6"/>
+        <circle cx="17" cy="7" r="1.1" fill="#fff"/>
+      </svg>
+    </a>
+  </div>
+</div>
+
+<style>
+.ft-feedback{
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(20, 18, 30, 0.75);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(168, 85, 247, 0.35);
+  border-radius: 30px;
+  padding: 8px 14px;
+  z-index: 999;
+  cursor: pointer;
+  transition: box-shadow .25s ease, border-color .25s ease;
+}
+.ft-feedback:hover{
+  border-color: rgba(168, 85, 247, 0.8);
+  box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
+}
+.ft-feedback-label{
+  color: #d8d0f0;
+  font-size: 12px;
+  font-family: inherit;
+  letter-spacing: .3px;
+  white-space: nowrap;
+}
+.ft-feedback-icons{
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  pointer-events: none;
+  transition: max-width .3s ease, opacity .25s ease;
+}
+.ft-feedback.active .ft-feedback-icons{
+  max-width: 100px;
+  opacity: 1;
+  pointer-events: auto;
+}
+@media (hover: hover) and (pointer: fine) {
+  .ft-feedback:hover .ft-feedback-icons{
+    max-width: 100px;
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+.ft-icon{
+  display: flex;
+  transition: transform .2s ease;
+}
+.ft-icon:hover{ transform: scale(1.15); }
+</style>
+
+<script>
+  document.getElementById('ftFeedback').addEventListener('click', function(e){
+    if (!e.target.closest('a')) {
+      e.preventDefault();
+      this.classList.toggle('active');
+    }
+  });
+
+  document.getElementById('ftGmailLink').addEventListener('click', function(e){
+    e.preventDefault();
+    var email = 'techtrakers@gmail.com';
+    var gmailWeb = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + email;
+    var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+    if (isMobile) {
+      var fallback = setTimeout(function(){ window.location.href = gmailWeb; }, 800);
+      window.addEventListener('blur', function(){ clearTimeout(fallback); }, { once: true });
+      window.location.href = 'googlegmail://co?to=' + email;
+    } else {
+      window.open(gmailWeb, '_blank');
+    }
+  });
+</script>
 </body>
 </html>
