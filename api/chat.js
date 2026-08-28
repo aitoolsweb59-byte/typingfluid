@@ -23,9 +23,12 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'No API keys configured' });
     }
 
-    const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
+    // Updated prompt to explicitly block "thinking"
+    const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Do not include any thinking process, internal monologue, or tags. Output only the final text. Topic: ' + message;
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    const groqModel = 'qwen/qwen3.6-27b'; 
+    
+    // Mixtral does not use <think> tags and is highly reliable on the free tier
+    const groqModel = 'mixtral-8x7b-32768'; 
 
     let lastErr = null;
     for (let i = 0; i < keys.length; i++) {
@@ -51,7 +54,7 @@ export default async function handler(req, res) {
                 const data = await response.json();
                 let aiText = data.choices?.[0]?.message?.content || "";
                 
-                // THE FIX: This Regex strips out the messy <think> blocks and leaves only the final text
+                // Fallback cleanup just in case another model slips through
                 aiText = aiText.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '').trim();
                 
                 if (!aiText) {
