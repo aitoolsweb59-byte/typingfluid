@@ -26,9 +26,8 @@ export default async function handler(req, res) {
     const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
-    // Non-reasoning model: no hidden <think> block eating the token budget,
-    // so it can't return a 200 with empty visible content.
-    const groqModel = 'llama-3.3-70b-versatile';
+    // Confirmed current/active model on Groq (as of Aug 2026).
+    const groqModel = 'qwen/qwen3.6-27b';
 
     let lastErr = null;
     for (let i = 0; i < keys.length; i++) {
@@ -46,7 +45,16 @@ export default async function handler(req, res) {
                         { role: 'user', content: message }
                     ],
                     temperature: 0.7,
-                    max_tokens: 2048
+                    max_tokens: 1024,
+                    // Root cause of the empty-response bug: Qwen 3.6 defaults to
+                    // "thinking mode" (reasoning_effort: "default") when this is
+                    // omitted. In thinking mode it can burn the entire max_tokens
+                    // budget on hidden reasoning and emit zero visible output,
+                    // which comes back as a 200 OK with content: "".
+                    // "none" = non-thinking mode, the mode Groq recommends for
+                    // short general-purpose text like these typing drills.
+                    reasoning_effort: 'none',
+                    reasoning_format: 'hidden' // extra safety net, in case reasoning leaks through
                 })
             });
 
@@ -58,8 +66,9 @@ export default async function handler(req, res) {
                     return res.status(200).json({ text: aiText });
                 }
 
-                // 200 OK but empty content: treat as a soft failure and try
-                // the next key instead of surfacing a fake "success" reply.
+                // Still got 200 + empty content (shouldn't happen now, but just
+                // in case) — treat as a soft failure and try the next key
+                // instead of showing the user a fake "success" placeholder.
                 lastErr = 'Model returned empty content';
                 console.error(`Key ${i + 1} returned 200 with empty content, trying next key`);
                 continue;
