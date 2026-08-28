@@ -988,7 +988,7 @@
                 els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
             } catch (err) {
                 removeTypingIndicator(typingId);
-                addMessage('Sorry, I could not connect to the AI. Please try again later.', 'ai');
+                addMessage('Error: ' + err.message, 'ai');
                 state.credits++;
                 updateCreditDisplay();
             } finally {
