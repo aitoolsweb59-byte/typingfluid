@@ -25,9 +25,10 @@ export default async function handler(req, res) {
 
     const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    
-    // This model is confirmed to work on your account
-    const groqModel = 'qwen/qwen3.6-27b'; 
+
+    // Non-reasoning model: no hidden <think> block eating the token budget,
+    // so it can't return a 200 with empty visible content.
+    const groqModel = 'llama-3.3-70b-versatile';
 
     let lastErr = null;
     for (let i = 0; i < keys.length; i++) {
@@ -45,29 +46,32 @@ export default async function handler(req, res) {
                         { role: 'user', content: message }
                     ],
                     temperature: 0.7,
-                    max_tokens: 1024,
-                    reasoning_format: 'hidden' // Natively strips the <think> blocks before sending
+                    max_tokens: 2048
                 })
             });
 
             if (response.ok) {
                 const data = await response.json();
-                let aiText = data.choices?.[0]?.message?.content || "";
-                
-                if (!aiText || aiText.trim() === "") {
-                    aiText = "Sorry, the AI generated an empty response. Let's try again.";
+                const aiText = (data.choices?.[0]?.message?.content || "").trim();
+
+                if (aiText) {
+                    return res.status(200).json({ text: aiText });
                 }
-                
-                return res.status(200).json({ text: aiText.trim() });
+
+                // 200 OK but empty content: treat as a soft failure and try
+                // the next key instead of surfacing a fake "success" reply.
+                lastErr = 'Model returned empty content';
+                console.error(`Key ${i + 1} returned 200 with empty content, trying next key`);
+                continue;
             }
 
             const errData = await response.json().catch(() => ({}));
             lastErr = errData.error?.message || `Groq API Error: ${response.status}`;
-            
+
             console.error(`Key ${i + 1} failed with status ${response.status}:`, errData);
 
             if (response.status === 429 || response.status === 401 || response.status === 403) {
-                continue; 
+                continue;
             }
 
             return res.status(502).json({ error: lastErr });
