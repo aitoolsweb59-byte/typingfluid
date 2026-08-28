@@ -13,7 +13,6 @@ export default async function handler(req, res) {
     const message = body?.message;
     if (!message) return res.status(400).json({ error: 'Message required' });
 
-    // .trim() removes any invisible spaces copied from Android clipboard
     const keys = [
         process.env.GROQ_KEY_1,
         process.env.GROQ_API_KEY
@@ -26,8 +25,6 @@ export default async function handler(req, res) {
 
     const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    
-    // Switched to Qwen: lightning fast, free tier supported, and no hidden reasoning tokens
     const groqModel = 'qwen/qwen3.6-27b'; 
 
     let lastErr = null;
@@ -46,15 +43,21 @@ export default async function handler(req, res) {
                         { role: 'user', content: message }
                     ],
                     temperature: 0.7,
-                    max_tokens: 1024 // Increased so the AI doesn't get cut off mid-sentence
+                    max_tokens: 1024 
                 })
             });
 
             if (response.ok) {
                 const data = await response.json();
+                let aiText = data.choices?.[0]?.message?.content || "";
                 
-                // Safely extract the text, providing a default message if it's empty
-                const aiText = data.choices?.[0]?.message?.content || "Sorry, the AI generated an empty response. Let's try again.";
+                // THE FIX: This Regex strips out the messy <think> blocks and leaves only the final text
+                aiText = aiText.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '').trim();
+                
+                if (!aiText) {
+                    aiText = "Sorry, the AI generated an empty response. Let's try again.";
+                }
+                
                 return res.status(200).json({ text: aiText });
             }
 
