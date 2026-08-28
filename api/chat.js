@@ -3,21 +3,40 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { message } = req.body;
+    // Safely parse body if it arrives as a string
+    let body = req.body;
+    if (typeof body === 'string') {
+        try {
+            body = JSON.parse(body);
+        } catch (e) {
+            return res.status(400).json({ error: 'Invalid JSON payload' });
+        }
+    }
+
+    const message = body?.message;
     if (!message || typeof message !== 'string') {
         return res.status(400).json({ error: 'Message required' });
     }
 
-    const keys = [
+    // Collect all possible key variants and trim accidental whitespace/newlines
+    const candidateKeys = [
+        process.env.GROQ_API_KEY,
+        process.env.GROQ_KEY,
         process.env.GROQ_KEY_1,
         process.env.GROQ_KEY_2,
         process.env.GROQ_KEY_3,
         process.env.GROQ_KEY_4,
         process.env.GROQ_KEY_5
-    ].filter(k => k && k.startsWith('gsk_'));
+    ];
+
+    const keys = candidateKeys
+        .map(k => (k ? k.trim() : ''))
+        .filter(k => k && k.startsWith('gsk_'));
 
     if (keys.length === 0) {
-        return res.status(500).json({ error: 'No API keys configured' });
+        return res.status(500).json({ 
+            error: 'No API keys found. Ensure GROQ_API_KEY or GROQ_KEY_1 is set in Vercel settings and the project is redeployed.' 
+        });
     }
 
     const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
@@ -51,13 +70,13 @@ export default async function handler(req, res) {
             }
 
             if (response.status === 401 || response.status === 403) {
-                lastErr = 'Key ' + (i + 1) + ' invalid';
+                lastErr = 'Key ' + (i + 1) + ' invalid or unauthorized';
                 continue;
             }
 
             const errData = await response.json().catch(() => ({}));
-            lastErr = errData.error?.message || 'API error';
-            if (response.status === 429) continue;
+            lastErr = errData.error?.message || `Groq API Error (${response.status})`;
+            if (response.status === 429) continue; // Rate limit hit, try next key
             return res.status(502).json({ error: lastErr });
         } catch (e) {
             lastErr = e.message;
