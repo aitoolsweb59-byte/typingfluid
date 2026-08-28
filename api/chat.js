@@ -26,7 +26,9 @@ export default async function handler(req, res) {
 
     const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    const groqModel = 'llama-3.1-8b-instant'; 
+    
+    // Updated to the active, highly capable model for free tiers
+    const groqModel = 'llama-3.3-70b-versatile'; 
 
     let lastErr = null;
     for (let i = 0; i < keys.length; i++) {
