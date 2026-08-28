@@ -23,12 +23,11 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'No API keys configured' });
     }
 
-    // Updated prompt to explicitly block "thinking"
-    const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Do not include any thinking process, internal monologue, or tags. Output only the final text. Topic: ' + message;
+    const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
     
-    // Mixtral does not use <think> tags and is highly reliable on the free tier
-    const groqModel = 'mixtral-8x7b-32768'; 
+    // This model is confirmed to work on your account
+    const groqModel = 'qwen/qwen3.6-27b'; 
 
     let lastErr = null;
     for (let i = 0; i < keys.length; i++) {
@@ -46,7 +45,8 @@ export default async function handler(req, res) {
                         { role: 'user', content: message }
                     ],
                     temperature: 0.7,
-                    max_tokens: 1024 
+                    max_tokens: 1024,
+                    reasoning_format: 'hidden' // Natively strips the <think> blocks before sending
                 })
             });
 
@@ -54,14 +54,11 @@ export default async function handler(req, res) {
                 const data = await response.json();
                 let aiText = data.choices?.[0]?.message?.content || "";
                 
-                // Fallback cleanup just in case another model slips through
-                aiText = aiText.replace(/<think>[\s\S]*?(?:<\/think>|$)/gi, '').trim();
-                
-                if (!aiText) {
+                if (!aiText || aiText.trim() === "") {
                     aiText = "Sorry, the AI generated an empty response. Let's try again.";
                 }
                 
-                return res.status(200).json({ text: aiText });
+                return res.status(200).json({ text: aiText.trim() });
             }
 
             const errData = await response.json().catch(() => ({}));
