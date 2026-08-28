@@ -28,7 +28,8 @@ export default async function handler(req, res) {
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
     
     // Updated to the active, highly capable model for free tiers
-    const groqModel = 'llama-3.3-70b-versatile'; 
+    const groqModel = 'llama3-8b-8192';
+    
 
     let lastErr = null;
     for (let i = 0; i < keys.length; i++) {
