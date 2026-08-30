@@ -173,7 +173,7 @@
         @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
 
         /* ========================================= */
-        /* --- TECHTRAKERS AD CARD (UPDATED)     --- */
+        /* --- YOUTUBE AD VIDEO CARD (UPDATED)   --- */
         /* ========================================= */
         .ad-card-special {
             background: linear-gradient(145deg, #0e1424, #171d33);
@@ -183,7 +183,6 @@
             text-align: center;
         }
         
-        /* Smooth motion graphics text */
         .ad-motion-text {
             font-family: 'Orbitron', sans-serif;
             font-size: 1.15rem; font-weight: 700; text-transform: uppercase;
@@ -200,44 +199,50 @@
             100% { background-position: 200% center; }
         }
 
-        .ad-image-wrapper {
-            position: relative; width: 100%; border-radius: 12px;
-            overflow: hidden; cursor: pointer; min-height: 250px;
-            display: flex; align-items: center; justify-content: center;
-            background: rgba(7,10,18,0.5); border: 1px solid rgba(255,255,255,0.1);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-        }
-        .ad-image-wrapper:hover {
-            transform: scale(1.02);
-            box-shadow: 0 10px 30px rgba(34,211,238,0.2);
-            border-color: var(--accent);
+        /* 16:9 Aspect Ratio Container for YouTube Iframe */
+        .video-container {
+            position: relative;
+            width: 100%;
+            padding-bottom: 56.25%; /* 16:9 ratio */
+            height: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            background: rgba(7,10,18,0.5); 
+            border: 1px solid rgba(255,255,255,0.1);
+            box-shadow: 0 10px 30px rgba(34,211,238,0.1);
         }
         
-        .ad-img {
-            width: 100%; height: auto; display: block; opacity: 0;
-            transition: opacity 0.5s ease;
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
         }
-        .ad-img.loaded { opacity: 1; }
+
+        .ad-timer {
+            position: absolute; top: 10px; right: 10px;
+            background: rgba(7,10,18,0.9); border: 2px solid var(--accent);
+            color: var(--accent); width: 32px; height: 32px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 14px; font-weight: bold; z-index: 30;
+            font-family: 'Orbitron', sans-serif;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
         
         .ad-close-x {
             position: absolute; top: 10px; right: 10px;
-            background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.2);
-            color: #fff; width: 28px; height: 28px; border-radius: 50%;
+            background: rgba(7,10,18,0.9); border: 2px solid rgba(255,255,255,0.3);
+            color: #fff; width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
-            font-size: 14px; cursor: pointer; z-index: 20;
+            font-size: 16px; font-weight: bold; cursor: pointer; z-index: 30;
             transition: all 0.2s ease;
         }
         .ad-close-x:hover {
             background: var(--error-color); border-color: var(--error-color);
-            transform: scale(1.1);
+            transform: scale(1.1); box-shadow: 0 0 15px rgba(248,113,113,0.4);
         }
-        
-        .ad-loading-spinner {
-            width: 40px; height: 40px; border: 3px solid rgba(34,211,238,0.2);
-            border-top-color: var(--accent); border-radius: 50%;
-            animation: spin 1s linear infinite; position: absolute;
-        }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
 
         .btn-primary { background: var(--accent); color: var(--bg-base); font-family: 'Orbitron', sans-serif; font-weight: 700; padding: 12px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.25s; text-transform: uppercase; width: 100%; }
         .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
@@ -381,20 +386,23 @@
         </div>
     </div>
 
-    <!-- TECHTRAKERS NEW AD MODAL -->
+    <!-- TECHTRAKERS NEW AD MODAL (YOUTUBE EMBED) -->
     <div class="modal-overlay" id="ad-modal">
-        <div class="modal-card ad-card-special p-6 max-w-md w-full">
-            <div class="ad-motion-text">Follow TechTrakers if you are interested in AI</div>
+        <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
+            <div class="ad-motion-text">Watch to earn 3 Credits</div>
             
-            <div class="ad-image-wrapper" id="ad-image-box">
-                <!-- X button directly on top right of the image -->
-                <button class="ad-close-x" id="ad-close-btn" aria-label="Close Ad">✕</button>
+            <div class="video-container">
+                <!-- 5-Second Timer -->
+                <div id="ad-timer" class="ad-timer">5</div>
                 
-                <img src="https://ibb.co/wFvP9ytk" alt="TechTrakers Ad" class="ad-img" id="ad-img">
-                <div class="ad-loading-spinner" id="ad-loader"></div>
+                <!-- X button directly on top right of the video (Hidden initially) -->
+                <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad">✕</button>
+                
+                <!-- Empty src initially, populated via JavaScript to autoplay -->
+                <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
             
-            <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold font-mono">Tap image or ✕ to claim +3 Credits</p>
+            <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold font-mono" id="ad-footer-text">Video is playing...</p>
         </div>
     </div>
 
@@ -512,7 +520,7 @@
             thunderColor: "purple",
             thunderEnabled: true,
             credits: 3,
-            isCompleted: false // New Flag to fix WPM Bug
+            isCompleted: false
         };
 
         const els = {
@@ -535,10 +543,14 @@
             closeChatBtn: document.getElementById('close-chat-btn'),
             creditPill: document.getElementById('credit-pill'),
             chatCreditPill: document.getElementById('chat-credit-pill'),
+            
+            // Ad DOM elements updated
             adModal: document.getElementById('ad-modal'),
-            adImageBox: document.getElementById('ad-image-box'),
-            adImg: document.getElementById('ad-img'),
-            adLoader: document.getElementById('ad-loader'),
+            adCloseBtn: document.getElementById('ad-close-btn'),
+            adTimer: document.getElementById('ad-timer'),
+            adIframe: document.getElementById('ad-iframe'),
+            adFooterText: document.getElementById('ad-footer-text'),
+            
             topicLabel: document.getElementById('topic-label'),
             initBtn: document.getElementById('init-btn')
         };
@@ -601,7 +613,7 @@
             state.correctKeystrokes = 0;
             state.isBlocked = false;
             state.isTypingStarted = false;
-            state.isCompleted = false; // Reset lock flag
+            state.isCompleted = false; 
             
             els.mobileInput.value = '';
             els.wpm.textContent = '0';
@@ -689,11 +701,7 @@
             }
         });
 
-        /* ==================================================== */
-        /* --- TYPING LOGIC FIX: PREVENTS 2000 WPM SPIKE    --- */
-        /* ==================================================== */
         function handleTypingInput(e) {
-            // Guard: Once drill is totally completed, completely ignore any fast keyboard bashing.
             if (state.isCompleted) {
                 if(e) e.preventDefault();
                 els.mobileInput.value = state.typedArray.join('');
@@ -787,7 +795,7 @@
 
         function finishDrill() {
             state.timerActive = false;
-            state.isCompleted = true; // Hard lock typing area completely
+            state.isCompleted = true; 
             els.mobileInput.blur();
             removeCursorUI();
             
@@ -863,22 +871,11 @@
         function playThunderRumble() { try { const ac = getAudio(); const now = ac.currentTime; const dur = 1.1; const sr = ac.sampleRate; const buf = ac.createBuffer(1, sr * dur, sr); const d = buf.getChannelData(0); for (let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.exp(-(j / sr) * 1.8); const noise = ac.createBufferSource(); noise.buffer = buf; const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(100, now); lp.frequency.exponentialRampToValueAtTime(40, now + dur); lp.Q.value = 1.5; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 220; bp.Q.value = 0.6; const gainLP = ac.createGain(); gainLP.gain.setValueAtTime(0.0, now); gainLP.gain.linearRampToValueAtTime(0.5, now + 0.05); gainLP.gain.exponentialRampToValueAtTime(0.001, now + dur); const gainBP = ac.createGain(); gainBP.gain.setValueAtTime(0.0, now); gainBP.gain.linearRampToValueAtTime(0.25, now + 0.04); gainBP.gain.exponentialRampToValueAtTime(0.001, now + 0.7); const master = ac.createGain(); master.gain.value = 0.65; noise.connect(lp); lp.connect(gainLP); gainLP.connect(master); noise.connect(bp); bp.connect(gainBP); gainBP.connect(master); master.connect(ac.destination); noise.start(now); noise.stop(now + dur); } catch(e) {} }
 
         /* ========================================= */
-        /* --- AD MANAGEMENT & NEW IMAGE LOGIC   --- */
+        /* --- YOUTUBE AD MANAGEMENT LOGIC       --- */
         /* ========================================= */
         
-        // Handle Ad Image Loading cleanly
-        els.adImg.addEventListener('load', function() {
-            this.classList.add('loaded');
-            if(els.adLoader) els.adLoader.style.display = 'none';
-        });
+        let adCountdownInterval;
         
-        // Failsafe if image link gets broken
-        els.adImg.addEventListener('error', function() {
-            if(els.adLoader) els.adLoader.style.display = 'none';
-            this.alt = "Failed to load TechTrakers Image. Tap here to claim credits.";
-            this.style.opacity = '1';
-        });
-
         function updateCreditDisplay() {
             const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
             els.creditPill.textContent = text;
@@ -891,10 +888,40 @@
                 els.chatCreditPill.classList.remove('zero');
             }
         }
+        
+        function showVideoAd() {
+            // Show the modal
+            els.adModal.classList.add('active');
+            
+            // Set the UI for timer countdown
+            els.adCloseBtn.classList.add('hidden');
+            els.adTimer.classList.remove('hidden');
+            els.adTimer.textContent = '5';
+            els.adFooterText.textContent = "Please wait to claim credits...";
+            
+            // Inject the YouTube URL (with autoplay enabled)
+            els.adIframe.src = "https://www.youtube.com/embed/q2Rg8jf4Iu0?si=CJ7iAjDifBIw4Wty&autoplay=1";
+            
+            let timeLeft = 5;
+            clearInterval(adCountdownInterval);
+            
+            adCountdownInterval = setInterval(() => {
+                timeLeft--;
+                els.adTimer.textContent = timeLeft;
+                
+                // When 5 seconds finish
+                if (timeLeft <= 0) {
+                    clearInterval(adCountdownInterval);
+                    els.adTimer.classList.add('hidden');
+                    els.adCloseBtn.classList.remove('hidden');
+                    els.adFooterText.textContent = "Tap ✕ to claim +3 Credits!";
+                }
+            }, 1000);
+        }
 
         function useCredit() {
             if (state.credits <= 0) {
-                els.adModal.classList.add('active'); // Pop Ad Up
+                showVideoAd();
                 return false;
             }
             state.credits--;
@@ -907,14 +934,18 @@
             state.credits = 3;
             updateCreditDisplay();
             els.adModal.classList.remove('active');
+            
+            // Critical: Remove the iframe source so it stops playing in the background
+            els.adIframe.src = "";
+            clearInterval(adCountdownInterval);
         }
 
-        // Entire image box + Close Button both grant 3 credits & close ad
-        els.adImageBox.addEventListener('click', claimAdReward);
+        // Only clicking the X button claims the reward now
+        els.adCloseBtn.addEventListener('click', claimAdReward);
 
         els.chatToggleBtn.addEventListener('click', () => {
             if (state.credits <= 0) {
-                els.adModal.classList.add('active');
+                showVideoAd();
                 return;
             }
             els.chatModal.classList.add('active');
