@@ -71,6 +71,8 @@
         .corner-btn.ghost:hover { border-color: #c084fc; box-shadow: 0 0 15px rgba(192,132,252,0.25); }
         .corner-btn.chat { border-color: rgba(34,211,238,0.3); color: var(--accent); padding: 10px; }
         .corner-btn.chat:hover { box-shadow: 0 0 20px var(--accent-glow); }
+        .corner-btn.custom-topic { border-color: rgba(74,222,128,0.3); color: #4ade80; padding: 10px; }
+        .corner-btn.custom-topic:hover { box-shadow: 0 0 20px rgba(74,222,128,0.35); }
         
         .metric-label { font-size: 0.65rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px; }
         .metric-value { font-family: 'Orbitron', sans-serif; font-size: 2.8rem; font-weight: 900; line-height: 1; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.08); }
@@ -246,6 +248,16 @@
 
         .btn-primary { background: var(--accent); color: var(--bg-base); font-family: 'Orbitron', sans-serif; font-weight: 700; padding: 12px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.25s; text-transform: uppercase; width: 100%; }
         .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+
+        .customize-textarea {
+            background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 14px; padding: 14px; color: var(--text-main);
+            font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6;
+            resize: vertical; min-height: 160px; outline: none;
+            transition: border-color 0.25s;
+        }
+        .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
+        .customize-textarea::placeholder { color: var(--text-dim); }
         
         .thunder-select { background: rgba(15,21,37,0.8); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 6px 12px; border-radius: 10px; font-size: 0.7rem; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; text-transform: uppercase; outline: none; cursor: pointer; backdrop-filter: blur(8px); }
         .thunder-select:focus { border-color: var(--accent); }
@@ -254,42 +266,24 @@
         .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
 
         /* ========================================= */
-        /* --- ONBOARDING TOOLTIPS & HIGHLIGHTS  --- */
+        /* --- AUTO-POPUP ONBOARDING TOASTS      --- */
         /* ========================================= */
-        #onboarding-overlay {
-            position: fixed; inset: 0; background: rgba(7, 10, 18, 0.75);
-            backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); z-index: 9900;
-            opacity: 0; pointer-events: none; transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        #onboarding-overlay.active { opacity: 1; pointer-events: auto; }
-        
-        .onboarding-tooltip {
+        .onb-toast {
             position: fixed; z-index: 9910;
-            background: rgba(15, 21, 37, 0.85); backdrop-filter: blur(16px);
-            color: var(--text-main); font-size: 0.85rem; line-height: 1.6;
-            padding: 16px 20px; border-radius: 14px; max-width: 270px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
-            opacity: 0; visibility: hidden; pointer-events: none;
-            transform: translateY(15px) scale(0.9);
+            background: rgba(15, 21, 37, 0.92); backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            color: var(--text-main); font-size: 0.78rem; font-weight: 500; line-height: 1.5;
+            padding: 10px 18px; border-radius: 999px; max-width: 250px;
+            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+            opacity: 0; visibility: hidden; pointer-events: none; text-align: center;
+            transform: translateY(10px) scale(0.95);
             transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
         }
-        .onboarding-tooltip h4 { font-family: 'Orbitron', sans-serif; font-size: 0.75rem; letter-spacing: 1px; margin: 0 0 6px 0; text-transform: uppercase; }
-        .onboarding-tooltip p { color: var(--text-dim); margin: 0; }
-        .onboarding-tooltip.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-        
-        #onboarding-chat-tooltip { top: 70px; right: 20px; border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 30px rgba(34, 211, 238, 0.15); }
-        #onboarding-chat-tooltip h4 { color: var(--accent); }
-        
-        #onboarding-feedback-tooltip { bottom: 70px; right: 20px; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 10px 30px rgba(0,0,0,0.5), 0 0 30px rgba(168, 85, 247, 0.15); }
-        #onboarding-feedback-tooltip h4 { color: #c084fc; }
+        .onb-toast.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
 
-        @keyframes pulseRing { 0% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.6); } 100% { box-shadow: 0 0 0 12px rgba(34, 211, 238, 0); } }
-        .highlight-active {
-            z-index: 9950 !important; position: relative; pointer-events: auto !important;
-            border-color: var(--accent) !important;
-            animation: pulseRing 1.5s infinite cubic-bezier(0.16, 1, 0.3, 1);
-            background: rgba(15,21,37,0.95) !important;
-        }
+        #onb-toast-chat { top: 62px; right: 20px; border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(34, 211, 238, 0.15); }
+        #onb-toast-customize { top: 62px; right: 20px; border: 1px solid rgba(74, 222, 128, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(74, 222, 128, 0.15); }
+        #onb-toast-feedback { bottom: 62px; right: 20px; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(168, 85, 247, 0.15); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
@@ -306,6 +300,9 @@
 
     <div class="fixed top-4 right-4 z-50 flex items-center gap-3 bg-[#070a12] p-1 rounded-xl">
         <span id="credit-pill" class="credit-pill">3 Credits</span>
+        <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+        </button>
         <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Topic Search">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
         </button>
@@ -386,6 +383,19 @@
         </div>
     </div>
 
+    <!-- CUSTOMIZE PARAGRAPH MODAL -->
+    <div class="modal-overlay" id="customize-modal">
+        <div class="modal-card">
+            <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                <h3 class="font-bold text-lg brand">CUSTOM <span class="gradient-text">TOPIC</span></h3>
+                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn">✕</button>
+            </div>
+            <p class="text-xs text-[#64748b]">Paste any topic or paragraph you want to practice typing on, then hit start.</p>
+            <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..."></textarea>
+            <button class="btn-primary" id="start-custom-typing-btn">Start Typing</button>
+        </div>
+    </div>
+
     <!-- TECHTRAKERS NEW AD MODAL (YOUTUBE EMBED) -->
     <div class="modal-overlay" id="ad-modal">
         <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
@@ -406,18 +416,10 @@
         </div>
     </div>
 
-    <!-- ONBOARDING OVERLAY & TOOLTIPS -->
-    <div id="onboarding-overlay"></div>
-
-    <div id="onboarding-chat-tooltip" class="onboarding-tooltip">
-        <h4>Personalized AI Drills</h4>
-        <p>Want to type about topics you love? Use the AI chatbot to generate custom paragraphs on demand!</p>
-    </div>
-
-    <div id="onboarding-feedback-tooltip" class="onboarding-tooltip">
-        <h4>We Value Your Feedback</h4>
-        <p>Found a bug or have an idea to share? Reach out to us anytime directly here.</p>
-    </div>
+    <!-- AUTO-POPUP ONBOARDING TOASTS -->
+    <div id="onb-toast-chat" class="onb-toast">Use chatbot for that topic, which you love to type.</div>
+    <div id="onb-toast-customize" class="onb-toast">Paste the topic on which you want to type.</div>
+    <div id="onb-toast-feedback" class="onb-toast">Give feedback. If you find any bugs...</div>
 
     <!-- Feedback widget: Gmail + Instagram -->
     <div class="ft-feedback" id="ftFeedback">
@@ -482,16 +484,26 @@
 
     <script>
         const PARAGRAPHS = [
-            "The journey of self-improvement begins with a single keystroke. Every great typist was once a beginner who refused to give up. Your fingers are learning a new language, and patience is the only teacher that matters.",
-            "Discipline is the bridge between goals and accomplishment. When you sit down to practice typing today, you are not just moving your fingers. You are building neural pathways that will serve you for a lifetime.",
-            "Speed comes from accuracy, not the other way around. Focus on hitting the right keys first, and the velocity will follow naturally. Trust the process and celebrate small victories every day.",
-            "Consistency beats intensity every single time. Twenty minutes of focused typing practice daily will transform you faster than three hours once a week. Show up for yourself even when motivation is low.",
-            "Your comfort zone is a beautiful place, but nothing ever grows there. Push through the awkward phase of learning home row keys. Soon your hands will dance across the keyboard without conscious thought.",
-            "Mistakes are proof that you are trying. Every incorrect keystroke is data for your brain to adjust. Do not fear the red highlights; embrace them as stepping stones toward mastery.",
-            "The professional typist and the amateur both feel the same urge to look at the keyboard. The difference is that the professional has trained their muscle memory to resist that urge through thousands of repetitions.",
-            "Focus on progress, not perfection. You do not need to type at one hundred words per minute today. You only need to be better than you were yesterday. That is the only competition that truly matters.",
-            "Your typing speed is a reflection of your thinking speed. As you eliminate the friction between thought and screen, your ideas will flow more freely. The keyboard becomes an extension of your mind.",
-            "Greatness is a lot of small things done well. Each correct keystroke is a vote for the person you want to become. Stack those votes daily and watch your skills compound over time."
+            "Every expert typist started with clumsy fingers and a blank screen. What separates them from everyone else is simply the number of times they sat back down and tried again. Your keyboard does not care about yesterday, only about right now.",
+            "Momentum is built one line at a time. You do not need a perfect plan to start typing faster, you only need to begin. The rest reveals itself through repetition and quiet, stubborn effort.",
+            "A calm mind types cleaner than a rushed one. Slow your breathing before you slow your fingers, and let accuracy set the pace instead of anxiety. Speed is simply what happens when fear leaves the room.",
+            "Nobody remembers the days you skipped practice, but your fingers do. Muscle memory is built in silence, one unnoticed session at a time, until suddenly the keyboard feels like an old friend.",
+            "The difference between a good typist and a great one is rarely talent. It is the willingness to keep practicing after the excitement of being a beginner has worn off completely.",
+            "Typing well is a quiet superpower in a noisy world. While others struggle to keep up with their own thoughts, your hands will already be there, waiting patiently for the next idea.",
+            "Do not chase perfect words per minute today. Chase one honest session of focused practice, free of distractions, and let the numbers take care of themselves over time.",
+            "Every red highlighted letter is simply your hand asking for one more chance to get it right. Answer that request kindly, and watch how quickly the mistakes fade away.",
+            "Confidence at the keyboard is not something you wait for. It is something you build, keystroke by keystroke, long before you ever feel ready to call yourself fast.",
+            "The keyboard rewards patience more than talent. Anyone willing to sit down daily and endure the awkward early stage will eventually outpace those who gave up too soon.",
+            "Great habits are boring from the outside and powerful from the inside. Practicing typing for a few honest minutes daily will quietly outperform any burst of last minute effort.",
+            "Your fingers already know more than you think, they just need permission to move without your eyes checking every single key. Trust them, and the speed will follow.",
+            "Small steady gains compound into something remarkable. A single extra word per minute each week feels invisible today, but becomes an entirely different skill months from now.",
+            "The most productive people are rarely the fastest thinkers, they are the ones who can get their thoughts onto the screen with the least friction. That is what real typing practice builds.",
+            "Comparison steals the joy of practice. Focus only on the version of yourself from last week, and let that be the only competitor that matters in this session.",
+            "Discomfort during practice is not a warning sign, it is proof that you are stretching past what used to be your limit. Lean into it instead of running from it.",
+            "You will not feel motivated every single day, and that is fine. Show up anyway, type the paragraph in front of you, and let discipline carry you on the days motivation forgets to.",
+            "A cluttered desk rarely produces a clear mind. Clear your space, silence your notifications, and give this short session of practice your complete and undivided attention.",
+            "Typing fast is really just thinking clearly under pressure and letting your hands keep up. Train the clarity first, and the raw speed will arrive as a natural side effect.",
+            "The best time to have started practicing was months ago. The second best time is the next few minutes, right here, on this very paragraph in front of you."
         ];
 
         const CARET_COLORS = {
@@ -543,6 +555,12 @@
             closeChatBtn: document.getElementById('close-chat-btn'),
             creditPill: document.getElementById('credit-pill'),
             chatCreditPill: document.getElementById('chat-credit-pill'),
+
+            customizeToggleBtn: document.getElementById('customize-toggle-btn'),
+            customizeModal: document.getElementById('customize-modal'),
+            customizeTextarea: document.getElementById('customize-textarea'),
+            closeCustomizeBtn: document.getElementById('close-customize-btn'),
+            startCustomTypingBtn: document.getElementById('start-custom-typing-btn'),
             
             // Ad DOM elements updated
             adModal: document.getElementById('ad-modal'),
@@ -659,6 +677,29 @@
             state.thunderEnabled = e.target.value !== 'none';
             updateCaretColor();
             updateCursorUI();
+        });
+
+        /* ========================================= */
+        /* --- CUSTOMIZE PARAGRAPH FEATURE       --- */
+        /* ========================================= */
+        els.customizeToggleBtn.addEventListener('click', () => {
+            els.customizeModal.classList.add('active');
+            els.customizeTextarea.focus();
+        });
+
+        els.closeCustomizeBtn.addEventListener('click', () => {
+            els.customizeModal.classList.remove('active');
+        });
+
+        els.startCustomTypingBtn.addEventListener('click', () => {
+            const text = sanitizeText(els.customizeTextarea.value);
+            if (!text) return;
+            state.rawText = text;
+            processTextForDifficulty(text);
+            resetDrill();
+            els.topicLabel.textContent = 'Custom Topic';
+            els.customizeModal.classList.remove('active');
+            els.customizeTextarea.value = '';
         });
 
         function getLineHeight() {
@@ -1041,48 +1082,27 @@
         function initOnboarding() {
             if (sessionStorage.getItem('ft_onboarding_done')) return;
 
-            const overlay = document.getElementById('onboarding-overlay');
-            const chatTooltip = document.getElementById('onboarding-chat-tooltip');
-            const feedbackTooltip = document.getElementById('onboarding-feedback-tooltip');
-            
-            const chatNav = document.querySelector('.fixed.top-4.right-4');
-            const chatBtn = document.getElementById('chat-toggle-btn');
-            const feedbackWidget = document.getElementById('ftFeedback');
+            const toastChat = document.getElementById('onb-toast-chat');
+            const toastCustomize = document.getElementById('onb-toast-customize');
+            const toastFeedback = document.getElementById('onb-toast-feedback');
 
-            let step = 1;
-
-            function showStep1() {
-                overlay.classList.add('active');
-                if (chatNav) chatNav.classList.add('highlight-active');
-                chatTooltip.classList.add('active');
+            function showToast(el, durationMs) {
+                return new Promise((resolve) => {
+                    el.classList.add('active');
+                    setTimeout(() => {
+                        el.classList.remove('active');
+                        setTimeout(resolve, 400);
+                    }, durationMs);
+                });
             }
 
-            function showStep2() {
-                if (chatNav) chatNav.classList.remove('highlight-active');
-                chatTooltip.classList.remove('active');
-
-                feedbackWidget.classList.add('highlight-active');
-                feedbackTooltip.classList.add('active');
-            }
-
-            function endOnboarding() {
-                overlay.classList.remove('active');
-                if (chatNav) chatNav.classList.remove('highlight-active');
-                chatTooltip.classList.remove('active');
-                feedbackWidget.classList.remove('highlight-active');
-                feedbackTooltip.classList.remove('active');
+            (async () => {
+                await new Promise((resolve) => setTimeout(resolve, 500));
+                await showToast(toastChat, 4000);
+                await showToast(toastCustomize, 3000);
+                await showToast(toastFeedback, 3000);
                 sessionStorage.setItem('ft_onboarding_done', 'true');
-            }
-
-            overlay.addEventListener('click', () => {
-                if (step === 1) { step = 2; showStep2(); } 
-                else endOnboarding();
-            });
-
-            chatBtn.addEventListener('click', () => { if (step === 1) endOnboarding(); });
-            feedbackWidget.addEventListener('click', () => { if (step === 2) endOnboarding(); });
-
-            setTimeout(showStep1, 400);
+            })();
         }
 
         document.addEventListener('DOMContentLoaded', () => {
