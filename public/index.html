@@ -1,1139 +1,885 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>FluidType | AI Learning Engine</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        :root {
-            --bg-base: #070a12;
-            --bg-surface: #0f1525;
-            --text-main: #e2e8f0;
-            --text-dim: #64748b;
-            --error-color: #f87171;
-            --error-bg: rgba(248,113,113,0.15);
-            --accent: #22d3ee;
-            --accent-glow: rgba(34,211,238,0.45);
-            --caret-color: #22d3ee;
-            --caret-glow: rgba(34,211,238,0.45);
-        }
-        * { box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-        body {
-            background-color: var(--bg-base);
-            color: var(--text-main);
-            font-family: 'Inter', sans-serif;
-            -webkit-tap-highlight-color: transparent;
-            overflow-x: hidden;
-            min-height: 100vh;
-        }
-        .ambient-bg {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none;
-            background:
-                radial-gradient(ellipse 80% 50% at 50% -20%, rgba(34,211,238,0.08), transparent),
-                radial-gradient(ellipse 60% 40% at 80% 80%, rgba(139,92,246,0.06), transparent);
-        }
-        .dot-grid {
-            position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
-            background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
-            background-size: 32px 32px;
-        }
-        .scanline {
-            position: fixed; inset: 0; pointer-events: none; z-index: 1;
-            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34,211,238,0.008) 2px, rgba(34,211,238,0.008) 4px);
-        }
-        #thunder-canvas {
-            position: fixed; inset: 0; width: 100%; height: 100%;
-            pointer-events: none; z-index: 999;
-        }
-        .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 2px; }
-        .gradient-text {
-            background: linear-gradient(135deg, #22d3ee, #a78bfa);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .corner-btn {
-            background: rgba(15,21,37,0.8); border: 1px solid rgba(255,255,255,0.1);
-            color: var(--text-main); padding: 8px 16px; border-radius: 12px;
-            font-size: 0.7rem; font-family: 'Orbitron', sans-serif;
-            letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer;
-            transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-            display: flex; align-items: center; gap: 6px;
-            backdrop-filter: blur(8px); text-decoration: none;
-        }
-        .corner-btn:hover { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-1px); }
-        .corner-btn.race { border-color: rgba(252,211,77,0.3); color: #fcd34d; }
-        .corner-btn.race:hover { border-color: #fcd34d; box-shadow: 0 0 15px rgba(252,211,77,0.25); }
-        .corner-btn.ghost { border-color: rgba(192,132,252,0.3); color: #c084fc; }
-        .corner-btn.ghost:hover { border-color: #c084fc; box-shadow: 0 0 15px rgba(192,132,252,0.25); }
-        .corner-btn.chat { border-color: rgba(34,211,238,0.3); color: var(--accent); padding: 10px; }
-        .corner-btn.chat:hover { box-shadow: 0 0 20px var(--accent-glow); }
-        .corner-btn.custom-topic { border-color: rgba(74,222,128,0.3); color: #4ade80; padding: 10px; }
-        .corner-btn.custom-topic:hover { box-shadow: 0 0 20px rgba(74,222,128,0.35); }
-        
-        .metric-label { font-size: 0.65rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px; }
-        .metric-value { font-family: 'Orbitron', sans-serif; font-size: 2.8rem; font-weight: 900; line-height: 1; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.08); }
-        .metric-suffix { font-size: 1.4rem; color: var(--text-dim); margin-left: 2px; }
-        
-        #typing-container {
-            font-family: 'Fira Code', monospace; line-height: 1.6;
-            --line-height: calc(1.65rem * 2.2); height: calc(5 * var(--line-height));
-            overflow-y: auto; overflow-x: hidden; padding: 1.25rem; border-radius: 18px;
-            background: rgba(15,21,37,0.55); border: 1px solid rgba(255,255,255,0.06);
-            scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
-            scroll-behavior: auto; overscroll-behavior: contain; position: relative;
-            outline: none; transition: border-color 0.3s, box-shadow 0.3s; font-size: 1.65rem;
-        }
-        #typing-container:focus, #typing-container:focus-within {
-            border-color: rgba(34,211,238,0.2); box-shadow: inset 0 0 30px rgba(34,211,238,0.03), 0 0 30px rgba(34,211,238,0.04);
-        }
-        #typing-container::-webkit-scrollbar { width: 5px; }
-        #typing-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-        
-        .char { white-space: pre; border-radius: 4px; transition: color 0.08s ease, background-color 0.08s ease; display: inline-block; }
-        .char.untyped { color: var(--text-dim); }
-        .char.correct { color: #f8fafc; text-shadow: 0 0 10px rgba(248,250,252,0.15); }
-        .char.incorrect { color: var(--error-color); background-color: var(--error-bg); }
-        
-        .caret, .caret-static { border-left: 2.5px solid var(--caret-color); box-shadow: -3px 0 12px var(--caret-glow), -1px 0 4px var(--caret-glow); margin-left: -1px; }
-        .caret { animation: blink 1.1s infinite cubic-bezier(0.4,0,0.2,1); }
-        @keyframes blink { 0%,100%{border-color:transparent;box-shadow:none;} 50%{border-color:var(--caret-color);box-shadow:-3px 0 12px var(--caret-glow);} }
-        
-        #mobile-input-target { position: absolute; opacity: 0; top: 0; left: 0; height: 100%; width: 100%; z-index: -1; pointer-events: none; }
-        #focus-overlay { position: absolute; inset: 0; background: rgba(7,10,18,0.7); backdrop-filter: blur(6px); border-radius: 18px; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; pointer-events: none; }
-        #focus-overlay.hidden { opacity: 0; }
-        .focus-pill { display: flex; align-items: center; gap: 10px; padding: 12px 24px; border-radius: 999px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); font-size: 0.9rem; color: var(--text-main); pointer-events: auto; cursor: text; transition: all 0.3s; }
-        .focus-pill:hover { border-color: rgba(34,211,238,0.2); background: rgba(34,211,238,0.04); }
-        
-        .diff-selector { display: flex; background: rgba(255,255,255,0.03); border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.05); }
-        .diff-btn { padding: 10px 22px; border-radius: 10px; font-size: 0.85rem; font-weight: 600; transition: all 0.25s; cursor: pointer; border: none; background: transparent; color: var(--text-dim); font-family: 'Inter', sans-serif; }
-        .diff-btn:hover { color: var(--text-main); }
-        .diff-btn.active { color: var(--accent); background: rgba(34,211,238,0.1); box-shadow: 0 2px 12px rgba(34,211,238,0.08); }
-        
-        .restart-btn { color: var(--text-dim); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding: 14px; border-radius: 50%; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-        .restart-btn:hover { color: var(--accent); background: rgba(34,211,238,0.08); transform: rotate(-180deg) scale(1.1); }
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+   <title>FluidType | Ghost Race Mode</title>
+   <link rel="preconnect" href="https://fonts.googleapis.com">
+   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+   <script src="https://cdn.tailwindcss.com"></script>
+   <style>
+       :root {
+           --bg-base: #070a12;
+           --bg-surface: #0f1525;
+           --text-main: #e2e8f0;
+           --text-dim: #64748b;
+           --error-color: #f87171;
+           --error-bg: rgba(248,113,113,0.15);
+           --accent: #c084fc;
+           --accent-glow: rgba(192,132,252,0.45);
+           --accent-dim: #9333ea;
+           --caret-color: #c084fc;
+           --caret-glow: rgba(192,132,252,0.45);
+           --ghost-cursor-color: #f472b6;
+           --ghost-cursor-glow: rgba(244,114,182,0.45);
+       }
+       * { box-sizing: border-box; }
+       html { scroll-behavior: smooth; }
+       body {
+           background-color: var(--bg-base);
+           color: var(--text-main);
+           font-family: 'Inter', sans-serif;
+           -webkit-tap-highlight-color: transparent;
+           overflow-x: hidden;
+           min-height: 100vh;
+       }
+       .ambient-bg {
+           position: fixed; inset: 0; z-index: 0; pointer-events: none;
+           background:
+               radial-gradient(ellipse 80% 50% at 50% -20%, rgba(192,132,252,0.1), transparent),
+               radial-gradient(ellipse 60% 40% at 80% 80%, rgba(34,211,238,0.06), transparent);
+       }
+       .dot-grid {
+           position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.35;
+           background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+           background-size: 32px 32px;
+       }
+       .scanline {
+           position: fixed; inset: 0; pointer-events: none; z-index: 1;
+           background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(192,132,252,0.01) 2px, rgba(192,132,252,0.01) 4px);
+       }
+       #thunder-canvas {
+           position: fixed; inset: 0; width: 100%; height: 100%;
+           pointer-events: none; z-index: 999;
+       }
+       .brand { font-family: 'Orbitron', sans-serif; font-weight: 900; letter-spacing: 2px; }
+       .gradient-text {
+           background: linear-gradient(135deg, #c084fc, #22d3ee);
+           -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+       }
+       .corner-btn {
+           background: rgba(15,21,37,0.8);
+           border: 1px solid rgba(255,255,255,0.1);
+           color: var(--text-main);
+           padding: 8px 14px;
+           border-radius: 12px;
+           font-size: 0.75rem;
+           font-family: 'Orbitron', sans-serif;
+           letter-spacing: 1px;
+           text-transform: uppercase;
+           cursor: pointer;
+           transition: all 0.25s;
+           display: flex; align-items: center; gap: 6px;
+           backdrop-filter: blur(8px);
+       }
+       .corner-btn:hover { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-1px); }
+       .corner-btn.chat { border-color: rgba(34,211,238,0.3); color: #22d3ee; padding: 10px; }
+       .corner-btn.chat:hover { box-shadow: 0 0 20px rgba(34,211,238,0.45); }
+       .corner-btn.custom-topic { border-color: rgba(74,222,128,0.3); color: #4ade80; padding: 10px; }
+       .corner-btn.custom-topic:hover { box-shadow: 0 0 20px rgba(74,222,128,0.35); }
 
-        /* ========================================= */
-        /* --- SMOOTH & MINIMAL MODAL ANIMATIONS --- */
-        /* ========================================= */
-        .modal-overlay {
-            position: fixed; inset: 0; z-index: 300;
-            background: rgba(7,10,18,0.6);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
-            display: flex; align-items: center; justify-content: center;
-            padding: 16px; opacity: 0; visibility: hidden; pointer-events: none;
-            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.35s ease;
-        }
-        .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
-        
-        .modal-card {
-            background: rgba(15,21,37,0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 20px; padding: 24px;
-            width: 100%; max-width: 480px;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.6), 0 0 30px rgba(34,211,238,0.05);
-            display: flex; flex-direction: column; gap: 16px;
-            transform: scale(0.9) translateY(15px);
-            opacity: 0;
-            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
-        }
-        .modal-overlay.active .modal-card {
-            transform: scale(1) translateY(0);
-            opacity: 1;
-        }
-        .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
-        
-        .chat-messages {
-            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
-            scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
-        }
-        .chat-messages::-webkit-scrollbar { width: 5px; }
-        .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-        
-        .msg-bubble { max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 0.95rem; line-height: 1.6; animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); word-break: break-word; }
-        @keyframes msgIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .msg-user { align-self: flex-end; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); border-bottom-right-radius: 4px; }
-        .msg-ai { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-bottom-left-radius: 4px; }
-        
-        .chat-input-wrap { display: flex; gap: 10px; padding: 12px; background: rgba(7,10,18,0.8); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
-        .chat-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.95rem; padding: 8px 12px; }
-        .chat-input::placeholder { color: var(--text-dim); }
-        .chat-send { background: var(--accent); color: var(--bg-base); border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.25s; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
-        .chat-send:hover:not(:disabled) { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.03); }
-        .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
-        
-        .typing-indicator { display: flex; gap: 6px; padding: 14px 18px; align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; border-bottom-left-radius: 4px; }
-        .typing-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
-        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
+       .diff-selector {
+           display: flex; background: rgba(255,255,255,0.03);
+           border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.05);
+       }
+       .diff-btn {
+           padding: 8px 18px; border-radius: 10px; font-size: 0.8rem; font-weight: 600;
+           transition: all 0.25s; cursor: pointer; border: none; background: transparent;
+           color: var(--text-dim); font-family: 'Inter', sans-serif;
+       }
+       .diff-btn:hover { color: var(--text-main); }
+       .diff-btn.active {
+           color: var(--accent); background: rgba(192,132,252,0.15);
+           box-shadow: 0 2px 12px rgba(192,132,252,0.1);
+       }
+       .metric-label {
+           font-size: 0.65rem; color: var(--text-dim); font-weight: 700;
+           text-transform: uppercase; letter-spacing: 3px; margin-bottom: 4px;
+       }
+       .metric-value {
+           font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900;
+           line-height: 1; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.08);
+       }
+       .metric-suffix { font-size: 1.1rem; color: var(--text-dim); margin-left: 2px; }
+       #typing-container {
+           font-family: 'Fira Code', monospace; line-height: 1.6;
+           --line-height: calc(1.65rem * 2.2);
+           height: calc(5 * var(--line-height));
+           overflow-y: auto; overflow-x: hidden;
+           padding: 1.25rem; border-radius: 18px;
+           background: rgba(15,21,37,0.55);
+           border: 1px solid rgba(255,255,255,0.08);
+           scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+           scroll-behavior: auto; overscroll-behavior: contain;
+           position: relative; outline: none;
+           transition: border-color 0.3s, box-shadow 0.3s;
+       }
+       #typing-container:focus, #typing-container:focus-within {
+           border-color: rgba(192,132,252,0.3);
+           box-shadow: inset 0 0 30px rgba(192,132,252,0.03), 0 0 30px rgba(192,132,252,0.05);
+       }
+       #typing-container::-webkit-scrollbar { width: 5px; }
+       #typing-container::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+       .char {
+           white-space: pre; border-radius: 4px;
+           transition: color 0.08s ease, background-color 0.08s ease;
+           display: inline-block; position: relative;
+       }
+       .char.untyped { color: var(--text-dim); }
+       .char.correct { color: #f8fafc; text-shadow: 0 0 10px rgba(248,250,252,0.15); }
+       .char.incorrect { color: var(--error-color); background-color: var(--error-bg); }
+       .caret {
+           border-left: 2.5px solid var(--caret-color);
+           box-shadow: -3px 0 12px var(--caret-glow);
+           animation: blink 1.1s infinite cubic-bezier(0.4,0,0.2,1);
+           margin-left: -1px;
+       }
+       .caret-static {
+           border-left: 2.5px solid var(--caret-color);
+           box-shadow: -3px 0 12px var(--caret-glow);
+           margin-left: -1px;
+       }
+       .ghost-caret {
+           border-right: 3px solid var(--ghost-cursor-color) !important;
+           box-shadow: 3px 0 12px var(--ghost-cursor-glow) !important;
+       }
+       #mobile-input-target {
+           position: absolute; opacity: 0; top: 0; left: 0;
+           height: 100%; width: 100%; z-index: 2; cursor: text;
+       }
+       #focus-overlay {
+           position: absolute; inset: 0;
+           background: rgba(7,10,18,0.7); backdrop-filter: blur(6px);
+           border-radius: 18px; display: flex; align-items: center; justify-content: center;
+           transition: opacity 0.3s; pointer-events: none;
+       }
+       #focus-overlay.hidden { opacity: 0; }
+       .focus-pill {
+           display: flex; align-items: center; gap: 10px;
+           padding: 12px 24px; border-radius: 999px;
+           background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+           font-size: 0.9rem; color: var(--text-main); pointer-events: auto; cursor: text;
+           transition: all 0.3s;
+       }
 
-        /* ========================================= */
-        /* --- YOUTUBE AD VIDEO CARD (UPDATED)   --- */
-        /* ========================================= */
-        .ad-card-special {
-            background: linear-gradient(145deg, #0e1424, #171d33);
-            border: 1px solid rgba(34,211,238,0.3);
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 35px rgba(34,211,238,0.15);
-            text-align: center;
-        }
-        
-        .ad-motion-text {
-            font-family: 'Orbitron', sans-serif;
-            font-size: 1.15rem; font-weight: 700; text-transform: uppercase;
-            text-align: center; letter-spacing: 1px; line-height: 1.4;
-            background: linear-gradient(270deg, #22d3ee, #a78bfa, #22d3ee);
-            background-size: 200% auto;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            animation: gradientMove 3s linear infinite;
-            margin-bottom: 20px;
-        }
-        @keyframes gradientMove {
-            0% { background-position: 0% center; }
-            100% { background-position: 200% center; }
-        }
+       /* MODAL STYLES ADDED FROM INDEX */
+       .modal-overlay {
+           position: fixed; inset: 0; z-index: 300;
+           background: rgba(7,10,18,0.6); backdrop-filter: blur(8px);
+           display: flex; align-items: center; justify-content: center;
+           padding: 16px; opacity: 0; visibility: hidden; pointer-events: none;
+           transition: opacity 0.35s ease, visibility 0.35s ease;
+       }
+       .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
+       .modal-card {
+           background: rgba(15,21,37,0.95);
+           border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+           padding: 24px; width: 100%; max-width: 480px;
+           box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+           display: flex; flex-direction: column; gap: 16px;
+           transform: scale(0.9) translateY(15px); opacity: 0;
+           transition: transform 0.4s ease, opacity 0.4s ease;
+       }
+       .modal-overlay.active .modal-card { transform: scale(1) translateY(0); opacity: 1; }
+       .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
+       
+       .chat-messages {
+           flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
+           scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+       }
+       .chat-messages::-webkit-scrollbar { width: 5px; }
+       .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+       .msg-bubble { max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 0.95rem; line-height: 1.6; word-break: break-word; }
+       .msg-user { align-self: flex-end; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); border-bottom-right-radius: 4px; }
+       .msg-ai { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-bottom-left-radius: 4px; }
+       .chat-input-wrap { display: flex; gap: 10px; padding: 12px; background: rgba(7,10,18,0.8); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+       .chat-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 0.95rem; padding: 8px 12px; }
+       .chat-send { background: var(--accent); color: var(--bg-base); border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; }
 
-        /* 16:9 Aspect Ratio Container for YouTube Iframe */
-        .video-container {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* 16:9 ratio */
-            height: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            background: rgba(7,10,18,0.5); 
-            border: 1px solid rgba(255,255,255,0.1);
-            box-shadow: 0 10px 30px rgba(34,211,238,0.1);
-        }
-        
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-        }
+       .btn-primary {
+           background: var(--accent); color: var(--bg-base);
+           font-family: 'Orbitron', sans-serif; font-weight: 700;
+           padding: 12px; border-radius: 12px; border: none;
+           cursor: pointer; transition: all 0.25s; text-transform: uppercase; width: 100%;
+       }
+       .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+       
+       .customize-textarea {
+           background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
+           border-radius: 14px; padding: 14px; color: var(--text-main); font-size: 0.9rem;
+           resize: vertical; min-height: 160px; outline: none; transition: border-color 0.25s;
+       }
+       .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
 
-        .ad-timer {
-            position: absolute; top: 10px; right: 10px;
-            background: rgba(7,10,18,0.9); border: 2px solid var(--accent);
-            color: var(--accent); width: 32px; height: 32px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: bold; z-index: 30;
-            font-family: 'Orbitron', sans-serif;
-            box-shadow: 0 0 10px var(--accent-glow);
-        }
-        
-        .ad-close-x {
-            position: absolute; top: 10px; right: 10px;
-            background: rgba(7,10,18,0.9); border: 2px solid rgba(255,255,255,0.3);
-            color: #fff; width: 32px; height: 32px; border-radius: 50%;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: bold; cursor: pointer; z-index: 30;
-            transition: all 0.2s ease;
-        }
-        .ad-close-x:hover {
-            background: var(--error-color); border-color: var(--error-color);
-            transform: scale(1.1); box-shadow: 0 0 15px rgba(248,113,113,0.4);
-        }
+       .credit-pill { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); color: #22d3ee; padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; font-weight: 700; transition: all 0.25s ease; }
+       .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
 
-        .btn-primary { background: var(--accent); color: var(--bg-base); font-family: 'Orbitron', sans-serif; font-weight: 700; padding: 12px; border-radius: 12px; border: none; cursor: pointer; transition: all 0.25s; text-transform: uppercase; width: 100%; }
-        .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+       .ad-card-special { background: linear-gradient(145deg, #0e1424, #171d33); border: 1px solid rgba(34,211,238,0.3); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); text-align: center; }
+       .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: rgba(7,10,18,0.5); }
+       .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
+       .ad-timer, .ad-close-x { position: absolute; top: 10px; right: 10px; background: rgba(7,10,18,0.9); border: 2px solid var(--accent); color: var(--accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; z-index: 30; }
+       .ad-close-x { color: #fff; cursor: pointer; border-color: rgba(255,255,255,0.3); }
 
-        .customize-textarea {
-            background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 14px; padding: 14px; color: var(--text-main);
-            font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6;
-            resize: vertical; min-height: 160px; outline: none;
-            transition: border-color 0.25s;
-        }
-        .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
-        .customize-textarea::placeholder { color: var(--text-dim); }
-        
-        .thunder-select { background: rgba(15,21,37,0.8); border: 1px solid rgba(255,255,255,0.1); color: var(--text-main); padding: 6px 12px; border-radius: 10px; font-size: 0.7rem; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; text-transform: uppercase; outline: none; cursor: pointer; backdrop-filter: blur(8px); }
-        .thunder-select:focus { border-color: var(--accent); }
-        
-        .credit-pill { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); color: var(--accent); padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; transition: all 0.25s ease; }
-        .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
-
-        /* ========================================= */
-        /* --- AUTO-POPUP ONBOARDING TOASTS      --- */
-        /* ========================================= */
-        .onb-toast {
-            position: fixed; z-index: 9910;
-            background: rgba(15, 21, 37, 0.92); backdrop-filter: blur(14px);
-            -webkit-backdrop-filter: blur(14px);
-            color: var(--text-main); font-size: 0.78rem; font-weight: 500; line-height: 1.5;
-            padding: 10px 18px; border-radius: 999px; max-width: 250px;
-            box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-            opacity: 0; visibility: hidden; pointer-events: none; text-align: center;
-            transform: translateY(10px) scale(0.95);
-            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
-        }
-        .onb-toast.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-
-        #onb-toast-chat { top: 62px; right: 20px; border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(34, 211, 238, 0.15); }
-        #onb-toast-customize { top: 62px; right: 20px; border: 1px solid rgba(74, 222, 128, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(74, 222, 128, 0.15); }
-        #onb-toast-feedback { bottom: 62px; right: 20px; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(168, 85, 247, 0.15); }
-    </style>
+       .btn-ghost-select {
+           background: rgba(255,255,255,0.03);
+           border: 1px solid rgba(255,255,255,0.1);
+           padding: 14px; border-radius: 14px;
+           display: flex; justify-content: space-between; align-items: center;
+           cursor: pointer; transition: all 0.25s;
+           color: var(--text-main);
+       }
+       .btn-ghost-select:hover {
+           border-color: var(--ghost-cursor-color);
+           background: rgba(244,114,182,0.08);
+           transform: translateX(4px);
+       }
+       @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
-    <div class="ambient-bg"></div>
-    <div class="dot-grid"></div>
-    <div class="scanline"></div>
-    <canvas id="thunder-canvas"></canvas>
-
-    <div class="fixed top-4 left-4 z-50 flex items-center gap-2 flex-wrap">
-        <button id="init-btn" class="corner-btn">INIT</button>
-        <a href="Race.html" class="corner-btn race">RACE</a>
-        <a href="ghost-race.html" class="corner-btn ghost">GHOST</a>
-    </div>
-
-    <div class="fixed top-4 right-4 z-50 flex items-center gap-3 bg-[#070a12] p-1 rounded-xl">
-        <span id="credit-pill" class="credit-pill">3 Credits</span>
-        <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-        </button>
-        <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Topic Search">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
-        </button>
-    </div>
-
-    <main class="w-full max-w-4xl flex flex-col gap-5 z-10 my-auto pt-20">
-        <div class="flex justify-between items-center border-b border-white/10 pb-4">
-            <div>
-                <h1 class="text-3xl font-black tracking-tight brand">FLUID<span class="gradient-text">TYPE</span></h1>
-                <p class="text-xs text-[#475569] tracking-widest uppercase font-bold mt-1" id="topic-label">Random Practice</p>
-            </div>
-            <div class="flex items-center gap-3">
-                <span class="text-xs text-[#475569] uppercase tracking-widest font-bold">Thunder</span>
-                <select id="thunder-color-select" class="thunder-select">
-                    <option value="none">None</option>
-                    <option value="purple" selected>Purple</option>
-                    <option value="green">Green</option>
-                    <option value="blue">Blue</option>
-                    <option value="yellow">Yellow</option>
-                    <option value="red">Red</option>
-                    <option value="orange">Orange</option>
-                    <option value="disco">Disco</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="flex justify-center">
-            <div class="diff-selector" id="difficulty-selector">
-                <button data-level="1" class="diff-btn active">a-z</button>
-                <button data-level="2" class="diff-btn">A-Z</button>
-                <button data-level="3" class="diff-btn">A-Z + !?</button>
-            </div>
-        </div>
-
-        <div class="flex justify-between items-end px-2 flex-wrap gap-4">
-            <div class="flex gap-8 sm:gap-10">
-                <div class="flex flex-col"><span class="metric-label">WPM</span><span class="metric-value" id="wpm">0</span></div>
-                <div class="flex flex-col"><span class="metric-label">Accuracy</span><span class="metric-value"><span id="accuracy">100</span><span class="metric-suffix">%</span></span></div>
-                <div class="flex flex-col"><span class="metric-label">Progress</span><span class="metric-value"><span id="progress">0</span><span class="metric-suffix">%</span></span></div>
-            </div>
-        </div>
-
-        <div id="typing-container" class="relative w-full cursor-text select-none" tabindex="0">
-            <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
-            <div id="text-display" class="flex flex-wrap pointer-events-none"></div>
-            <div id="focus-overlay" class="hidden">
-                <div class="focus-pill" id="focus-pill">
-                    <svg class="w-5 h-5 text-[#22d3ee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
-                    Tap to engage
-                </div>
-            </div>
-        </div>
-
-        <div class="flex justify-center">
-            <button id="restart-btn" class="restart-btn" aria-label="Restart Drill">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-            </button>
-        </div>
-    </main>
-
-    <!-- AI CHAT MODAL -->
-    <div class="modal-overlay" id="chat-modal">
-        <div class="modal-card chat-card">
-            <div class="flex justify-between items-center pb-2 border-b border-white/10">
-                <h3 class="font-bold text-lg brand">AI <span class="gradient-text">CHAT</span></h3>
-                <div class="flex items-center gap-3">
-                    <span class="credit-pill" id="chat-credit-pill">3 Credits</span>
-                    <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-chat-btn">✕</button>
-                </div>
-            </div>
-            <div class="chat-messages" id="chat-messages">
-                <div class="msg-bubble msg-ai">Welcome to FluidType AI. Ask me anything to generate custom typing drills for you.</div>
-            </div>
-            <div class="chat-input-wrap">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off">
-                <button class="chat-send" id="chat-send">Send</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- CUSTOMIZE PARAGRAPH MODAL -->
-    <div class="modal-overlay" id="customize-modal">
-        <div class="modal-card">
-            <div class="flex justify-between items-center pb-2 border-b border-white/10">
-                <h3 class="font-bold text-lg brand">CUSTOM <span class="gradient-text">TOPIC</span></h3>
-                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn">✕</button>
-            </div>
-            <p class="text-xs text-[#64748b]">Paste any topic or paragraph you want to practice typing on, then hit start.</p>
-            <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..."></textarea>
-            <button class="btn-primary" id="start-custom-typing-btn">Start Typing</button>
-        </div>
-    </div>
-
-    <!-- TECHTRAKERS NEW AD MODAL (YOUTUBE EMBED) -->
-    <div class="modal-overlay" id="ad-modal">
-        <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
-            <div class="ad-motion-text">Watch to earn 3 Credits</div>
-            
-            <div class="video-container">
-                <!-- 5-Second Timer -->
-                <div id="ad-timer" class="ad-timer">5</div>
-                
-                <!-- X button directly on top right of the video (Hidden initially) -->
-                <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad">✕</button>
-                
-                <!-- Empty src initially, populated via JavaScript to autoplay -->
-                <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-            </div>
-            
-            <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold font-mono" id="ad-footer-text">Video is playing...</p>
-        </div>
-    </div>
-
-    <!-- AUTO-POPUP ONBOARDING TOASTS -->
-    <div id="onb-toast-chat" class="onb-toast">Use chatbot for that topic, which you love to type.</div>
-    <div id="onb-toast-customize" class="onb-toast">Paste the topic on which you want to type.</div>
-    <div id="onb-toast-feedback" class="onb-toast">Give feedback. If you find any bugs...</div>
-
-    <!-- Feedback widget: Gmail + Instagram -->
-    <div class="ft-feedback" id="ftFeedback">
-        <span class="ft-feedback-label">Feedback</span>
-        <div class="ft-feedback-icons">
-            <a href="mailto:techtrakers@gmail.com" id="ftGmailLink" aria-label="Email us on Gmail" class="ft-icon">
-                <svg viewBox="0 0 24 24" width="20" height="20">
-                    <rect x="2" y="4" width="20" height="16" rx="2" fill="#fff"/>
-                    <rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="#4285F4" stroke-width="1.4"/>
-                    <path d="M2.5 5.5L12 13 21.5 5.5" fill="none" stroke="#EA4335" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
-            </a>
-            <a href="https://www.instagram.com/techtrakers" target="_blank" rel="noopener noreferrer" aria-label="Message us on Instagram" class="ft-icon">
-                <svg viewBox="0 0 24 24" width="20" height="20">
-                    <defs>
-                        <linearGradient id="ftIgGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                            <stop offset="0%" stop-color="#feda75"/>
-                            <stop offset="30%" stop-color="#fa7e1e"/>
-                            <stop offset="60%" stop-color="#d62976"/>
-                            <stop offset="100%" stop-color="#962fbf"/>
-                        </linearGradient>
-                    </defs>
-                    <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#ftIgGrad)"/>
-                    <circle cx="12" cy="12" r="5" fill="none" stroke="#fff" stroke-width="1.6"/>
-                    <circle cx="17" cy="7" r="1.1" fill="#fff"/>
-                </svg>
-            </a>
-        </div>
-    </div>
-
-    <style>
-        .ft-feedback {
-            position: fixed; bottom: 20px; right: 20px;
-            display: flex; align-items: center; gap: 10px;
-            background: rgba(20, 18, 30, 0.75); backdrop-filter: blur(8px);
-            border: 1px solid rgba(168, 85, 247, 0.35);
-            border-radius: 30px; padding: 8px 14px;
-            z-index: 999; cursor: pointer;
-            transition: box-shadow .25s ease, border-color .25s ease;
-        }
-        .ft-feedback:hover {
-            border-color: rgba(168, 85, 247, 0.8);
-            box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
-        }
-        .ft-feedback-label {
-            color: #d8d0f0; font-size: 12px; font-family: inherit; letter-spacing: .3px; white-space: nowrap;
-        }
-        .ft-feedback-icons {
-            display: flex; align-items: center; gap: 8px;
-            max-width: 0; opacity: 0; overflow: hidden; pointer-events: none;
-            transition: max-width .3s cubic-bezier(0.16, 1, 0.3, 1), opacity .25s ease;
-        }
-        .ft-feedback.active .ft-feedback-icons {
-            max-width: 100px; opacity: 1; pointer-events: auto;
-        }
-        @media (hover: hover) and (pointer: fine) {
-            .ft-feedback:hover .ft-feedback-icons { max-width: 100px; opacity: 1; pointer-events: auto; }
-        }
-        .ft-icon { display: flex; transition: transform .2s ease; }
-        .ft-icon:hover { transform: scale(1.15); }
-    </style>
-
-    <script>
-        const PARAGRAPHS = [
-            "Every expert typist started with clumsy fingers and a blank screen. What separates them from everyone else is simply the number of times they sat back down and tried again. Your keyboard does not care about yesterday, only about right now.",
-            "Momentum is built one line at a time. You do not need a perfect plan to start typing faster, you only need to begin. The rest reveals itself through repetition and quiet, stubborn effort.",
-            "A calm mind types cleaner than a rushed one. Slow your breathing before you slow your fingers, and let accuracy set the pace instead of anxiety. Speed is simply what happens when fear leaves the room.",
-            "Nobody remembers the days you skipped practice, but your fingers do. Muscle memory is built in silence, one unnoticed session at a time, until suddenly the keyboard feels like an old friend.",
-            "The difference between a good typist and a great one is rarely talent. It is the willingness to keep practicing after the excitement of being a beginner has worn off completely.",
-            "Typing well is a quiet superpower in a noisy world. While others struggle to keep up with their own thoughts, your hands will already be there, waiting patiently for the next idea.",
-            "Do not chase perfect words per minute today. Chase one honest session of focused practice, free of distractions, and let the numbers take care of themselves over time.",
-            "Every red highlighted letter is simply your hand asking for one more chance to get it right. Answer that request kindly, and watch how quickly the mistakes fade away.",
-            "Confidence at the keyboard is not something you wait for. It is something you build, keystroke by keystroke, long before you ever feel ready to call yourself fast.",
-            "The keyboard rewards patience more than talent. Anyone willing to sit down daily and endure the awkward early stage will eventually outpace those who gave up too soon.",
-            "Great habits are boring from the outside and powerful from the inside. Practicing typing for a few honest minutes daily will quietly outperform any burst of last minute effort.",
-            "Your fingers already know more than you think, they just need permission to move without your eyes checking every single key. Trust them, and the speed will follow.",
-            "Small steady gains compound into something remarkable. A single extra word per minute each week feels invisible today, but becomes an entirely different skill months from now.",
-            "The most productive people are rarely the fastest thinkers, they are the ones who can get their thoughts onto the screen with the least friction. That is what real typing practice builds.",
-            "Comparison steals the joy of practice. Focus only on the version of yourself from last week, and let that be the only competitor that matters in this session.",
-            "Discomfort during practice is not a warning sign, it is proof that you are stretching past what used to be your limit. Lean into it instead of running from it.",
-            "You will not feel motivated every single day, and that is fine. Show up anyway, type the paragraph in front of you, and let discipline carry you on the days motivation forgets to.",
-            "A cluttered desk rarely produces a clear mind. Clear your space, silence your notifications, and give this short session of practice your complete and undivided attention.",
-            "Typing fast is really just thinking clearly under pressure and letting your hands keep up. Train the clarity first, and the raw speed will arrive as a natural side effect.",
-            "The best time to have started practicing was months ago. The second best time is the next few minutes, right here, on this very paragraph in front of you."
-        ];
-
-        const CARET_COLORS = {
-            purple: { color: '#c084fc', glow: 'rgba(192,132,252,0.45)' },
-            green:  { color: '#4ade80', glow: 'rgba(74,222,128,0.45)' },
-            blue:   { color: '#22d3ee', glow: 'rgba(34,211,238,0.45)' },
-            yellow: { color: '#facc15', glow: 'rgba(250,204,21,0.45)' },
-            red:    { color: '#f87171', glow: 'rgba(248,113,113,0.45)' },
-            orange: { color: '#fb923c', glow: 'rgba(251,146,60,0.45)' },
-            disco:  { color: '#22d3ee', glow: 'rgba(34,211,238,0.45)' },
-            none:   { color: '#22d3ee', glow: 'rgba(34,211,238,0.45)' }
-        };
-
-        const state = {
-            targetDifficulty: 1,
-            rawText: "",
-            charArray: [],
-            typedArray: [],
-            currentIndex: 0,
-            startTime: null,
-            timerActive: false,
-            totalKeystrokes: 0,
-            correctKeystrokes: 0,
-            isTypingStarted: false,
-            isBlocked: false,
-            thunderColor: "purple",
-            thunderEnabled: true,
-            credits: 3,
-            isCompleted: false
-        };
-
-        const els = {
-            container: document.getElementById('typing-container'),
-            display: document.getElementById('text-display'),
-            mobileInput: document.getElementById('mobile-input-target'),
-            focusOverlay: document.getElementById('focus-overlay'),
-            wpm: document.getElementById('wpm'),
-            accuracy: document.getElementById('accuracy'),
-            progress: document.getElementById('progress'),
-            restartBtn: document.getElementById('restart-btn'),
-            diffButtons: document.querySelectorAll('.diff-btn'),
-            thunderCanvas: document.getElementById('thunder-canvas'),
-            thunderSelect: document.getElementById('thunder-color-select'),
-            chatToggleBtn: document.getElementById('chat-toggle-btn'),
-            chatModal: document.getElementById('chat-modal'),
-            chatMessages: document.getElementById('chat-messages'),
-            chatInput: document.getElementById('chat-input'),
-            chatSend: document.getElementById('chat-send'),
-            closeChatBtn: document.getElementById('close-chat-btn'),
-            creditPill: document.getElementById('credit-pill'),
-            chatCreditPill: document.getElementById('chat-credit-pill'),
-
-            customizeToggleBtn: document.getElementById('customize-toggle-btn'),
-            customizeModal: document.getElementById('customize-modal'),
-            customizeTextarea: document.getElementById('customize-textarea'),
-            closeCustomizeBtn: document.getElementById('close-customize-btn'),
-            startCustomTypingBtn: document.getElementById('start-custom-typing-btn'),
-            
-            // Ad DOM elements updated
-            adModal: document.getElementById('ad-modal'),
-            adCloseBtn: document.getElementById('ad-close-btn'),
-            adTimer: document.getElementById('ad-timer'),
-            adIframe: document.getElementById('ad-iframe'),
-            adFooterText: document.getElementById('ad-footer-text'),
-            
-            topicLabel: document.getElementById('topic-label'),
-            initBtn: document.getElementById('init-btn')
-        };
-
-        function updateCaretColor() {
-            const c = CARET_COLORS[state.thunderColor] || CARET_COLORS.blue;
-            document.documentElement.style.setProperty('--caret-color', c.color);
-            document.documentElement.style.setProperty('--caret-glow', c.glow);
-        }
-
-        function loadRandomParagraph() {
-            const idx = Math.floor(Math.random() * PARAGRAPHS.length);
-            state.rawText = PARAGRAPHS[idx];
-            processTextForDifficulty(state.rawText);
-            resetDrill();
-        }
-
-        function processTextForDifficulty(text) {
-            let processed = text;
-            if (state.targetDifficulty === 1) {
-                processed = processed.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
-            } else if (state.targetDifficulty === 2) {
-                processed = processed.replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
-            } else {
-                processed = processed.replace(/\s+/g, ' ').trim();
-            }
-            state.charArray = processed.split('');
-        }
-
-        function renderTextUI() {
-            els.display.innerHTML = '';
-            state.charArray.forEach((char, index) => {
-                const span = document.createElement('span');
-                span.innerText = char;
-                span.className = 'char untyped';
-                span.id = `char-${index}`;
-                els.display.appendChild(span);
-            });
-            updateCursorUI();
-        }
-
-        function updateCursorUI() {
-            document.querySelectorAll('.char').forEach(el => el.classList.remove('caret', 'caret-static'));
-            if (state.currentIndex < state.charArray.length) {
-                const active = document.getElementById(`char-${state.currentIndex}`);
-                if (active) active.classList.add(state.timerActive ? 'caret-static' : 'caret');
-            }
-        }
-
-        function removeCursorUI() {
-            document.querySelectorAll('.char').forEach(el => el.classList.remove('caret', 'caret-static'));
-        }
-
-        function resetDrill() {
-            state.typedArray = [];
-            state.currentIndex = 0;
-            state.startTime = null;
-            state.timerActive = false;
-            state.totalKeystrokes = 0;
-            state.correctKeystrokes = 0;
-            state.isBlocked = false;
-            state.isTypingStarted = false;
-            state.isCompleted = false; 
-            
-            els.mobileInput.value = '';
-            els.wpm.textContent = '0';
-            els.accuracy.textContent = '100';
-            els.progress.textContent = '0';
-            els.container.scrollTop = 0;
-            renderTextUI();
-            els.mobileInput.focus();
-        }
-
-        els.initBtn.addEventListener('click', loadRandomParagraph);
-        els.restartBtn.addEventListener('click', resetDrill);
-        els.container.addEventListener('click', () => {
-            if(!state.isCompleted) els.mobileInput.focus();
-        });
-        
-        els.mobileInput.addEventListener('focus', () => {
-            if(state.isCompleted) return;
-            els.focusOverlay.classList.add('hidden');
-            updateCursorUI();
-        });
-        els.mobileInput.addEventListener('blur', () => {
-            if (state.currentIndex < state.charArray.length) {
-                els.focusOverlay.classList.remove('hidden');
-                removeCursorUI();
-            }
-        });
-
-        els.diffButtons.forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                els.diffButtons.forEach(b => b.classList.remove('active'));
-                e.target.classList.add('active');
-                state.targetDifficulty = parseInt(e.target.getAttribute('data-level'));
-                if (state.rawText) {
-                    processTextForDifficulty(state.rawText);
-                    resetDrill();
-                }
-            });
-        });
-
-        els.thunderSelect.addEventListener('change', (e) => {
-            state.thunderColor = e.target.value;
-            state.thunderEnabled = e.target.value !== 'none';
-            updateCaretColor();
-            updateCursorUI();
-        });
-
-        /* ========================================= */
-        /* --- CUSTOMIZE PARAGRAPH FEATURE       --- */
-        /* ========================================= */
-        els.customizeToggleBtn.addEventListener('click', () => {
-            els.customizeModal.classList.add('active');
-            els.customizeTextarea.focus();
-        });
-
-        els.closeCustomizeBtn.addEventListener('click', () => {
-            els.customizeModal.classList.remove('active');
-        });
-
-        els.startCustomTypingBtn.addEventListener('click', () => {
-            const text = sanitizeText(els.customizeTextarea.value);
-            if (!text) return;
-            state.rawText = text;
-            processTextForDifficulty(text);
-            resetDrill();
-            els.topicLabel.textContent = 'Custom Topic';
-            els.customizeModal.classList.remove('active');
-            els.customizeTextarea.value = '';
-        });
-
-        function getLineHeight() {
-            const c0 = document.getElementById('char-0');
-            if (!c0) {
-                const fs = parseFloat(window.getComputedStyle(els.container).fontSize) || 26.4;
-                return fs * 2.2;
-            }
-            for (let i = 1; i < state.charArray.length; i++) {
-                const c = document.getElementById(`char-${i}`);
-                if (c && c.offsetTop > c0.offsetTop + 2) return c.offsetTop - c0.offsetTop;
-            }
-            const style = window.getComputedStyle(els.container);
-            const lh = style.lineHeight;
-            if (lh === 'normal') { const fs = parseFloat(style.fontSize); return fs * 1.6; }
-            return parseFloat(lh) || 58;
-        }
-
-        function autoScroll() {
-            if (!state.isTypingStarted || state.charArray.length === 0) return;
-            const activeChar = document.getElementById(`char-${state.currentIndex}`);
-            if (!activeChar) return;
-            const container = els.container;
-            const charTop = activeChar.offsetTop;
-            const charHeight = activeChar.offsetHeight || 20;
-            const lineHeight = getLineHeight();
-            const visibleTop = container.scrollTop;
-            const visibleHeight = container.clientHeight;
-            if (charTop + charHeight > visibleTop + visibleHeight - lineHeight * 0.3) {
-                container.scrollTop = charTop - lineHeight * 3;
-            } else if (charTop < visibleTop + lineHeight * 0.3) {
-                container.scrollTop = Math.max(0, charTop - lineHeight);
-            }
-        }
-
-        els.mobileInput.addEventListener('input', (e) => handleTypingInput(e));
-        window.addEventListener('keydown', (e) => {
-            if (e.code === 'Space' && e.target === document.body) {
-                e.preventDefault(); if(!state.isCompleted) els.mobileInput.focus();
-            }
-        });
-
-        function handleTypingInput(e) {
-            if (state.isCompleted) {
-                if(e) e.preventDefault();
-                els.mobileInput.value = state.typedArray.join('');
-                return;
-            }
-
-            const inputValue = els.mobileInput.value;
-            const inputLength = inputValue.length;
-
-            if (!state.timerActive && inputLength > 0 && !state.isBlocked) {
-                state.timerActive = true;
-                state.startTime = performance.now();
-                requestAnimationFrame(calculateMetricsLoop);
-            }
-            if (!state.isTypingStarted && inputLength > 0) {
-                state.isTypingStarted = true;
-            }
-
-            // Handle Backspacing
-            if (inputLength < state.currentIndex) {
-                const diff = state.currentIndex - inputLength;
-                for (let i = 0; i < diff; i++) {
-                    if (state.currentIndex > 0) {
-                        state.currentIndex--;
-                        state.typedArray.pop();
-                        const span = document.getElementById(`char-${state.currentIndex}`);
-                        if (span) span.className = 'char untyped';
-                    }
-                }
-                state.isBlocked = false;
-                updateCursorUI(); updateProgress(); autoScroll();
-                return;
-            }
-
-            // Handle Blocked State (Wrong Key)
-            if (state.isBlocked) {
-                if (inputLength > state.currentIndex) {
-                    const typedChar = inputValue[state.currentIndex];
-                    const expectedChar = state.charArray[state.currentIndex];
-                    if (typedChar === expectedChar) {
-                        state.isBlocked = false;
-                        state.typedArray.push(typedChar);
-                        state.correctKeystrokes++; state.totalKeystrokes++;
-                        const span = document.getElementById(`char-${state.currentIndex}`);
-                        span.className = 'char correct';
-                        state.currentIndex++;
-                        updateCursorUI(); updateProgress(); autoScroll();
-                        spawnThunderBolt(state.currentIndex - 1, 'correct');
-                        
-                        if (state.currentIndex >= state.charArray.length) {
-                            finishDrill();
-                        }
-                    } else {
-                        state.totalKeystrokes++;
-                        els.mobileInput.value = state.typedArray.join('');
-                        const span = document.getElementById(`char-${state.currentIndex}`);
-                        if (span) { span.classList.remove('shake'); void span.offsetWidth; span.classList.add('shake'); }
-                    }
-                }
-                return;
-            }
-
-            // Normal typing progression
-            if (state.currentIndex < state.charArray.length && inputLength > state.currentIndex) {
-                const typedChar = inputValue[state.currentIndex];
-                const expectedChar = state.charArray[state.currentIndex];
-                const span = document.getElementById(`char-${state.currentIndex}`);
-                state.totalKeystrokes++;
-
-                if (typedChar === expectedChar) {
-                    state.typedArray.push(typedChar);
-                    state.correctKeystrokes++;
-                    span.className = 'char correct';
-                    state.currentIndex++;
-                    updateCursorUI(); updateProgress(); autoScroll();
-                    spawnThunderBolt(state.currentIndex - 1, 'correct');
-                    
-                    if (state.currentIndex >= state.charArray.length) {
-                        finishDrill();
-                    }
-                } else {
-                    span.classList.remove('untyped'); span.classList.add('incorrect');
-                    void span.offsetWidth; span.classList.add('shake');
-                    state.isBlocked = true;
-                    els.mobileInput.value = state.typedArray.join('');
-                    spawnThunderBolt(state.currentIndex, 'wrong');
-                    playThunderRumble();
-                }
-            }
-        }
-
-        function finishDrill() {
-            state.timerActive = false;
-            state.isCompleted = true; 
-            els.mobileInput.blur();
-            removeCursorUI();
-            
-            if (state.startTime) {
-                const timeElapsedMin = Math.max(0.001, (performance.now() - state.startTime) / 60000);
-                const finalWpm = Math.round((state.correctKeystrokes / 5) / timeElapsedMin);
-                els.wpm.innerText = isFinite(finalWpm) ? finalWpm : 0;
-            }
-        }
-
-        function updateProgress() {
-            const pct = state.charArray.length > 0 ? Math.round((state.currentIndex / state.charArray.length) * 100) : 0;
-            els.progress.textContent = pct;
-        }
-
-        function calculateMetricsLoop() {
-            if (!state.timerActive || !state.startTime || state.isCompleted) return;
-            const elapsedMs = performance.now() - state.startTime;
-            if (elapsedMs > 50) {
-                const timeElapsedMin = elapsedMs / 60000;
-                let wpmVal = (state.correctKeystrokes / 5) / timeElapsedMin;
-                let accVal = state.totalKeystrokes > 0 ? (state.correctKeystrokes / state.totalKeystrokes) * 100 : 100;
-                if (!isFinite(wpmVal) || isNaN(wpmVal)) wpmVal = 0;
-                if (accVal < 0 || isNaN(accVal)) accVal = 100;
-                els.wpm.innerText = Math.round(wpmVal);
-                els.accuracy.innerText = Math.round(accVal);
-            }
-            if (state.timerActive) requestAnimationFrame(calculateMetricsLoop);
-        }
-
-        // --- Thunder Effect Boilerplate ---
-        const canvas = els.thunderCanvas; const ctx = canvas.getContext('2d'); let particles = []; let charW = 9.6;
-        function resizeThunderCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; const fsize = parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4; charW = fsize * 0.601; }
-        resizeThunderCanvas(); window.addEventListener('resize', resizeThunderCanvas);
-        const COLOR_MAP = { purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' }, green: { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' }, blue: { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' }, yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' }, red: { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' }, orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' } };
-        function getDiscoColors() { const hues = ['purple', 'green', 'blue', 'yellow', 'red', 'orange']; return COLOR_MAP[hues[Math.floor(Math.random() * hues.length)]]; }
-        class LightningBolt {
-            constructor(x, y, type) {
-                this.startX = x; this.y = y + (Math.random() - 0.5) * 10; this.life = 1; this.type = type; this.totalLen = charW; this.decay = 0.055 + Math.random() * 0.03;
-                let theme = state.thunderColor === 'disco' ? getDiscoColors() : COLOR_MAP[state.thunderColor]; if (!theme) theme = COLOR_MAP.blue;
-                if (type === 'correct') { this.dir = 1; this.colTip = theme.tip; this.colMid = theme.mid; this.colGlow = theme.glow; this.w = 2.6 + Math.random() * 1.2; } else { this.dir = -1; this.colTip = COLOR_MAP.red.tip; this.colMid = COLOR_MAP.red.mid; this.colGlow = COLOR_MAP.red.glow; this.w = 3.0 + Math.random() * 1.5; }
-                this.buildPath();
-            }
-            buildPath() {
-                const segs = Math.max(3, Math.round(this.totalLen / 3)); const segLen = this.totalLen / segs; this.pts = [{ x: 0, y: 0 }]; let cx = 0, cy = 0; this.branches = [];
-                for (let i = 1; i <= segs; i++) {
-                    cx += segLen + (Math.random() - 0.3) * segLen * 0.3; cy += (Math.random() - 0.5) * 6; this.pts.push({ x: cx, y: cy });
-                    if (i > 0 && i < segs && Math.random() < 0.45) {
-                        const bLen = charW * (0.2 + Math.random() * 0.4); const bDir = Math.random() < 0.5 ? -1 : 1; const bAngle = bDir * (0.3 + Math.random() * 0.5); const bSegs = 2 + Math.floor(Math.random() * 2);
-                        const branch = [{ x: cx, y: cy }]; let bx = cx, by = cy;
-                        for (let j = 1; j <= bSegs; j++) { bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4; by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4; branch.push({ x: bx, y: by }); }
-                        this.branches.push(branch);
-                    }
-                }
-            }
-            strokePath(pts, offX, offY, color, width, blur, alpha) { if (pts.length < 2) return; ctx.save(); ctx.globalAlpha = alpha; ctx.shadowBlur = blur; ctx.shadowColor = color; ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.translate(offX, offY); ctx.beginPath(); ctx.moveTo(pts[0].x * this.dir, pts[0].y); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y); ctx.stroke(); ctx.restore(); }
-            drawPoly(pts, ox, oy, a) { this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28); this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9); this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a); }
-            update() { this.life -= this.decay; } draw() { const a = Math.max(0, this.life); this.drawPoly(this.pts, this.startX, this.y, a); for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55); }
-        }
-        function spawnThunderBolt(charIndex, type) {
-            if (!state.thunderEnabled || !state.isTypingStarted) return;
-            const span = document.getElementById(`char-${charIndex}`); if (!span) return;
-            const rect = span.getBoundingClientRect(); const x = rect.left + rect.width / 2; const y = rect.top + rect.height / 2;
-            const count = (type === 'correct') ? 2 : 3;
-            for (let i = 0; i < count; i++) particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
-            if (type === 'correct') playThunderCrack();
-        }
-        (function thunderLoop() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles = particles.filter(p => p.life > 0); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(thunderLoop); })();
-        
-        let audioCtx = null;
-        function getAudio() { if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)(); if (audioCtx.state === 'suspended') audioCtx.resume(); return audioCtx; }
-        function playThunderCrack() { try { const ac = getAudio(); const now = ac.currentTime; const dur = 0.55; const sr = ac.sampleRate; const buf = ac.createBuffer(1, sr * dur, sr); const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) { const t = i / sr; d[i] = (Math.random() * 2 - 1) * ((t < 0.005 ? 1.0 : Math.exp(-t * 9)) * 0.9 + Math.exp(-t * 2.2) * 0.4); } const noise = ac.createBufferSource(); noise.buffer = buf; const bpLow = ac.createBiquadFilter(); bpLow.type = 'bandpass'; bpLow.frequency.setValueAtTime(120, now); bpLow.frequency.exponentialRampToValueAtTime(60, now + dur); bpLow.Q.value = 0.5; const bpCrack = ac.createBiquadFilter(); bpCrack.type = 'bandpass'; bpCrack.frequency.value = 3500; bpCrack.Q.value = 0.8; const gainCrack = ac.createGain(); gainCrack.gain.setValueAtTime(0.55, now); gainCrack.gain.exponentialRampToValueAtTime(0.001, now + 0.08); const gainRumble = ac.createGain(); gainRumble.gain.setValueAtTime(0.0, now); gainRumble.gain.linearRampToValueAtTime(0.35, now + 0.03); gainRumble.gain.exponentialRampToValueAtTime(0.001, now + dur); const master = ac.createGain(); master.gain.value = 0.7; noise.connect(bpCrack); bpCrack.connect(gainCrack); gainCrack.connect(master); noise.connect(bpLow); bpLow.connect(gainRumble); gainRumble.connect(master); master.connect(ac.destination); noise.start(now); noise.stop(now + dur); } catch(e) {} }
-        function playThunderRumble() { try { const ac = getAudio(); const now = ac.currentTime; const dur = 1.1; const sr = ac.sampleRate; const buf = ac.createBuffer(1, sr * dur, sr); const d = buf.getChannelData(0); for (let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.exp(-(j / sr) * 1.8); const noise = ac.createBufferSource(); noise.buffer = buf; const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(100, now); lp.frequency.exponentialRampToValueAtTime(40, now + dur); lp.Q.value = 1.5; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 220; bp.Q.value = 0.6; const gainLP = ac.createGain(); gainLP.gain.setValueAtTime(0.0, now); gainLP.gain.linearRampToValueAtTime(0.5, now + 0.05); gainLP.gain.exponentialRampToValueAtTime(0.001, now + dur); const gainBP = ac.createGain(); gainBP.gain.setValueAtTime(0.0, now); gainBP.gain.linearRampToValueAtTime(0.25, now + 0.04); gainBP.gain.exponentialRampToValueAtTime(0.001, now + 0.7); const master = ac.createGain(); master.gain.value = 0.65; noise.connect(lp); lp.connect(gainLP); gainLP.connect(master); noise.connect(bp); bp.connect(gainBP); gainBP.connect(master); master.connect(ac.destination); noise.start(now); noise.stop(now + dur); } catch(e) {} }
-
-        /* ========================================= */
-        /* --- YOUTUBE AD MANAGEMENT LOGIC       --- */
-        /* ========================================= */
-        
-        let adCountdownInterval;
-        
-        function updateCreditDisplay() {
-            const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
-            els.creditPill.textContent = text;
-            els.chatCreditPill.textContent = text;
-            if (state.credits === 0) {
-                els.creditPill.classList.add('zero');
-                els.chatCreditPill.classList.add('zero');
-            } else {
-                els.creditPill.classList.remove('zero');
-                els.chatCreditPill.classList.remove('zero');
-            }
-        }
-        
-        function showVideoAd() {
-            // Show the modal
-            els.adModal.classList.add('active');
-            
-            // Set the UI for timer countdown
-            els.adCloseBtn.classList.add('hidden');
-            els.adTimer.classList.remove('hidden');
-            els.adTimer.textContent = '5';
-            els.adFooterText.textContent = "Please wait to claim credits...";
-            
-            // Inject the YouTube URL (with autoplay enabled)
-            els.adIframe.src = "https://www.youtube.com/embed/q2Rg8jf4Iu0?si=CJ7iAjDifBIw4Wty&autoplay=1";
-            
-            let timeLeft = 5;
-            clearInterval(adCountdownInterval);
-            
-            adCountdownInterval = setInterval(() => {
-                timeLeft--;
-                els.adTimer.textContent = timeLeft;
-                
-                // When 5 seconds finish
-                if (timeLeft <= 0) {
-                    clearInterval(adCountdownInterval);
-                    els.adTimer.classList.add('hidden');
-                    els.adCloseBtn.classList.remove('hidden');
-                    els.adFooterText.textContent = "Tap ✕ to claim +3 Credits!";
-                }
-            }, 1000);
-        }
-
-        function useCredit() {
-            if (state.credits <= 0) {
-                showVideoAd();
-                return false;
-            }
-            state.credits--;
-            updateCreditDisplay();
-            return true;
-        }
-
-        function claimAdReward(e) {
-            if(e) e.stopPropagation();
-            state.credits = 3;
-            updateCreditDisplay();
-            els.adModal.classList.remove('active');
-            
-            // Critical: Remove the iframe source so it stops playing in the background
-            els.adIframe.src = "";
-            clearInterval(adCountdownInterval);
-        }
-
-        // Only clicking the X button claims the reward now
-        els.adCloseBtn.addEventListener('click', claimAdReward);
-
-        els.chatToggleBtn.addEventListener('click', () => {
-            if (state.credits <= 0) {
-                showVideoAd();
-                return;
-            }
-            els.chatModal.classList.add('active');
-            els.chatInput.focus();
-        });
-        
-        els.closeChatBtn.addEventListener('click', () => {
-            els.chatModal.classList.remove('active');
-        });
-
-        function addMessage(text, role) {
-            const bubble = document.createElement('div');
-            bubble.className = `msg-bubble msg-${role}`;
-            if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
-            else bubble.textContent = text;
-            els.chatMessages.appendChild(bubble);
-            els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
-        }
-        function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
-        
-        function showTypingIndicator() {
-            const id = 'typing-' + Date.now();
-            const div = document.createElement('div');
-            div.id = id; div.className = 'typing-indicator';
-            div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
-            els.chatMessages.appendChild(div);
-            els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
-            return id;
-        }
-        function removeTypingIndicator(id) { const el = document.getElementById(id); if (el) el.remove(); }
-
-        async function sendChatMessage() {
-            const text = els.chatInput.value.trim();
-            if (!text) return;
-            if (!useCredit()) return;
-
-            addMessage(text, 'user');
-            els.chatInput.value = '';
-            els.chatSend.disabled = true;
-            const typingId = showTypingIndicator();
-
-            try {
-                const res = await fetch('/api/chat', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: text })
-                });
-                removeTypingIndicator(typingId);
-                if (!res.ok) {
-                    const errData = await res.json().catch(() => ({}));
-                    throw new Error(errData.error || 'Server error');
-                }
-                const data = await res.json();
-                const clean = sanitizeText(data.text);
-                addMessage(clean, 'ai');
-
-                const loadBtn = document.createElement('button');
-                loadBtn.className = 'btn-primary mt-2';
-                loadBtn.textContent = 'Practice This';
-                loadBtn.style.fontSize = '0.7rem';
-                loadBtn.style.padding = '8px';
-                loadBtn.onclick = () => {
-                    state.rawText = clean;
-                    processTextForDifficulty(clean);
-                    resetDrill();
-                    els.topicLabel.textContent = 'AI Generated';
-                    els.chatModal.classList.remove('active');
-                };
-                const lastBubble = els.chatMessages.lastElementChild;
-                if (lastBubble) lastBubble.appendChild(loadBtn);
-                els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
-            } catch (err) {
-                removeTypingIndicator(typingId);
-                addMessage('Error: ' + err.message, 'ai');
-                state.credits++;
-                updateCreditDisplay();
-            } finally {
-                els.chatSend.disabled = false;
-            }
-        }
-
-        function sanitizeText(text) {
-            if (!text) return '';
-            return text.replace(/[—–]/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[^ -~]/g, '').replace(/\s+/g, ' ').trim();
-        }
-
-        els.chatSend.addEventListener('click', sendChatMessage);
-        els.chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
-
-        /* ========================================= */
-        /* --- ONBOARDING SCRIPT LOGIC           --- */
-        /* ========================================= */
-        function initOnboarding() {
-            if (sessionStorage.getItem('ft_onboarding_done')) return;
-
-            const toastChat = document.getElementById('onb-toast-chat');
-            const toastCustomize = document.getElementById('onb-toast-customize');
-            const toastFeedback = document.getElementById('onb-toast-feedback');
-
-            function showToast(el, durationMs) {
-                return new Promise((resolve) => {
-                    el.classList.add('active');
-                    setTimeout(() => {
-                        el.classList.remove('active');
-                        setTimeout(resolve, 400);
-                    }, durationMs);
-                });
-            }
-
-            (async () => {
-                await new Promise((resolve) => setTimeout(resolve, 500));
-                await showToast(toastChat, 4000);
-                await showToast(toastCustomize, 3000);
-                await showToast(toastFeedback, 3000);
-                sessionStorage.setItem('ft_onboarding_done', 'true');
-            })();
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            loadRandomParagraph();
-            updateCaretColor();
-            updateCreditDisplay();
-            initOnboarding();
-        });
-
-        // Feedback Widget Handlers
-        document.getElementById('ftFeedback').addEventListener('click', function(e) {
-            if (!e.target.closest('a')) {
-                e.preventDefault();
-                this.classList.toggle('active');
-            }
-        });
-
-        document.getElementById('ftGmailLink').addEventListener('click', function(e) {
-            e.preventDefault();
-            var email = 'techtrakers@gmail.com';
-            var gmailWeb = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + email;
-            var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-
-            if (isMobile) {
-                var fallback = setTimeout(function(){ window.location.href = gmailWeb; }, 800);
-                window.addEventListener('blur', function(){ clearTimeout(fallback); }, { once: true });
-                window.location.href = 'googlegmail://co?to=' + email;
-            } else {
-                window.open(gmailWeb, '_blank');
-            }
-        });
-    </script>
+   <div class="ambient-bg"></div>
+   <div class="dot-grid"></div>
+   <div class="scanline"></div>
+   <canvas id="thunder-canvas"></canvas>
+
+   <div class="fixed top-4 left-4 z-50 flex items-center gap-2">
+       <button id="thunder-toggle-btn" class="corner-btn">
+           <span>⚡ THUNDER: ON</span>
+       </button>
+       <select id="thunder-color-select" class="corner-btn bg-[#0f1525] text-xs outline-none">
+           <option value="purple">Color: Purple</option>
+           <option value="green">Color: Green</option>
+           <option value="blue">Color: Blue</option>
+           <option value="yellow">Color: Yellow</option>
+           <option value="red">Color: Red</option>
+           <option value="orange">Color: Orange</option>
+           <option value="disco">Color: DISCO 🪩</option>
+       </select>
+   </div>
+
+   <!-- UPDATED TOP RIGHT MENU (CREDITS + CHAT + CUSTOM + EXIT) -->
+   <div class="fixed top-4 right-4 z-50 flex items-center gap-3 bg-[#070a12] p-1 rounded-xl">
+       <span id="credit-pill" class="credit-pill">3 Credits</span>
+       <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph">
+           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+       </button>
+       <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Topic Search">
+           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+       </button>
+       <a href="index.html" class="corner-btn hover:border-red-400">
+           <span>✕ EXIT</span>
+       </a>
+   </div>
+
+   <main class="w-full max-w-4xl flex flex-col gap-6 z-10 my-auto pt-16">
+       <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-white/10 pb-4">
+           <div>
+               <h1 class="text-3xl font-black tracking-tight brand">FLUID<span class="gradient-text">GHOST</span></h1>
+               <p class="text-xs text-[#64748b] tracking-widest uppercase font-bold mt-1" id="ghost-status">
+                   Mode: Initial Solo Run (Setting your Ghost Baseline)
+               </p>
+           </div>
+           <div class="diff-selector">
+               <button data-level="1" class="diff-btn active">a-z</button>
+               <button data-level="2" class="diff-btn">A-Z</button>
+               <button data-level="3" class="diff-btn">A-Z + !?</button>
+           </div>
+       </div>
+
+       <div class="flex justify-between items-end px-2 flex-wrap gap-4">
+           <div class="flex gap-6 sm:gap-10">
+               <div class="flex flex-col"><span class="metric-label">WPM</span><span class="metric-value" id="wpm">0</span></div>
+               <div class="flex flex-col"><span class="metric-label">Accuracy</span><span class="metric-value"><span id="accuracy">100</span><span class="metric-suffix">%</span></span></div>
+               <div class="flex flex-col"><span class="metric-label">Progress</span><span class="metric-value"><span id="progress">0</span><span class="metric-suffix">%</span></span></div>
+           </div>
+           <div class="flex gap-6 border-l border-white/10 pl-6" id="ghost-metrics" style="display: none;">
+               <div class="flex flex-col"><span class="metric-label text-[#f472b6]">Ghost WPM</span><span class="metric-value text-[#f472b6]" id="ghost-wpm">0</span></div>
+               <div class="flex flex-col"><span class="metric-label text-[#f472b6]">Ghost Prog</span><span class="metric-value text-[#f472b6]"><span id="ghost-progress">0</span><span class="metric-suffix">%</span></span></div>
+           </div>
+       </div>
+
+       <div id="typing-container" class="relative w-full text-[1.65rem] leading-[2.2] cursor-text select-none" tabindex="0">
+           <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+           <div id="text-display" class="flex flex-wrap pointer-events-none"></div>
+           <div id="focus-overlay" class="hidden">
+               <div class="focus-pill" id="focus-pill">
+                   <svg class="w-5 h-5 text-[#c084fc]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                   Tap to Race Your Past
+               </div>
+           </div>
+       </div>
+
+       <div class="flex justify-center">
+           <button id="restart-btn" class="p-3 text-[#64748b] hover:text-[#c084fc] transition-all transform hover:-rotate-180" title="Restart Drill">
+               <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+           </button>
+       </div>
+   </main>
+
+   <!-- GHOST SELECT MODAL -->
+   <div class="modal-overlay" id="ghost-select-modal">
+       <div class="modal-card">
+           <div class="flex justify-between items-center">
+               <h3 class="font-bold text-lg brand text-[#f472b6]">SELECT YOUR GHOST</h3>
+               <button class="text-sm text-[#64748b] hover:text-white" onclick="closeGhostModal()">✕</button>
+           </div>
+           <p class="text-xs text-[#64748b]">Which of your past selves do you want to race?</p>
+           <div id="ghost-options-list" class="flex flex-col gap-3 my-2"></div>
+           <button class="btn-primary" style="background:#f472b6" onclick="closeGhostModal()">Continue Solo Run</button>
+       </div>
+   </div>
+
+   <!-- AI CHAT MODAL -->
+   <div class="modal-overlay" id="chat-modal">
+       <div class="modal-card chat-card">
+           <div class="flex justify-between items-center pb-2 border-b border-white/10">
+               <h3 class="font-bold text-lg brand">AI <span class="gradient-text">CHAT</span></h3>
+               <div class="flex items-center gap-3">
+                   <span class="credit-pill" id="chat-credit-pill">3 Credits</span>
+                   <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-chat-btn">✕</button>
+               </div>
+           </div>
+           <div class="chat-messages" id="chat-messages">
+               <div class="msg-bubble msg-ai">Welcome to FluidType AI. Ask me anything to generate custom Ghost Race typing drills for you.</div>
+           </div>
+           <div class="chat-input-wrap">
+               <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off">
+               <button class="chat-send" id="chat-send">Send</button>
+           </div>
+       </div>
+   </div>
+
+   <!-- CUSTOMIZE PARAGRAPH MODAL -->
+   <div class="modal-overlay" id="customize-modal">
+       <div class="modal-card">
+           <div class="flex justify-between items-center pb-2 border-b border-white/10">
+               <h3 class="font-bold text-lg brand">CUSTOM <span class="text-[#4ade80]">TOPIC</span></h3>
+               <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn">✕</button>
+           </div>
+           <p class="text-xs text-[#64748b]">Paste any topic to practice typing on. (Note: New text resets your ghost history!)</p>
+           <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..."></textarea>
+           <button class="btn-primary" style="background:#4ade80" id="start-custom-typing-btn">Start Typing</button>
+       </div>
+   </div>
+
+   <!-- TECHTRAKERS AD MODAL -->
+   <div class="modal-overlay" id="ad-modal">
+       <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
+           <div class="font-bold text-[#22d3ee] mb-4 uppercase tracking-widest text-lg">Watch to earn 3 Credits</div>
+           <div class="video-container">
+               <div id="ad-timer" class="ad-timer">5</div>
+               <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad">✕</button>
+               <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+           </div>
+           <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold" id="ad-footer-text">Video is playing...</p>
+       </div>
+   </div>
+
+   <script>
+       const DEFAULT_TOPICS = [
+           "Every expert was once a beginner who refused to give up. Your fingers are learning a language of their own through repetition and patience.",
+           "Speed is a byproduct of accuracy and countless hours of intentional practice. Do not rush the process of becoming great at something new.",
+           "The keyboard is your instrument and practice is your rehearsal for mastery. Mistakes are simply feedback that guide your fingers toward the right path.",
+           "Your past self set the baseline and your present self is breaking that barrier. Racing against who you were yesterday is the purest form of growth."
+       ];
+
+       const state = {
+           targetDifficulty: 1,
+           rawText: "",
+           charArray: [],
+           typedArray: [],
+           currentIndex: 0,
+           startTime: null,
+           timerActive: false,
+           totalKeystrokes: 0,
+           correctKeystrokes: 0,
+           isTypingStarted: false,
+           thunderEnabled: true,
+           thunderColor: "purple",
+           runHistory: [],
+           currentRecording: [],
+           activeGhostRun: null,
+           ghostIndex: 0,
+           ghostTimer: null,
+           isCoolingDown: false,
+           credits: 3
+       };
+
+       const els = {
+           container: document.getElementById('typing-container'),
+           display: document.getElementById('text-display'),
+           mobileInput: document.getElementById('mobile-input-target'),
+           focusOverlay: document.getElementById('focus-overlay'),
+           wpm: document.getElementById('wpm'),
+           accuracy: document.getElementById('accuracy'),
+           progress: document.getElementById('progress'),
+           ghostWpm: document.getElementById('ghost-wpm'),
+           ghostProgress: document.getElementById('ghost-progress'),
+           ghostMetrics: document.getElementById('ghost-metrics'),
+           ghostStatus: document.getElementById('ghost-status'),
+           thunderCanvas: document.getElementById('thunder-canvas'),
+           thunderToggleBtn: document.getElementById('thunder-toggle-btn'),
+           thunderColorSelect: document.getElementById('thunder-color-select'),
+           diffButtons: document.querySelectorAll('.diff-btn'),
+           ghostSelectModal: document.getElementById('ghost-select-modal'),
+           ghostOptionsList: document.getElementById('ghost-options-list'),
+           restartBtn: document.getElementById('restart-btn'),
+
+           chatToggleBtn: document.getElementById('chat-toggle-btn'),
+           chatModal: document.getElementById('chat-modal'),
+           chatMessages: document.getElementById('chat-messages'),
+           chatInput: document.getElementById('chat-input'),
+           chatSend: document.getElementById('chat-send'),
+           closeChatBtn: document.getElementById('close-chat-btn'),
+           creditPill: document.getElementById('credit-pill'),
+           chatCreditPill: document.getElementById('chat-credit-pill'),
+
+           customizeToggleBtn: document.getElementById('customize-toggle-btn'),
+           customizeModal: document.getElementById('customize-modal'),
+           customizeTextarea: document.getElementById('customize-textarea'),
+           closeCustomizeBtn: document.getElementById('close-customize-btn'),
+           startCustomTypingBtn: document.getElementById('start-custom-typing-btn'),
+
+           adModal: document.getElementById('ad-modal'),
+           adCloseBtn: document.getElementById('ad-close-btn'),
+           adTimer: document.getElementById('ad-timer'),
+           adIframe: document.getElementById('ad-iframe'),
+           adFooterText: document.getElementById('ad-footer-text')
+       };
+
+       els.thunderToggleBtn.addEventListener('click', () => {
+           state.thunderEnabled = !state.thunderEnabled;
+           els.thunderToggleBtn.innerHTML = `<span>⚡ THUNDER: ${state.thunderEnabled ? 'ON' : 'OFF'}</span>`;
+       });
+
+       els.thunderColorSelect.addEventListener('change', (e) => {
+           state.thunderColor = e.target.value;
+           updateCaretColor();
+       });
+
+       function updateCaretColor() {
+           const map = {
+               purple: { caret: '#c084fc', glow: 'rgba(192,132,252,0.45)' },
+               green: { caret: '#4ade80', glow: 'rgba(74,222,128,0.45)' },
+               blue: { caret: '#4dcfff', glow: 'rgba(77,207,255,0.45)' },
+               yellow: { caret: '#facc15', glow: 'rgba(250,204,21,0.45)' },
+               red: { caret: '#f87171', glow: 'rgba(248,113,113,0.45)' },
+               orange: { caret: '#fb923c', glow: 'rgba(251,146,60,0.45)' }
+           };
+           const theme = map[state.thunderColor] || map.purple;
+           document.documentElement.style.setProperty('--caret-color', theme.caret);
+           document.documentElement.style.setProperty('--caret-glow', theme.glow);
+       }
+
+       els.diffButtons.forEach(btn => {
+           btn.addEventListener('click', (e) => {
+               els.diffButtons.forEach(b => b.classList.remove('active'));
+               e.target.classList.add('active');
+               state.targetDifficulty = parseInt(e.target.getAttribute('data-level'));
+               if (state.rawText) {
+                   processTextForDifficulty(state.rawText);
+                   resetDrill();
+               }
+           });
+       });
+
+       function sanitizeText(text) {
+           if (!text) return '';
+           return text.replace(/[—–]/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[^ -~]/g, '').replace(/\s+/g, ' ').trim();
+       }
+
+       function processTextForDifficulty(text) {
+           let processed = text;
+           if (state.targetDifficulty === 1) {
+               processed = processed.toLowerCase().replace(/[^a-z\s]/g, '').replace(/\s+/g, ' ').trim();
+           } else if (state.targetDifficulty === 2) {
+               processed = processed.replace(/[^a-zA-Z\s]/g, ' ').replace(/\s+/g, ' ').trim();
+           } else {
+               processed = processed.replace(/\s+/g, ' ').trim();
+           }
+           state.charArray = processed.split('');
+       }
+
+       function loadRandomParagraph() {
+           const text = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
+           state.rawText = text;
+           processTextForDifficulty(text);
+           resetDrill();
+       }
+
+       function triggerGhostSelectionModal() {
+           els.ghostOptionsList.innerHTML = '';
+           const runsToShow = state.runHistory.slice(-3);
+           runsToShow.forEach((run) => {
+               const btn = document.createElement('button');
+               btn.className = 'btn-ghost-select';
+               btn.innerHTML = `
+                   <div>
+                       <div class="font-bold text-sm">Race Run #${run.id}</div>
+                       <div class="text-xs text-[#64748b]">Accuracy: ${run.accuracy}%</div>
+                   </div>
+                   <div class="text-xl font-black text-[#f472b6] font-['Orbitron']">${run.wpm} WPM</div>
+               `;
+               btn.addEventListener('click', () => {
+                   selectGhostRun(run);
+                   closeGhostModal();
+               });
+               els.ghostOptionsList.appendChild(btn);
+           });
+           els.ghostSelectModal.classList.add('active');
+       }
+
+       function closeGhostModal() { els.ghostSelectModal.classList.remove('active'); }
+
+       function selectGhostRun(run) {
+           state.activeGhostRun = run;
+           els.ghostMetrics.style.display = 'flex';
+           els.ghostWpm.textContent = run.wpm;
+           els.ghostStatus.textContent = `Mode: Racing against Past Self (Run #${run.id} - ${run.wpm} WPM)`;
+           resetDrill();
+       }
+
+       function renderTextUI() {
+           els.display.innerHTML = '';
+           state.charArray.forEach((char, idx) => {
+               const span = document.createElement('span');
+               span.innerText = char;
+               span.className = 'char untyped';
+               span.id = `char-${idx}`;
+               els.display.appendChild(span);
+           });
+           updateCursorUI();
+       }
+
+       function updateCursorUI() {
+           document.querySelectorAll('.char').forEach(el => el.classList.remove('caret', 'caret-static', 'ghost-caret'));
+           if (state.currentIndex < state.charArray.length) {
+               const active = document.getElementById(`char-${state.currentIndex}`);
+               if (active) active.classList.add(state.timerActive ? 'caret-static' : 'caret');
+           }
+           if (state.activeGhostRun && state.ghostIndex < state.charArray.length) {
+               const ghostEl = document.getElementById(`char-${state.ghostIndex}`);
+               if (ghostEl) ghostEl.classList.add('ghost-caret');
+           }
+       }
+
+       function resetDrill() {
+           state.isCoolingDown = true;
+           state.typedArray = [];
+           state.currentIndex = 0;
+           state.startTime = null;
+           state.timerActive = false;
+           state.totalKeystrokes = 0;
+           state.correctKeystrokes = 0;
+           state.isTypingStarted = false;
+           state.currentRecording = [];
+           state.ghostIndex = 0;
+           if (state.ghostTimer) clearInterval(state.ghostTimer);
+
+           els.mobileInput.value = '';
+           els.wpm.textContent = '0';
+           els.accuracy.textContent = '100';
+           els.progress.textContent = '0';
+           els.ghostProgress.textContent = '0';
+           els.container.scrollTop = 0;
+           renderTextUI();
+           els.mobileInput.focus();
+
+           setTimeout(() => { state.isCoolingDown = false; els.mobileInput.value = ''; }, 250);
+       }
+
+       els.restartBtn.addEventListener('click', resetDrill);
+       els.container.addEventListener('click', () => els.mobileInput.focus());
+       els.mobileInput.addEventListener('focus', () => els.focusOverlay.classList.add('hidden'));
+       els.mobileInput.addEventListener('blur', () => els.focusOverlay.classList.remove('hidden'));
+
+       function getLineHeight() {
+           const c0 = document.getElementById('char-0');
+           if (!c0) return 58;
+           for (let i = 1; i < state.charArray.length; i++) {
+               const c = document.getElementById(`char-${i}`);
+               if (c && c.offsetTop > c0.offsetTop + 2) return c.offsetTop - c0.offsetTop;
+           }
+           return 58;
+       }
+
+       function autoScroll() {
+           if (!state.isTypingStarted || state.charArray.length === 0) return;
+           const activeChar = document.getElementById(`char-${state.currentIndex}`);
+           if (!activeChar) return;
+           const container = els.container;
+           const charTop = activeChar.offsetTop;
+           const charHeight = activeChar.offsetHeight || 20;
+           const lineHeight = getLineHeight();
+           const visibleTop = container.scrollTop;
+           const visibleHeight = container.clientHeight;
+
+           if (charTop + charHeight > visibleTop + visibleHeight - lineHeight * 0.3) {
+               container.scrollTop = charTop - lineHeight * 3;
+           } else if (charTop < visibleTop + lineHeight * 0.3) {
+               container.scrollTop = Math.max(0, charTop - lineHeight);
+           }
+       }
+
+       function startGhostReplay() {
+           if (!state.activeGhostRun || !state.activeGhostRun.timing || state.activeGhostRun.timing.length === 0) return;
+           const startTime = performance.now();
+           state.ghostTimer = setInterval(() => {
+               const elapsed = performance.now() - startTime;
+               const record = state.activeGhostRun.timing;
+               while (state.ghostIndex < record.length && elapsed >= record[state.ghostIndex].timestamp) {
+                   state.ghostIndex++;
+                   els.ghostProgress.textContent = Math.round((state.ghostIndex / state.charArray.length) * 100);
+                   updateCursorUI();
+               }
+               if (state.ghostIndex >= record.length) clearInterval(state.ghostTimer);
+           }, 16);
+       }
+
+       els.mobileInput.addEventListener('input', () => {
+           if (state.isCoolingDown) return;
+           const inputValue = els.mobileInput.value;
+           const inputLength = inputValue.length;
+
+           if (!state.timerActive && inputLength > 0) {
+               state.timerActive = true;
+               state.startTime = performance.now();
+               requestAnimationFrame(calculateMetricsLoop);
+               startGhostReplay();
+           }
+           if (!state.isTypingStarted && inputLength > 0) state.isTypingStarted = true;
+
+           if (inputLength < state.currentIndex) {
+               const diff = state.currentIndex - inputLength;
+               for (let i = 0; i < diff; i++) {
+                   if (state.currentIndex > 0) {
+                       state.currentIndex--;
+                       state.typedArray.pop();
+                       const span = document.getElementById(`char-${state.currentIndex}`);
+                       if (span) span.className = 'char untyped';
+                   }
+               }
+               updateCursorUI(); updateProgress(); autoScroll();
+               return;
+           }
+
+           while (state.currentIndex < state.charArray.length && inputLength > state.currentIndex) {
+               const typedChar = inputValue[state.currentIndex];
+               const expectedChar = state.charArray[state.currentIndex];
+               const span = document.getElementById(`char-${state.currentIndex}`);
+               state.totalKeystrokes++;
+
+               if (typedChar === expectedChar) {
+                   state.typedArray.push(typedChar);
+                   state.correctKeystrokes++;
+                   span.className = 'char correct';
+                   const timestamp = performance.now() - state.startTime;
+                   state.currentRecording.push({ charIndex: state.currentIndex, timestamp });
+                   state.currentIndex++;
+                   updateCursorUI(); updateProgress(); autoScroll();
+                   spawnThunderBolt(state.currentIndex - 1, 'correct');
+
+                   if (state.currentIndex >= state.charArray.length) {
+                       state.timerActive = false;
+                       els.mobileInput.blur();
+                       if (state.ghostTimer) clearInterval(state.ghostTimer);
+                       const finalWpm = Math.round((state.correctKeystrokes / 5) / ((performance.now() - state.startTime) / 60000));
+                       const finalAcc = Math.round((state.correctKeystrokes / state.totalKeystrokes) * 100);
+                       state.runHistory.push({ id: state.runHistory.length + 1, wpm: finalWpm, accuracy: finalAcc, timing: [...state.currentRecording] });
+                       
+                       if (state.runHistory.length >= 2) {
+                           setTimeout(() => triggerGhostSelectionModal(), 600);
+                       } else {
+                           selectGhostRun(state.runHistory[0]);
+                       }
+                       return;
+                   }
+               } else {
+                   span.classList.remove('untyped'); span.classList.add('incorrect');
+                   els.mobileInput.value = state.typedArray.join('');
+                   spawnThunderBolt(state.currentIndex, 'wrong');
+                   updateCursorUI();
+                   return;
+               }
+           }
+       });
+
+       function updateProgress() {
+           els.progress.textContent = state.charArray.length > 0 ? Math.round((state.currentIndex / state.charArray.length) * 100) : 0;
+       }
+
+       function calculateMetricsLoop() {
+           if (!state.timerActive && state.currentIndex === 0) return;
+           const timeElapsedMin = (performance.now() - state.startTime) / 60000;
+           let wpmVal = (state.correctKeystrokes / 5) / timeElapsedMin;
+           let accVal = state.totalKeystrokes > 0 ? (state.correctKeystrokes / state.totalKeystrokes) * 100 : 100;
+           if (!isFinite(wpmVal) || isNaN(wpmVal)) wpmVal = 0;
+           if (accVal < 0 || isNaN(accVal)) accVal = 100;
+           els.wpm.innerText = Math.round(wpmVal);
+           els.accuracy.innerText = Math.round(accVal);
+           if (state.timerActive) requestAnimationFrame(calculateMetricsLoop);
+       }
+
+       /* CUSTOMIZE TOPIC LOGIC */
+       els.customizeToggleBtn.addEventListener('click', () => { els.customizeModal.classList.add('active'); els.customizeTextarea.focus(); });
+       els.closeCustomizeBtn.addEventListener('click', () => els.customizeModal.classList.remove('active'));
+       
+       els.startCustomTypingBtn.addEventListener('click', () => {
+           const text = sanitizeText(els.customizeTextarea.value);
+           if (!text) return;
+           state.rawText = text;
+           processTextForDifficulty(text);
+           
+           // CRITICAL: Flush ghost run history! You can't race ghosts on a different track shape!
+           state.runHistory = [];
+           state.activeGhostRun = null;
+           els.ghostMetrics.style.display = 'none';
+           els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
+           
+           resetDrill();
+           els.customizeModal.classList.remove('active');
+           els.customizeTextarea.value = '';
+       });
+
+       /* AD AND CREDITS LOGIC */
+       let adCountdownInterval;
+       function updateCreditDisplay() {
+           const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
+           els.creditPill.textContent = text;
+           els.chatCreditPill.textContent = text;
+           if (state.credits === 0) {
+               els.creditPill.classList.add('zero'); els.chatCreditPill.classList.add('zero');
+           } else {
+               els.creditPill.classList.remove('zero'); els.chatCreditPill.classList.remove('zero');
+           }
+       }
+       function showVideoAd() {
+           els.adModal.classList.add('active');
+           els.adCloseBtn.classList.add('hidden'); els.adTimer.classList.remove('hidden');
+           els.adTimer.textContent = '5'; els.adFooterText.textContent = "Please wait to claim credits...";
+           els.adIframe.src = "https://www.youtube.com/embed/q2Rg8jf4Iu0?si=CJ7iAjDifBIw4Wty&autoplay=1";
+           
+           let timeLeft = 5; clearInterval(adCountdownInterval);
+           adCountdownInterval = setInterval(() => {
+               timeLeft--; els.adTimer.textContent = timeLeft;
+               if (timeLeft <= 0) {
+                   clearInterval(adCountdownInterval);
+                   els.adTimer.classList.add('hidden'); els.adCloseBtn.classList.remove('hidden');
+                   els.adFooterText.textContent = "Tap ✕ to claim +3 Credits!";
+               }
+           }, 1000);
+       }
+       function useCredit() {
+           if (state.credits <= 0) { showVideoAd(); return false; }
+           state.credits--; updateCreditDisplay(); return true;
+       }
+       els.adCloseBtn.addEventListener('click', () => {
+           state.credits = 3; updateCreditDisplay();
+           els.adModal.classList.remove('active'); els.adIframe.src = "";
+       });
+
+       /* CHAT LOGIC */
+       els.chatToggleBtn.addEventListener('click', () => { if (state.credits <= 0) showVideoAd(); else { els.chatModal.classList.add('active'); els.chatInput.focus(); } });
+       els.closeChatBtn.addEventListener('click', () => els.chatModal.classList.remove('active'));
+       
+       function addMessage(text, role) {
+           const bubble = document.createElement('div');
+           bubble.className = `msg-bubble msg-${role}`;
+           if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`; else bubble.textContent = text;
+           els.chatMessages.appendChild(bubble); els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+       }
+       function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+       async function sendChatMessage() {
+           const text = els.chatInput.value.trim();
+           if (!text || !useCredit()) return;
+           addMessage(text, 'user'); els.chatInput.value = ''; els.chatSend.disabled = true;
+
+           try {
+               const res = await fetch('/api/chat', {
+                   method: 'POST', headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ message: text })
+               });
+               if (!res.ok) throw new Error('Server error');
+               const data = await res.json(); const clean = sanitizeText(data.text);
+               addMessage(clean, 'ai');
+
+               const loadBtn = document.createElement('button');
+               loadBtn.className = 'btn-primary mt-2'; loadBtn.textContent = 'Practice This in Ghost Mode';
+               loadBtn.style.fontSize = '0.7rem'; loadBtn.style.padding = '8px';
+               loadBtn.onclick = () => {
+                   state.rawText = clean;
+                   processTextForDifficulty(clean);
+                   
+                   // CRITICAL: Clear ghost history on new text injection
+                   state.runHistory = [];
+                   state.activeGhostRun = null;
+                   els.ghostMetrics.style.display = 'none';
+                   els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
+
+                   resetDrill();
+                   els.chatModal.classList.remove('active');
+               };
+               els.chatMessages.lastElementChild.appendChild(loadBtn);
+               els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+           } catch (err) {
+               addMessage('Error communicating with API.', 'ai');
+               state.credits++; updateCreditDisplay();
+           } finally { els.chatSend.disabled = false; }
+       }
+       els.chatSend.addEventListener('click', sendChatMessage);
+       els.chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+
+       /* THUNDER RENDERER */
+       const canvas = els.thunderCanvas; const ctx = canvas.getContext('2d');
+       let particles = []; let charW = 9.6;
+       function resizeThunderCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; charW = (parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4) * 0.601; }
+       resizeThunderCanvas(); window.addEventListener('resize', resizeThunderCanvas);
+
+       const COLOR_MAP = { purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' }, green: { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' }, blue: { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' }, yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' }, red: { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' }, orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' } };
+       function getDiscoColors() { const h = ['purple', 'green', 'blue', 'yellow', 'red', 'orange']; return COLOR_MAP[h[Math.floor(Math.random() * h.length)]]; }
+
+       class LightningBolt {
+           constructor(x, y, type) {
+               this.startX = x; this.y = y + (Math.random() - 0.5) * 10; this.life = 1; this.totalLen = charW; this.decay = 0.055 + Math.random() * 0.03;
+               let t = state.thunderColor === 'disco' ? getDiscoColors() : COLOR_MAP[state.thunderColor];
+               if (type === 'wrong') { this.dir = -1; this.colTip = COLOR_MAP.red.tip; this.colMid = COLOR_MAP.red.mid; this.colGlow = COLOR_MAP.red.glow; this.w = 3.0 + Math.random() * 1.5; } 
+               else { this.dir = 1; this.colTip = t.tip; this.colMid = t.mid; this.colGlow = t.glow; this.w = 2.6 + Math.random() * 1.2; }
+               this.buildPath();
+           }
+           buildPath() {
+               const segs = Math.max(3, Math.round(this.totalLen / 3)); const segLen = this.totalLen / segs; this.pts = [{ x: 0, y: 0 }]; let cx = 0, cy = 0; this.branches = [];
+               for (let i = 1; i <= segs; i++) {
+                   cx += segLen + (Math.random() - 0.3) * segLen * 0.3; cy += (Math.random() - 0.5) * 6; this.pts.push({ x: cx, y: cy });
+                   if (i > 0 && i < segs && Math.random() < 0.45) {
+                       const bLen = charW * (0.2 + Math.random() * 0.4); const bDir = Math.random() < 0.5 ? -1 : 1; const bAngle = bDir * (0.3 + Math.random() * 0.5); const bSegs = 2 + Math.floor(Math.random() * 2);
+                       const branch = [{ x: cx, y: cy }]; let bx = cx, by = cy;
+                       for (let j = 1; j <= bSegs; j++) { bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4; by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4; branch.push({ x: bx, y: by }); }
+                       this.branches.push(branch);
+                   }
+               }
+           }
+           strokePath(pts, offX, offY, color, width, blur, alpha) { if (pts.length < 2) return; ctx.save(); ctx.globalAlpha = alpha; ctx.shadowBlur = blur; ctx.shadowColor = color; ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.translate(offX, offY); ctx.beginPath(); ctx.moveTo(pts[0].x * this.dir, pts[0].y); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y); ctx.stroke(); ctx.restore(); }
+           drawPoly(pts, ox, oy, a) { this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28); this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9); this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a); }
+           update() { this.life -= this.decay; }
+           draw() { const a = Math.max(0, this.life); this.drawPoly(this.pts, this.startX, this.y, a); for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55); }
+       }
+
+       function spawnThunderBolt(charIndex, type) {
+           if (!state.thunderEnabled || !state.isTypingStarted || type === 'ghost') return;
+           const span = document.getElementById(`char-${charIndex}`); if (!span) return;
+           const rect = span.getBoundingClientRect(); const x = rect.left + rect.width / 2; const y = rect.top + rect.height / 2;
+           for (let i = 0; i < (type === 'correct' ? 2 : 3); i++) particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
+       }
+
+       (function thunderLoop() {
+           ctx.clearRect(0, 0, canvas.width, canvas.height);
+           particles = particles.filter(p => p.life > 0); particles.forEach(p => { p.update(); p.draw(); });
+           requestAnimationFrame(thunderLoop);
+       })();
+
+       document.addEventListener('DOMContentLoaded', () => { loadRandomParagraph(); updateCaretColor(); updateCreditDisplay(); });
+   </script>
 </body>
 </html>
