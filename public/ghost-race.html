@@ -73,11 +73,12 @@
            display: flex; align-items: center; gap: 6px;
            backdrop-filter: blur(8px);
        }
-       .corner-btn:hover {
-           border-color: var(--accent);
-           box-shadow: 0 0 15px var(--accent-glow);
-           transform: translateY(-1px);
-       }
+       .corner-btn:hover { border-color: var(--accent); box-shadow: 0 0 15px var(--accent-glow); transform: translateY(-1px); }
+       .corner-btn.chat { border-color: rgba(34,211,238,0.3); color: #22d3ee; padding: 10px; }
+       .corner-btn.chat:hover { box-shadow: 0 0 20px rgba(34,211,238,0.45); }
+       .corner-btn.custom-topic { border-color: rgba(74,222,128,0.3); color: #4ade80; padding: 10px; }
+       .corner-btn.custom-topic:hover { box-shadow: 0 0 20px rgba(74,222,128,0.35); }
+
        .diff-selector {
            display: flex; background: rgba(255,255,255,0.03);
            border-radius: 14px; padding: 4px; border: 1px solid rgba(255,255,255,0.05);
@@ -161,29 +162,84 @@
            font-size: 0.9rem; color: var(--text-main); pointer-events: auto; cursor: text;
            transition: all 0.3s;
        }
+
+       /* MODALS */
        .modal-overlay {
            position: fixed; inset: 0; z-index: 300;
-           background: rgba(7,10,18,0.85); backdrop-filter: blur(12px);
-           display: none; align-items: center; justify-content: center;
-           padding: 16px; opacity: 0; transition: opacity 0.3s ease;
+           background: rgba(7,10,18,0.6); backdrop-filter: blur(8px);
+           display: flex; align-items: center; justify-content: center;
+           padding: 16px; opacity: 0; visibility: hidden; pointer-events: none;
+           transition: opacity 0.35s ease, visibility 0.35s ease;
        }
-       .modal-overlay.active { display: flex; opacity: 1; }
+       .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
        .modal-card {
            background: rgba(15,21,37,0.95);
-           border: 1px solid rgba(255,255,255,0.1);
-           border-radius: 20px;
-           padding: 24px;
-           width: 100%; max-width: 480px;
+           border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
+           padding: 24px; width: 100%; max-width: 480px;
            box-shadow: 0 20px 50px rgba(0,0,0,0.5);
            display: flex; flex-direction: column; gap: 16px;
+           transform: scale(0.9) translateY(15px); opacity: 0;
+           transition: transform 0.4s ease, opacity 0.4s ease;
        }
+       .modal-overlay.active .modal-card { transform: scale(1) translateY(0); opacity: 1; }
+       .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
+       
+       .chat-messages {
+           flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
+           scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+       }
+       .chat-messages::-webkit-scrollbar { width: 5px; }
+       .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+       .msg-bubble { max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 0.95rem; line-height: 1.6; word-break: break-word; }
+       .msg-user { align-self: flex-end; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); border-bottom-right-radius: 4px; }
+       .msg-ai { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-bottom-left-radius: 4px; }
+       .chat-input-wrap { display: flex; gap: 10px; padding: 12px; background: rgba(7,10,18,0.8); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+       .chat-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 0.95rem; padding: 8px 12px; }
+       .chat-send { background: var(--accent); color: var(--bg-base); border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; }
+
+       /* TYPING INDICATOR */
+       .typing-indicator { 
+           display: flex; align-items: center; gap: 6px; padding: 14px 18px; 
+           align-self: flex-start; background: rgba(255,255,255,0.03); 
+           border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; 
+           border-bottom-left-radius: 4px; color: var(--text-dim); 
+           font-size: 0.9rem; font-style: italic; 
+       }
+       .typing-dot { 
+           width: 5px; height: 5px; background: var(--accent); 
+           border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; 
+       }
+       .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+       .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+       @keyframes typingBounce { 
+           0%,80%,100% { transform: scale(0); opacity: 0.3; } 
+           40% { transform: scale(1); opacity: 1; } 
+       }
+
        .btn-primary {
            background: var(--accent); color: var(--bg-base);
            font-family: 'Orbitron', sans-serif; font-weight: 700;
            padding: 12px; border-radius: 12px; border: none;
-           cursor: pointer; transition: all 0.25s; text-transform: uppercase;
+           cursor: pointer; transition: all 0.25s; text-transform: uppercase; width: 100%;
        }
        .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
+       
+       .customize-textarea {
+           background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
+           border-radius: 14px; padding: 14px; color: var(--text-main); font-size: 0.9rem;
+           resize: vertical; min-height: 160px; outline: none; transition: border-color 0.25s;
+       }
+       .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
+
+       .credit-pill { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); color: #22d3ee; padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; font-weight: 700; transition: all 0.25s ease; }
+       .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
+
+       .ad-card-special { background: linear-gradient(145deg, #0e1424, #171d33); border: 1px solid rgba(34,211,238,0.3); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); text-align: center; }
+       .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: rgba(7,10,18,0.5); }
+       .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
+       .ad-timer, .ad-close-x { position: absolute; top: 10px; right: 10px; background: rgba(7,10,18,0.9); border: 2px solid var(--accent); color: var(--accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; z-index: 30; }
+       .ad-close-x { color: #fff; cursor: pointer; border-color: rgba(255,255,255,0.3); }
+
        .btn-ghost-select {
            background: rgba(255,255,255,0.03);
            border: 1px solid rgba(255,255,255,0.1);
@@ -198,116 +254,6 @@
            transform: translateX(4px);
        }
        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
-
-       /* ========================================= */
-       /* --- AI CHAT / CUSTOMIZE / CREDITS UI  --- */
-       /* ========================================= */
-       .corner-btn.chat { border-color: rgba(34,211,238,0.3); color: #22d3ee; padding: 10px; }
-       .corner-btn.chat:hover { box-shadow: 0 0 20px rgba(34,211,238,0.45); }
-       .corner-btn.custom-topic { border-color: rgba(74,222,128,0.3); color: #4ade80; padding: 10px; }
-       .corner-btn.custom-topic:hover { box-shadow: 0 0 20px rgba(74,222,128,0.35); }
-
-       .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
-
-       .chat-messages {
-           flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
-           scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
-       }
-       .chat-messages::-webkit-scrollbar { width: 5px; }
-       .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-       .msg-bubble { max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 0.95rem; line-height: 1.6; animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); word-break: break-word; }
-       @keyframes msgIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-       .msg-user { align-self: flex-end; background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.2); border-bottom-right-radius: 4px; }
-       .msg-ai { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-bottom-left-radius: 4px; }
-
-       .chat-input-wrap { display: flex; gap: 10px; padding: 12px; background: rgba(7,10,18,0.8); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
-       .chat-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.95rem; padding: 8px 12px; }
-       .chat-input::placeholder { color: var(--text-dim); }
-       .chat-send { background: var(--accent); color: var(--bg-base); border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.25s; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
-       .chat-send:hover:not(:disabled) { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.03); }
-       .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
-
-       .typing-indicator { display: flex; gap: 6px; padding: 14px 18px; align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; border-bottom-left-radius: 4px; }
-       .typing-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
-       .typing-dot:nth-child(1) { animation-delay: -0.32s; }
-       .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-       @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
-
-       .ad-card-special {
-           background: linear-gradient(145deg, #0e1424, #171d33);
-           border: 1px solid rgba(192,132,252,0.3);
-           border-radius: 20px;
-           box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 35px rgba(192,132,252,0.15);
-           text-align: center;
-       }
-       .ad-motion-text {
-           font-family: 'Orbitron', sans-serif;
-           font-size: 1.15rem; font-weight: 700; text-transform: uppercase;
-           text-align: center; letter-spacing: 1px; line-height: 1.4;
-           background: linear-gradient(270deg, #c084fc, #22d3ee, #c084fc);
-           background-size: 200% auto;
-           -webkit-background-clip: text;
-           -webkit-text-fill-color: transparent;
-           animation: gradientMove 3s linear infinite;
-           margin-bottom: 20px;
-       }
-       @keyframes gradientMove { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
-
-       .video-container {
-           position: relative; width: 100%; padding-bottom: 56.25%; height: 0;
-           overflow: hidden; border-radius: 12px; background: rgba(7,10,18,0.5);
-           border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(192,132,252,0.1);
-       }
-       .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
-
-       .ad-timer {
-           position: absolute; top: 10px; right: 10px;
-           background: rgba(7,10,18,0.9); border: 2px solid var(--accent);
-           color: var(--accent); width: 32px; height: 32px; border-radius: 50%;
-           display: flex; align-items: center; justify-content: center;
-           font-size: 14px; font-weight: bold; z-index: 30;
-           font-family: 'Orbitron', sans-serif;
-           box-shadow: 0 0 10px var(--accent-glow);
-       }
-       .ad-close-x {
-           position: absolute; top: 10px; right: 10px;
-           background: rgba(7,10,18,0.9); border: 2px solid rgba(255,255,255,0.3);
-           color: #fff; width: 32px; height: 32px; border-radius: 50%;
-           display: flex; align-items: center; justify-content: center;
-           font-size: 16px; font-weight: bold; cursor: pointer; z-index: 30;
-           transition: all 0.2s ease;
-       }
-       .ad-close-x:hover { background: var(--error-color); border-color: var(--error-color); transform: scale(1.1); box-shadow: 0 0 15px rgba(248,113,113,0.4); }
-
-       .customize-textarea {
-           background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
-           border-radius: 14px; padding: 14px; color: var(--text-main);
-           font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6;
-           resize: vertical; min-height: 160px; outline: none;
-           transition: border-color 0.25s;
-       }
-       .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
-       .customize-textarea::placeholder { color: var(--text-dim); }
-
-       .credit-pill { background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.2); color: var(--accent); padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; transition: all 0.25s ease; }
-       .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
-
-       .onb-toast {
-           position: fixed; z-index: 9910;
-           background: rgba(15, 21, 37, 0.92); backdrop-filter: blur(14px);
-           -webkit-backdrop-filter: blur(14px);
-           color: var(--text-main); font-size: 0.78rem; font-weight: 500; line-height: 1.5;
-           padding: 10px 18px; border-radius: 999px; max-width: 250px;
-           box-shadow: 0 12px 30px rgba(0,0,0,0.5);
-           opacity: 0; visibility: hidden; pointer-events: none; text-align: center;
-           transform: translateY(10px) scale(0.95);
-           transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
-       }
-       .onb-toast.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-       #onb-toast-chat { top: 62px; right: 20px; border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(34, 211, 238, 0.15); }
-       #onb-toast-customize { top: 62px; right: 20px; border: 1px solid rgba(74, 222, 128, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(74, 222, 128, 0.15); }
-       #onb-toast-feedback { bottom: 62px; right: 20px; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(168, 85, 247, 0.15); }
    </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
@@ -389,6 +335,7 @@
        </div>
    </main>
 
+   <!-- GHOST SELECT MODAL -->
    <div class="modal-overlay" id="ghost-select-modal">
        <div class="modal-card">
            <div class="flex justify-between items-center">
@@ -397,7 +344,7 @@
            </div>
            <p class="text-xs text-[#64748b]">Which of your past selves do you want to race?</p>
            <div id="ghost-options-list" class="flex flex-col gap-3 my-2"></div>
-           <button class="btn-primary" onclick="closeGhostModal()">Continue Solo Run</button>
+           <button class="btn-primary" style="background:#f472b6" onclick="closeGhostModal()">Continue Solo Run</button>
        </div>
    </div>
 
@@ -412,7 +359,7 @@
                </div>
            </div>
            <div class="chat-messages" id="chat-messages">
-               <div class="msg-bubble msg-ai">Welcome to FluidGhost AI. Ask me anything to generate a custom paragraph, then race your past self on it.</div>
+               <div class="msg-bubble msg-ai">Welcome to FluidType AI. Ask me anything to generate custom Ghost Race typing drills for you.</div>
            </div>
            <div class="chat-input-wrap">
                <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off">
@@ -425,98 +372,34 @@
    <div class="modal-overlay" id="customize-modal">
        <div class="modal-card">
            <div class="flex justify-between items-center pb-2 border-b border-white/10">
-               <h3 class="font-bold text-lg brand">CUSTOM <span class="gradient-text">TOPIC</span></h3>
+               <h3 class="font-bold text-lg brand">CUSTOM <span class="text-[#4ade80]">TOPIC</span></h3>
                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn">✕</button>
            </div>
-           <p class="text-xs text-[#64748b]">Paste any topic or paragraph you want to race against your ghost on.</p>
+           <p class="text-xs text-[#64748b]">Paste any topic to practice typing on. (Note: New text resets your ghost history!)</p>
            <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..."></textarea>
-           <button class="btn-primary" id="start-custom-typing-btn">Start Typing</button>
+           <button class="btn-primary" style="background:#4ade80" id="start-custom-typing-btn">Start Typing</button>
        </div>
    </div>
 
-   <!-- TECHTRAKERS AD MODAL (YOUTUBE EMBED) -->
+   <!-- TECHTRAKERS AD MODAL -->
    <div class="modal-overlay" id="ad-modal">
        <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
-           <div class="ad-motion-text">Watch to earn 3 Credits</div>
+           <div class="font-bold text-[#22d3ee] mb-4 uppercase tracking-widest text-lg">Watch to earn 3 Credits</div>
            <div class="video-container">
                <div id="ad-timer" class="ad-timer">5</div>
                <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad">✕</button>
-               <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+               <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
            </div>
-           <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold font-mono" id="ad-footer-text">Video is playing...</p>
+           <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold" id="ad-footer-text">Video is playing...</p>
        </div>
    </div>
-
-   <!-- AUTO-POPUP ONBOARDING TOASTS -->
-   <div id="onb-toast-chat" class="onb-toast">Use chatbot for that topic, which you love to type.</div>
-   <div id="onb-toast-customize" class="onb-toast">Paste the topic on which you want to type.</div>
-   <div id="onb-toast-feedback" class="onb-toast">Give feedback. If you find any bugs...</div>
-
-   <!-- Feedback widget: Gmail + Instagram -->
-   <div class="ft-feedback" id="ftFeedback">
-       <span class="ft-feedback-label">Feedback</span>
-       <div class="ft-feedback-icons">
-           <a href="mailto:techtrakers@gmail.com" id="ftGmailLink" aria-label="Email us on Gmail" class="ft-icon">
-               <svg viewBox="0 0 24 24" width="20" height="20">
-                   <rect x="2" y="4" width="20" height="16" rx="2" fill="#fff"/>
-                   <rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="#4285F4" stroke-width="1.4"/>
-                   <path d="M2.5 5.5L12 13 21.5 5.5" fill="none" stroke="#EA4335" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-               </svg>
-           </a>
-           <a href="https://www.instagram.com/techtrakers" target="_blank" rel="noopener noreferrer" aria-label="Message us on Instagram" class="ft-icon">
-               <svg viewBox="0 0 24 24" width="20" height="20">
-                   <defs>
-                       <linearGradient id="ftIgGrad" x1="0%" y1="100%" x2="100%" y2="0%">
-                           <stop offset="0%" stop-color="#feda75"/>
-                           <stop offset="30%" stop-color="#fa7e1e"/>
-                           <stop offset="60%" stop-color="#d62976"/>
-                           <stop offset="100%" stop-color="#962fbf"/>
-                       </linearGradient>
-                   </defs>
-                   <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#ftIgGrad)"/>
-                   <circle cx="12" cy="12" r="5" fill="none" stroke="#fff" stroke-width="1.6"/>
-                   <circle cx="17" cy="7" r="1.1" fill="#fff"/>
-               </svg>
-           </a>
-       </div>
-   </div>
-
-   <style>
-       .ft-feedback {
-           position: fixed; bottom: 20px; right: 20px;
-           display: flex; align-items: center; gap: 10px;
-           background: rgba(20, 18, 30, 0.75); backdrop-filter: blur(8px);
-           border: 1px solid rgba(168, 85, 247, 0.35);
-           border-radius: 30px; padding: 8px 14px;
-           z-index: 999; cursor: pointer;
-           transition: box-shadow .25s ease, border-color .25s ease;
-       }
-       .ft-feedback:hover { border-color: rgba(168, 85, 247, 0.8); box-shadow: 0 0 14px rgba(168, 85, 247, 0.45); }
-       .ft-feedback-label { color: #d8d0f0; font-size: 12px; font-family: inherit; letter-spacing: .3px; white-space: nowrap; }
-       .ft-feedback-icons { display: flex; align-items: center; gap: 8px; max-width: 0; opacity: 0; overflow: hidden; pointer-events: none; transition: max-width .3s cubic-bezier(0.16, 1, 0.3, 1), opacity .25s ease; }
-       .ft-feedback.active .ft-feedback-icons { max-width: 100px; opacity: 1; pointer-events: auto; }
-       @media (hover: hover) and (pointer: fine) { .ft-feedback:hover .ft-feedback-icons { max-width: 100px; opacity: 1; pointer-events: auto; } }
-       .ft-icon { display: flex; transition: transform .2s ease; }
-       .ft-icon:hover { transform: scale(1.15); }
-   </style>
 
    <script>
        const DEFAULT_TOPICS = [
-           "Every expert was once a beginner who refused to give up. Your fingers are learning a language of their own through repetition and patience. Trust that progress is happening even when it feels invisible.",
-           "Speed is a byproduct of accuracy and countless hours of intentional practice. Do not rush the process of becoming great at something new. Celebrate every correct keystroke as a small victory today.",
-           "The keyboard is your instrument and practice is your rehearsal for mastery. Mistakes are simply feedback that guide your fingers toward the right path. Keep showing up and the results will follow naturally.",
-           "Discipline beats motivation every single time you choose to start a new drill. You are building muscle memory that will serve you for years to come. Stay consistent and watch your confidence grow with every session.",
-           "Your past self set the baseline and your present self is breaking that barrier. Racing against who you were yesterday is the purest form of growth. Win or lose against the ghost, you are already improving.",
-           "Focus on the rhythm of your breathing and the flow of your fingers across the keys. When mind and body align in perfect concentration, time seems to slow down. That state of flow is where true speed is born.",
-           "Small daily improvements compound into extraordinary results over time. You do not need to be the fastest today, you only need to be better than yesterday. Progress is the only metric that truly matters in the end.",
-           "Typing is a meditation for the modern mind, requiring presence and calm determination. Let go of the need for perfection and embrace the journey of incremental growth. Each session sharpens both your mind and your craft.",
-           "The ghost on your screen is not your enemy but a mirror reflecting your potential. It shows you exactly what you are capable of achieving with focus. Use it as fuel to push beyond your perceived limits.",
-           "Comfort zones are graveyards where potential goes to rest and die. True growth happens when you challenge yourself to go slightly faster than feels safe. Courage on the keyboard translates to courage in life.",
-           "You have everything you need inside you to become exceptionally skilled. The only thing standing between you and mastery is the willingness to practice daily. Believe in your capacity to learn and adapt quickly.",
-           "Errors are not failures but necessary stepping stones toward fluency. Every time you correct a mistake, your brain rewires itself more efficiently. Welcome the challenge because it is sculpting a better version of you.",
-           "There is no finish line in the journey of self improvement and skill acquisition. The goal is not to arrive but to become someone who never stops refining their craft. Enjoy the process as much as the outcome.",
-           "Your hands are capable of moving faster than your doubts would have you believe. Silence the inner critic by focusing entirely on the next word in front of you. Presence and practice will silence every excuse.",
-           "Excellence is not a single act but a habit that you build one keystroke at a time. The time you invest in yourself today pays dividends for your entire future. Keep typing, keep growing, keep believing in yourself."
+           "Every expert was once a beginner who refused to give up. Your fingers are learning a language of their own through repetition and patience.",
+           "Speed is a byproduct of accuracy and countless hours of intentional practice. Do not rush the process of becoming great at something new.",
+           "The keyboard is your instrument and practice is your rehearsal for mastery. Mistakes are simply feedback that guide your fingers toward the right path.",
+           "Your past self set the baseline and your present self is breaking that barrier. Racing against who you were yesterday is the purest form of growth."
        ];
 
        const state = {
@@ -561,14 +444,14 @@
            ghostOptionsList: document.getElementById('ghost-options-list'),
            restartBtn: document.getElementById('restart-btn'),
 
-           creditPill: document.getElementById('credit-pill'),
-           chatCreditPill: document.getElementById('chat-credit-pill'),
            chatToggleBtn: document.getElementById('chat-toggle-btn'),
            chatModal: document.getElementById('chat-modal'),
            chatMessages: document.getElementById('chat-messages'),
            chatInput: document.getElementById('chat-input'),
            chatSend: document.getElementById('chat-send'),
            closeChatBtn: document.getElementById('close-chat-btn'),
+           creditPill: document.getElementById('credit-pill'),
+           chatCreditPill: document.getElementById('chat-credit-pill'),
 
            customizeToggleBtn: document.getElementById('customize-toggle-btn'),
            customizeModal: document.getElementById('customize-modal'),
@@ -619,6 +502,11 @@
            });
        });
 
+       function sanitizeText(text) {
+           if (!text) return '';
+           return text.replace(/[—–]/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[^ -~]/g, '').replace(/\s+/g, ' ').trim();
+       }
+
        function processTextForDifficulty(text) {
            let processed = text;
            if (state.targetDifficulty === 1) {
@@ -635,23 +523,6 @@
            const text = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
            state.rawText = text;
            processTextForDifficulty(text);
-           resetDrill();
-       }
-
-       // Loads a brand new piece of text (from AI chat or a pasted custom
-       // paragraph) and starts a fresh Ghost baseline for it, since any
-       // previously recorded runs were timed against the old text.
-       function loadNewText(text, label) {
-           state.rawText = text;
-           processTextForDifficulty(text);
-           state.runHistory = [];
-           state.activeGhostRun = null;
-           state.ghostIndex = 0;
-           if (state.ghostTimer) clearInterval(state.ghostTimer);
-           els.ghostMetrics.style.display = 'none';
-           els.ghostWpm.textContent = '0';
-           els.ghostProgress.textContent = '0';
-           els.ghostStatus.textContent = `Mode: Initial Solo Run (${label} - Setting your Ghost Baseline)`;
            resetDrill();
        }
 
@@ -713,7 +584,6 @@
 
        function resetDrill() {
            state.isCoolingDown = true;
-
            state.typedArray = [];
            state.currentIndex = 0;
            state.startTime = null;
@@ -734,15 +604,11 @@
            renderTextUI();
            els.mobileInput.focus();
 
-           setTimeout(() => {
-               state.isCoolingDown = false;
-               els.mobileInput.value = ''; 
-           }, 250);
+           setTimeout(() => { state.isCoolingDown = false; els.mobileInput.value = ''; }, 250);
        }
 
        els.restartBtn.addEventListener('click', resetDrill);
        els.container.addEventListener('click', () => els.mobileInput.focus());
-       els.container.addEventListener('touchstart', () => els.mobileInput.focus());
        els.mobileInput.addEventListener('focus', () => els.focusOverlay.classList.add('hidden'));
        els.mobileInput.addEventListener('blur', () => els.focusOverlay.classList.remove('hidden'));
 
@@ -785,17 +651,12 @@
                    els.ghostProgress.textContent = Math.round((state.ghostIndex / state.charArray.length) * 100);
                    updateCursorUI();
                }
-               if (state.ghostIndex >= record.length) {
-                   clearInterval(state.ghostTimer);
-               }
+               if (state.ghostIndex >= record.length) clearInterval(state.ghostTimer);
            }, 16);
        }
 
-       els.mobileInput.addEventListener('input', handleTypingInput);
-
-       function handleTypingInput() {
+       els.mobileInput.addEventListener('input', () => {
            if (state.isCoolingDown) return;
-
            const inputValue = els.mobileInput.value;
            const inputLength = inputValue.length;
 
@@ -805,9 +666,7 @@
                requestAnimationFrame(calculateMetricsLoop);
                startGhostReplay();
            }
-           if (!state.isTypingStarted && inputLength > 0) {
-               state.isTypingStarted = true;
-           }
+           if (!state.isTypingStarted && inputLength > 0) state.isTypingStarted = true;
 
            if (inputLength < state.currentIndex) {
                const diff = state.currentIndex - inputLength;
@@ -819,9 +678,7 @@
                        if (span) span.className = 'char untyped';
                    }
                }
-               updateCursorUI();
-               updateProgress();
-               autoScroll();
+               updateCursorUI(); updateProgress(); autoScroll();
                return;
            }
 
@@ -838,9 +695,7 @@
                    const timestamp = performance.now() - state.startTime;
                    state.currentRecording.push({ charIndex: state.currentIndex, timestamp });
                    state.currentIndex++;
-                   updateCursorUI();
-                   updateProgress();
-                   autoScroll();
+                   updateCursorUI(); updateProgress(); autoScroll();
                    spawnThunderBolt(state.currentIndex - 1, 'correct');
 
                    if (state.currentIndex >= state.charArray.length) {
@@ -849,12 +704,8 @@
                        if (state.ghostTimer) clearInterval(state.ghostTimer);
                        const finalWpm = Math.round((state.correctKeystrokes / 5) / ((performance.now() - state.startTime) / 60000));
                        const finalAcc = Math.round((state.correctKeystrokes / state.totalKeystrokes) * 100);
-                       state.runHistory.push({
-                           id: state.runHistory.length + 1,
-                           wpm: finalWpm,
-                           accuracy: finalAcc,
-                           timing: [...state.currentRecording]
-                       });
+                       state.runHistory.push({ id: state.runHistory.length + 1, wpm: finalWpm, accuracy: finalAcc, timing: [...state.currentRecording] });
+                       
                        if (state.runHistory.length >= 2) {
                            setTimeout(() => triggerGhostSelectionModal(), 600);
                        } else {
@@ -863,19 +714,17 @@
                        return;
                    }
                } else {
-                   span.classList.remove('untyped');
-                   span.classList.add('incorrect');
+                   span.classList.remove('untyped'); span.classList.add('incorrect');
                    els.mobileInput.value = state.typedArray.join('');
                    spawnThunderBolt(state.currentIndex, 'wrong');
                    updateCursorUI();
                    return;
                }
            }
-       }
+       });
 
        function updateProgress() {
-           const pct = state.charArray.length > 0 ? Math.round((state.currentIndex / state.charArray.length) * 100) : 0;
-           els.progress.textContent = pct;
+           els.progress.textContent = state.charArray.length > 0 ? Math.round((state.currentIndex / state.charArray.length) * 100) : 0;
        }
 
        function calculateMetricsLoop() {
@@ -890,351 +739,198 @@
            if (state.timerActive) requestAnimationFrame(calculateMetricsLoop);
        }
 
-       const canvas = els.thunderCanvas;
-       const ctx = canvas.getContext('2d');
-       let particles = [];
-       let charW = 9.6;
+       /* CUSTOMIZE TOPIC LOGIC */
+       els.customizeToggleBtn.addEventListener('click', () => { els.customizeModal.classList.add('active'); els.customizeTextarea.focus(); });
+       els.closeCustomizeBtn.addEventListener('click', () => els.customizeModal.classList.remove('active'));
+       
+       els.startCustomTypingBtn.addEventListener('click', () => {
+           const text = sanitizeText(els.customizeTextarea.value);
+           if (!text) return;
+           state.rawText = text;
+           processTextForDifficulty(text);
+           
+           // CRITICAL: Flush ghost run history! You can't race ghosts on a different track shape!
+           state.runHistory = [];
+           state.activeGhostRun = null;
+           els.ghostMetrics.style.display = 'none';
+           els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
+           
+           resetDrill();
+           els.customizeModal.classList.remove('active');
+           els.customizeTextarea.value = '';
+       });
 
-       function resizeThunderCanvas() {
-           canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-           const fsize = parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4;
-           charW = fsize * 0.601;
-       }
-       resizeThunderCanvas();
-       window.addEventListener('resize', resizeThunderCanvas);
-
-       const COLOR_MAP = {
-           purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' },
-           green:  { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' },
-           blue:   { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' },
-           yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' },
-           red:    { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' },
-           orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' }
-       };
-
-       function getDiscoColors() {
-           const hues = ['purple', 'green', 'blue', 'yellow', 'red', 'orange'];
-           const rand = hues[Math.floor(Math.random() * hues.length)];
-           return COLOR_MAP[rand];
-       }
-
-       class LightningBolt {
-           constructor(x, y, type) {
-               this.startX = x; this.y = y + (Math.random() - 0.5) * 10;
-               this.life = 1; this.type = type; this.totalLen = charW;
-               this.decay = 0.055 + Math.random() * 0.03;
-               let theme = state.thunderColor === 'disco' ? getDiscoColors() : COLOR_MAP[state.thunderColor];
-               if (type === 'wrong') {
-                   this.dir = -1;
-                   this.colTip = COLOR_MAP.red.tip; this.colMid = COLOR_MAP.red.mid; this.colGlow = COLOR_MAP.red.glow;
-                   this.w = 3.0 + Math.random() * 1.5;
-               } else {
-                   this.dir = 1;
-                   this.colTip = theme.tip; this.colMid = theme.mid; this.colGlow = theme.glow;
-                   this.w = 2.6 + Math.random() * 1.2;
-               }
-               this.buildPath();
-           }
-           buildPath() {
-               const segs = Math.max(3, Math.round(this.totalLen / 3));
-               const segLen = this.totalLen / segs;
-               this.pts = [{ x: 0, y: 0 }];
-               let cx = 0, cy = 0; this.branches = [];
-               for (let i = 1; i <= segs; i++) {
-                   cx += segLen + (Math.random() - 0.3) * segLen * 0.3;
-                   cy += (Math.random() - 0.5) * 6;
-                   this.pts.push({ x: cx, y: cy });
-                   if (i > 0 && i < segs && Math.random() < 0.45) {
-                       const bLen = charW * (0.2 + Math.random() * 0.4);
-                       const bDir = Math.random() < 0.5 ? -1 : 1;
-                       const bAngle = bDir * (0.3 + Math.random() * 0.5);
-                       const bSegs = 2 + Math.floor(Math.random() * 2);
-                       const branch = [{ x: cx, y: cy }];
-                       let bx = cx, by = cy;
-                       for (let j = 1; j <= bSegs; j++) {
-                           bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4;
-                           by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4;
-                           branch.push({ x: bx, y: by });
-                       }
-                       this.branches.push(branch);
-                   }
-               }
-           }
-           strokePath(pts, offX, offY, color, width, blur, alpha) {
-               if (pts.length < 2) return;
-               ctx.save();
-               ctx.globalAlpha = alpha; ctx.shadowBlur = blur; ctx.shadowColor = color;
-               ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-               ctx.translate(offX, offY);
-               ctx.beginPath(); ctx.moveTo(pts[0].x * this.dir, pts[0].y);
-               for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y);
-               ctx.stroke(); ctx.restore();
-           }
-           drawPoly(pts, ox, oy, a) {
-               this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28);
-               this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9);
-               this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a);
-           }
-           update() { this.life -= this.decay; }
-           draw() {
-               const a = Math.max(0, this.life);
-               this.drawPoly(this.pts, this.startX, this.y, a);
-               for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55);
-           }
-       }
-
-       function spawnThunderBolt(charIndex, type) {
-           if (!state.thunderEnabled || !state.isTypingStarted) return;
-           if (type === 'ghost') return;
-           const span = document.getElementById(`char-${charIndex}`);
-           if (!span) return;
-           const rect = span.getBoundingClientRect();
-           const x = rect.left + rect.width / 2;
-           const y = rect.top + rect.height / 2;
-           const count = type === 'correct' ? 2 : 3;
-           for (let i = 0; i < count; i++) {
-               particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
-           }
-       }
-
-       (function thunderLoop() {
-           ctx.clearRect(0, 0, canvas.width, canvas.height);
-           particles = particles.filter(p => p.life > 0);
-           particles.forEach(p => { p.update(); p.draw(); });
-           requestAnimationFrame(thunderLoop);
-       })();
-
-       /* ========================================= */
-       /* --- YOUTUBE AD MANAGEMENT LOGIC       --- */
-       /* ========================================= */
+       /* AD AND CREDITS LOGIC */
        let adCountdownInterval;
-
        function updateCreditDisplay() {
            const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
            els.creditPill.textContent = text;
            els.chatCreditPill.textContent = text;
            if (state.credits === 0) {
-               els.creditPill.classList.add('zero');
-               els.chatCreditPill.classList.add('zero');
+               els.creditPill.classList.add('zero'); els.chatCreditPill.classList.add('zero');
            } else {
-               els.creditPill.classList.remove('zero');
-               els.chatCreditPill.classList.remove('zero');
+               els.creditPill.classList.remove('zero'); els.chatCreditPill.classList.remove('zero');
            }
        }
-
        function showVideoAd() {
            els.adModal.classList.add('active');
-           els.adCloseBtn.classList.add('hidden');
-           els.adTimer.classList.remove('hidden');
-           els.adTimer.textContent = '5';
-           els.adFooterText.textContent = "Please wait to claim credits...";
+           els.adCloseBtn.classList.add('hidden'); els.adTimer.classList.remove('hidden');
+           els.adTimer.textContent = '5'; els.adFooterText.textContent = "Please wait to claim credits...";
            els.adIframe.src = "https://www.youtube.com/embed/q2Rg8jf4Iu0?si=CJ7iAjDifBIw4Wty&autoplay=1";
-
-           let timeLeft = 5;
-           clearInterval(adCountdownInterval);
+           
+           let timeLeft = 5; clearInterval(adCountdownInterval);
            adCountdownInterval = setInterval(() => {
-               timeLeft--;
-               els.adTimer.textContent = timeLeft;
+               timeLeft--; els.adTimer.textContent = timeLeft;
                if (timeLeft <= 0) {
                    clearInterval(adCountdownInterval);
-                   els.adTimer.classList.add('hidden');
-                   els.adCloseBtn.classList.remove('hidden');
+                   els.adTimer.classList.add('hidden'); els.adCloseBtn.classList.remove('hidden');
                    els.adFooterText.textContent = "Tap ✕ to claim +3 Credits!";
                }
            }, 1000);
        }
-
        function useCredit() {
-           if (state.credits <= 0) {
-               showVideoAd();
-               return false;
-           }
-           state.credits--;
-           updateCreditDisplay();
-           return true;
+           if (state.credits <= 0) { showVideoAd(); return false; }
+           state.credits--; updateCreditDisplay(); return true;
        }
-
-       function claimAdReward(e) {
-           if (e) e.stopPropagation();
-           state.credits = 3;
-           updateCreditDisplay();
-           els.adModal.classList.remove('active');
-           els.adIframe.src = "";
-           clearInterval(adCountdownInterval);
-       }
-
-       els.adCloseBtn.addEventListener('click', claimAdReward);
-
-       /* ========================================= */
-       /* --- AI CHAT FEATURE                   --- */
-       /* ========================================= */
-       els.chatToggleBtn.addEventListener('click', () => {
-           if (state.credits <= 0) {
-               showVideoAd();
-               return;
-           }
-           els.chatModal.classList.add('active');
-           els.chatInput.focus();
+       els.adCloseBtn.addEventListener('click', () => {
+           state.credits = 3; updateCreditDisplay();
+           els.adModal.classList.remove('active'); els.adIframe.src = "";
        });
 
-       els.closeChatBtn.addEventListener('click', () => {
-           els.chatModal.classList.remove('active');
-       });
-
+       /* CHAT LOGIC */
+       els.chatToggleBtn.addEventListener('click', () => { if (state.credits <= 0) showVideoAd(); else { els.chatModal.classList.add('active'); els.chatInput.focus(); } });
+       els.closeChatBtn.addEventListener('click', () => els.chatModal.classList.remove('active'));
+       
        function addMessage(text, role) {
            const bubble = document.createElement('div');
            bubble.className = `msg-bubble msg-${role}`;
-           if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
-           else bubble.textContent = text;
-           els.chatMessages.appendChild(bubble);
-           els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+           if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`; else bubble.textContent = text;
+           els.chatMessages.appendChild(bubble); els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
        }
        function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
 
        function showTypingIndicator() {
            const id = 'typing-' + Date.now();
            const div = document.createElement('div');
-           div.id = id; div.className = 'typing-indicator';
-           div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+           div.id = id;
+           div.className = 'typing-indicator';
+           div.innerHTML = 'Thinking <div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
            els.chatMessages.appendChild(div);
            els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
            return id;
        }
-       function removeTypingIndicator(id) { const el = document.getElementById(id); if (el) el.remove(); }
-
-       function sanitizeText(text) {
-           if (!text) return '';
-           return text.replace(/[—–]/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[^ -~]/g, '').replace(/\s+/g, ' ').trim();
+       function removeTypingIndicator(id) {
+           const el = document.getElementById(id);
+           if (el) el.remove();
        }
 
        async function sendChatMessage() {
            const text = els.chatInput.value.trim();
-           if (!text) return;
-           if (!useCredit()) return;
-
-           addMessage(text, 'user');
-           els.chatInput.value = '';
+           if (!text || !useCredit()) return;
+           
+           addMessage(text, 'user'); 
+           els.chatInput.value = ''; 
            els.chatSend.disabled = true;
+
+           // Show the "Thinking..." bubble
            const typingId = showTypingIndicator();
 
            try {
                const res = await fetch('/api/chat', {
-                   method: 'POST',
-                   headers: { 'Content-Type': 'application/json' },
-                   body: JSON.stringify({ message: text, provider: 'gemini' })
+                   method: 'POST', headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ message: text })
                });
+               
+               // Remove the "Thinking..." bubble once we get a response
                removeTypingIndicator(typingId);
-               if (!res.ok) {
-                   const errData = await res.json().catch(() => ({}));
-                   throw new Error(errData.error || 'Server error');
-               }
-               const data = await res.json();
+               
+               if (!res.ok) throw new Error('Server error');
+               
+               const data = await res.json(); 
                const clean = sanitizeText(data.text);
                addMessage(clean, 'ai');
 
                const loadBtn = document.createElement('button');
-               loadBtn.className = 'btn-primary mt-2';
-               loadBtn.textContent = 'Practice This';
-               loadBtn.style.fontSize = '0.7rem';
+               loadBtn.className = 'btn-primary mt-2'; 
+               loadBtn.textContent = 'Practice This in Ghost Mode';
+               loadBtn.style.fontSize = '0.7rem'; 
                loadBtn.style.padding = '8px';
                loadBtn.onclick = () => {
-                   loadNewText(clean, 'AI Generated');
+                   state.rawText = clean;
+                   processTextForDifficulty(clean);
+                   
+                   state.runHistory = [];
+                   state.activeGhostRun = null;
+                   els.ghostMetrics.style.display = 'none';
+                   els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
+
+                   resetDrill();
                    els.chatModal.classList.remove('active');
                };
-               const lastBubble = els.chatMessages.lastElementChild;
-               if (lastBubble) lastBubble.appendChild(loadBtn);
+               els.chatMessages.lastElementChild.appendChild(loadBtn);
                els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
            } catch (err) {
                removeTypingIndicator(typingId);
-               addMessage('Error: ' + err.message, 'ai');
-               state.credits++;
+               addMessage('Error communicating with API.', 'ai');
+               state.credits++; 
                updateCreditDisplay();
-           } finally {
-               els.chatSend.disabled = false;
+           } finally { 
+               els.chatSend.disabled = false; 
            }
        }
 
        els.chatSend.addEventListener('click', sendChatMessage);
        els.chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 
-       /* ========================================= */
-       /* --- CUSTOMIZE PARAGRAPH FEATURE       --- */
-       /* ========================================= */
-       els.customizeToggleBtn.addEventListener('click', () => {
-           els.customizeModal.classList.add('active');
-           els.customizeTextarea.focus();
-       });
+       /* THUNDER RENDERER */
+       const canvas = els.thunderCanvas; const ctx = canvas.getContext('2d');
+       let particles = []; let charW = 9.6;
+       function resizeThunderCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; charW = (parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4) * 0.601; }
+       resizeThunderCanvas(); window.addEventListener('resize', resizeThunderCanvas);
 
-       els.closeCustomizeBtn.addEventListener('click', () => {
-           els.customizeModal.classList.remove('active');
-       });
+       const COLOR_MAP = { purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' }, green: { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' }, blue: { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' }, yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' }, red: { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' }, orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' } };
+       function getDiscoColors() { const h = ['purple', 'green', 'blue', 'yellow', 'red', 'orange']; return COLOR_MAP[h[Math.floor(Math.random() * h.length)]]; }
 
-       els.startCustomTypingBtn.addEventListener('click', () => {
-           const text = sanitizeText(els.customizeTextarea.value);
-           if (!text) return;
-           loadNewText(text, 'Custom Topic');
-           els.customizeModal.classList.remove('active');
-           els.customizeTextarea.value = '';
-       });
-
-       /* ========================================= */
-       /* --- ONBOARDING SCRIPT LOGIC           --- */
-       /* ========================================= */
-       function initOnboarding() {
-           if (sessionStorage.getItem('ft_ghost_onboarding_done')) return;
-
-           const toastChat = document.getElementById('onb-toast-chat');
-           const toastCustomize = document.getElementById('onb-toast-customize');
-           const toastFeedback = document.getElementById('onb-toast-feedback');
-
-           function showToast(el, durationMs) {
-               return new Promise((resolve) => {
-                   el.classList.add('active');
-                   setTimeout(() => {
-                       el.classList.remove('active');
-                       setTimeout(resolve, 400);
-                   }, durationMs);
-               });
+       class LightningBolt {
+           constructor(x, y, type) {
+               this.startX = x; this.y = y + (Math.random() - 0.5) * 10; this.life = 1; this.totalLen = charW; this.decay = 0.055 + Math.random() * 0.03;
+               let t = state.thunderColor === 'disco' ? getDiscoColors() : COLOR_MAP[state.thunderColor];
+               if (type === 'wrong') { this.dir = -1; this.colTip = COLOR_MAP.red.tip; this.colMid = COLOR_MAP.red.mid; this.colGlow = COLOR_MAP.red.glow; this.w = 3.0 + Math.random() * 1.5; } 
+               else { this.dir = 1; this.colTip = t.tip; this.colMid = t.mid; this.colGlow = t.glow; this.w = 2.6 + Math.random() * 1.2; }
+               this.buildPath();
            }
-
-           (async () => {
-               await new Promise((resolve) => setTimeout(resolve, 500));
-               await showToast(toastChat, 4000);
-               await showToast(toastCustomize, 3000);
-               await showToast(toastFeedback, 3000);
-               sessionStorage.setItem('ft_ghost_onboarding_done', 'true');
-           })();
+           buildPath() {
+               const segs = Math.max(3, Math.round(this.totalLen / 3)); const segLen = this.totalLen / segs; this.pts = [{ x: 0, y: 0 }]; let cx = 0, cy = 0; this.branches = [];
+               for (let i = 1; i <= segs; i++) {
+                   cx += segLen + (Math.random() - 0.3) * segLen * 0.3; cy += (Math.random() - 0.5) * 6; this.pts.push({ x: cx, y: cy });
+                   if (i > 0 && i < segs && Math.random() < 0.45) {
+                       const bLen = charW * (0.2 + Math.random() * 0.4); const bDir = Math.random() < 0.5 ? -1 : 1; const bAngle = bDir * (0.3 + Math.random() * 0.5); const bSegs = 2 + Math.floor(Math.random() * 2);
+                       const branch = [{ x: cx, y: cy }]; let bx = cx, by = cy;
+                       for (let j = 1; j <= bSegs; j++) { bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4; by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4; branch.push({ x: bx, y: by }); }
+                       this.branches.push(branch);
+                   }
+               }
+           }
+           strokePath(pts, offX, offY, color, width, blur, alpha) { if (pts.length < 2) return; ctx.save(); ctx.globalAlpha = alpha; ctx.shadowBlur = blur; ctx.shadowColor = color; ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.translate(offX, offY); ctx.beginPath(); ctx.moveTo(pts[0].x * this.dir, pts[0].y); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y); ctx.stroke(); ctx.restore(); }
+           drawPoly(pts, ox, oy, a) { this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28); this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9); this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a); }
+           update() { this.life -= this.decay; }
+           draw() { const a = Math.max(0, this.life); this.drawPoly(this.pts, this.startX, this.y, a); for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55); }
        }
 
-       // Feedback Widget Handlers
-       document.getElementById('ftFeedback').addEventListener('click', function(e) {
-           if (!e.target.closest('a')) {
-               e.preventDefault();
-               this.classList.toggle('active');
-           }
-       });
+       function spawnThunderBolt(charIndex, type) {
+           if (!state.thunderEnabled || !state.isTypingStarted || type === 'ghost') return;
+           const span = document.getElementById(`char-${charIndex}`); if (!span) return;
+           const rect = span.getBoundingClientRect(); const x = rect.left + rect.width / 2; const y = rect.top + rect.height / 2;
+           for (let i = 0; i < (type === 'correct' ? 2 : 3); i++) particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
+       }
 
-       document.getElementById('ftGmailLink').addEventListener('click', function(e) {
-           e.preventDefault();
-           var email = 'techtrakers@gmail.com';
-           var gmailWeb = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + email;
-           var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+       (function thunderLoop() {
+           ctx.clearRect(0, 0, canvas.width, canvas.height);
+           particles = particles.filter(p => p.life > 0); particles.forEach(p => { p.update(); p.draw(); });
+           requestAnimationFrame(thunderLoop);
+       })();
 
-           if (isMobile) {
-               var fallback = setTimeout(function(){ window.location.href = gmailWeb; }, 800);
-               window.addEventListener('blur', function(){ clearTimeout(fallback); }, { once: true });
-               window.location.href = 'googlegmail://co?to=' + email;
-           } else {
-               window.open(gmailWeb, '_blank');
-           }
-       });
-
-       document.addEventListener('DOMContentLoaded', () => {
-           loadRandomParagraph();
-           updateCaretColor();
-           updateCreditDisplay();
-           initOnboarding();
-       });
+       document.addEventListener('DOMContentLoaded', () => { loadRandomParagraph(); updateCaretColor(); updateCreditDisplay(); });
    </script>
 </body>
 </html>
