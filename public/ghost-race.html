@@ -198,6 +198,116 @@
            transform: translateX(4px);
        }
        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+
+       /* ========================================= */
+       /* --- AI CHAT / CUSTOMIZE / CREDITS UI  --- */
+       /* ========================================= */
+       .corner-btn.chat { border-color: rgba(34,211,238,0.3); color: #22d3ee; padding: 10px; }
+       .corner-btn.chat:hover { box-shadow: 0 0 20px rgba(34,211,238,0.45); }
+       .corner-btn.custom-topic { border-color: rgba(74,222,128,0.3); color: #4ade80; padding: 10px; }
+       .corner-btn.custom-topic:hover { box-shadow: 0 0 20px rgba(74,222,128,0.35); }
+
+       .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
+
+       .chat-messages {
+           flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
+           scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
+       }
+       .chat-messages::-webkit-scrollbar { width: 5px; }
+       .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
+
+       .msg-bubble { max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 0.95rem; line-height: 1.6; animation: msgIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); word-break: break-word; }
+       @keyframes msgIn { from { opacity: 0; transform: translateY(8px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+       .msg-user { align-self: flex-end; background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.2); border-bottom-right-radius: 4px; }
+       .msg-ai { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-bottom-left-radius: 4px; }
+
+       .chat-input-wrap { display: flex; gap: 10px; padding: 12px; background: rgba(7,10,18,0.8); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+       .chat-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-family: 'Inter', sans-serif; font-size: 0.95rem; padding: 8px 12px; }
+       .chat-input::placeholder { color: var(--text-dim); }
+       .chat-send { background: var(--accent); color: var(--bg-base); border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; transition: all 0.25s; font-family: 'Orbitron', sans-serif; letter-spacing: 1px; }
+       .chat-send:hover:not(:disabled) { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.03); }
+       .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+
+       .typing-indicator { display: flex; gap: 6px; padding: 14px 18px; align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; border-bottom-left-radius: 4px; }
+       .typing-dot { width: 7px; height: 7px; background: var(--accent); border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; }
+       .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+       .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+       @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
+
+       .ad-card-special {
+           background: linear-gradient(145deg, #0e1424, #171d33);
+           border: 1px solid rgba(192,132,252,0.3);
+           border-radius: 20px;
+           box-shadow: 0 15px 40px rgba(0,0,0,0.6), 0 0 35px rgba(192,132,252,0.15);
+           text-align: center;
+       }
+       .ad-motion-text {
+           font-family: 'Orbitron', sans-serif;
+           font-size: 1.15rem; font-weight: 700; text-transform: uppercase;
+           text-align: center; letter-spacing: 1px; line-height: 1.4;
+           background: linear-gradient(270deg, #c084fc, #22d3ee, #c084fc);
+           background-size: 200% auto;
+           -webkit-background-clip: text;
+           -webkit-text-fill-color: transparent;
+           animation: gradientMove 3s linear infinite;
+           margin-bottom: 20px;
+       }
+       @keyframes gradientMove { 0% { background-position: 0% center; } 100% { background-position: 200% center; } }
+
+       .video-container {
+           position: relative; width: 100%; padding-bottom: 56.25%; height: 0;
+           overflow: hidden; border-radius: 12px; background: rgba(7,10,18,0.5);
+           border: 1px solid rgba(255,255,255,0.1); box-shadow: 0 10px 30px rgba(192,132,252,0.1);
+       }
+       .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
+
+       .ad-timer {
+           position: absolute; top: 10px; right: 10px;
+           background: rgba(7,10,18,0.9); border: 2px solid var(--accent);
+           color: var(--accent); width: 32px; height: 32px; border-radius: 50%;
+           display: flex; align-items: center; justify-content: center;
+           font-size: 14px; font-weight: bold; z-index: 30;
+           font-family: 'Orbitron', sans-serif;
+           box-shadow: 0 0 10px var(--accent-glow);
+       }
+       .ad-close-x {
+           position: absolute; top: 10px; right: 10px;
+           background: rgba(7,10,18,0.9); border: 2px solid rgba(255,255,255,0.3);
+           color: #fff; width: 32px; height: 32px; border-radius: 50%;
+           display: flex; align-items: center; justify-content: center;
+           font-size: 16px; font-weight: bold; cursor: pointer; z-index: 30;
+           transition: all 0.2s ease;
+       }
+       .ad-close-x:hover { background: var(--error-color); border-color: var(--error-color); transform: scale(1.1); box-shadow: 0 0 15px rgba(248,113,113,0.4); }
+
+       .customize-textarea {
+           background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
+           border-radius: 14px; padding: 14px; color: var(--text-main);
+           font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6;
+           resize: vertical; min-height: 160px; outline: none;
+           transition: border-color 0.25s;
+       }
+       .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
+       .customize-textarea::placeholder { color: var(--text-dim); }
+
+       .credit-pill { background: rgba(192,132,252,0.1); border: 1px solid rgba(192,132,252,0.2); color: var(--accent); padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; transition: all 0.25s ease; }
+       .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
+
+       .onb-toast {
+           position: fixed; z-index: 9910;
+           background: rgba(15, 21, 37, 0.92); backdrop-filter: blur(14px);
+           -webkit-backdrop-filter: blur(14px);
+           color: var(--text-main); font-size: 0.78rem; font-weight: 500; line-height: 1.5;
+           padding: 10px 18px; border-radius: 999px; max-width: 250px;
+           box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+           opacity: 0; visibility: hidden; pointer-events: none; text-align: center;
+           transform: translateY(10px) scale(0.95);
+           transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
+       }
+       .onb-toast.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
+       #onb-toast-chat { top: 62px; right: 20px; border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(34, 211, 238, 0.15); }
+       #onb-toast-customize { top: 62px; right: 20px; border: 1px solid rgba(74, 222, 128, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(74, 222, 128, 0.15); }
+       #onb-toast-feedback { bottom: 62px; right: 20px; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(168, 85, 247, 0.15); }
    </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
@@ -221,7 +331,14 @@
        </select>
    </div>
 
-   <div class="fixed top-4 right-4 z-50 flex items-center gap-3">
+   <div class="fixed top-4 right-4 z-50 flex items-center gap-3 bg-[#070a12] p-1 rounded-xl">
+       <span id="credit-pill" class="credit-pill">3 Credits</span>
+       <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph">
+           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+       </button>
+       <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Topic Search">
+           <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
+       </button>
        <a href="index.html" class="corner-btn hover:border-red-400">
            <span>✕ EXIT</span>
        </a>
@@ -284,6 +401,105 @@
        </div>
    </div>
 
+   <!-- AI CHAT MODAL -->
+   <div class="modal-overlay" id="chat-modal">
+       <div class="modal-card chat-card">
+           <div class="flex justify-between items-center pb-2 border-b border-white/10">
+               <h3 class="font-bold text-lg brand">AI <span class="gradient-text">CHAT</span></h3>
+               <div class="flex items-center gap-3">
+                   <span class="credit-pill" id="chat-credit-pill">3 Credits</span>
+                   <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-chat-btn">✕</button>
+               </div>
+           </div>
+           <div class="chat-messages" id="chat-messages">
+               <div class="msg-bubble msg-ai">Welcome to FluidGhost AI. Ask me anything to generate a custom paragraph, then race your past self on it.</div>
+           </div>
+           <div class="chat-input-wrap">
+               <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off">
+               <button class="chat-send" id="chat-send">Send</button>
+           </div>
+       </div>
+   </div>
+
+   <!-- CUSTOMIZE PARAGRAPH MODAL -->
+   <div class="modal-overlay" id="customize-modal">
+       <div class="modal-card">
+           <div class="flex justify-between items-center pb-2 border-b border-white/10">
+               <h3 class="font-bold text-lg brand">CUSTOM <span class="gradient-text">TOPIC</span></h3>
+               <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn">✕</button>
+           </div>
+           <p class="text-xs text-[#64748b]">Paste any topic or paragraph you want to race against your ghost on.</p>
+           <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..."></textarea>
+           <button class="btn-primary" id="start-custom-typing-btn">Start Typing</button>
+       </div>
+   </div>
+
+   <!-- TECHTRAKERS AD MODAL (YOUTUBE EMBED) -->
+   <div class="modal-overlay" id="ad-modal">
+       <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
+           <div class="ad-motion-text">Watch to earn 3 Credits</div>
+           <div class="video-container">
+               <div id="ad-timer" class="ad-timer">5</div>
+               <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad">✕</button>
+               <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+           </div>
+           <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold font-mono" id="ad-footer-text">Video is playing...</p>
+       </div>
+   </div>
+
+   <!-- AUTO-POPUP ONBOARDING TOASTS -->
+   <div id="onb-toast-chat" class="onb-toast">Use chatbot for that topic, which you love to type.</div>
+   <div id="onb-toast-customize" class="onb-toast">Paste the topic on which you want to type.</div>
+   <div id="onb-toast-feedback" class="onb-toast">Give feedback. If you find any bugs...</div>
+
+   <!-- Feedback widget: Gmail + Instagram -->
+   <div class="ft-feedback" id="ftFeedback">
+       <span class="ft-feedback-label">Feedback</span>
+       <div class="ft-feedback-icons">
+           <a href="mailto:techtrakers@gmail.com" id="ftGmailLink" aria-label="Email us on Gmail" class="ft-icon">
+               <svg viewBox="0 0 24 24" width="20" height="20">
+                   <rect x="2" y="4" width="20" height="16" rx="2" fill="#fff"/>
+                   <rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="#4285F4" stroke-width="1.4"/>
+                   <path d="M2.5 5.5L12 13 21.5 5.5" fill="none" stroke="#EA4335" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+               </svg>
+           </a>
+           <a href="https://www.instagram.com/techtrakers" target="_blank" rel="noopener noreferrer" aria-label="Message us on Instagram" class="ft-icon">
+               <svg viewBox="0 0 24 24" width="20" height="20">
+                   <defs>
+                       <linearGradient id="ftIgGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+                           <stop offset="0%" stop-color="#feda75"/>
+                           <stop offset="30%" stop-color="#fa7e1e"/>
+                           <stop offset="60%" stop-color="#d62976"/>
+                           <stop offset="100%" stop-color="#962fbf"/>
+                       </linearGradient>
+                   </defs>
+                   <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#ftIgGrad)"/>
+                   <circle cx="12" cy="12" r="5" fill="none" stroke="#fff" stroke-width="1.6"/>
+                   <circle cx="17" cy="7" r="1.1" fill="#fff"/>
+               </svg>
+           </a>
+       </div>
+   </div>
+
+   <style>
+       .ft-feedback {
+           position: fixed; bottom: 20px; right: 20px;
+           display: flex; align-items: center; gap: 10px;
+           background: rgba(20, 18, 30, 0.75); backdrop-filter: blur(8px);
+           border: 1px solid rgba(168, 85, 247, 0.35);
+           border-radius: 30px; padding: 8px 14px;
+           z-index: 999; cursor: pointer;
+           transition: box-shadow .25s ease, border-color .25s ease;
+       }
+       .ft-feedback:hover { border-color: rgba(168, 85, 247, 0.8); box-shadow: 0 0 14px rgba(168, 85, 247, 0.45); }
+       .ft-feedback-label { color: #d8d0f0; font-size: 12px; font-family: inherit; letter-spacing: .3px; white-space: nowrap; }
+       .ft-feedback-icons { display: flex; align-items: center; gap: 8px; max-width: 0; opacity: 0; overflow: hidden; pointer-events: none; transition: max-width .3s cubic-bezier(0.16, 1, 0.3, 1), opacity .25s ease; }
+       .ft-feedback.active .ft-feedback-icons { max-width: 100px; opacity: 1; pointer-events: auto; }
+       @media (hover: hover) and (pointer: fine) { .ft-feedback:hover .ft-feedback-icons { max-width: 100px; opacity: 1; pointer-events: auto; } }
+       .ft-icon { display: flex; transition: transform .2s ease; }
+       .ft-icon:hover { transform: scale(1.15); }
+   </style>
+
    <script>
        const DEFAULT_TOPICS = [
            "Every expert was once a beginner who refused to give up. Your fingers are learning a language of their own through repetition and patience. Trust that progress is happening even when it feels invisible.",
@@ -321,7 +537,8 @@
            activeGhostRun: null,
            ghostIndex: 0,
            ghostTimer: null,
-           isCoolingDown: false
+           isCoolingDown: false,
+           credits: 3
        };
 
        const els = {
@@ -342,7 +559,28 @@
            diffButtons: document.querySelectorAll('.diff-btn'),
            ghostSelectModal: document.getElementById('ghost-select-modal'),
            ghostOptionsList: document.getElementById('ghost-options-list'),
-           restartBtn: document.getElementById('restart-btn')
+           restartBtn: document.getElementById('restart-btn'),
+
+           creditPill: document.getElementById('credit-pill'),
+           chatCreditPill: document.getElementById('chat-credit-pill'),
+           chatToggleBtn: document.getElementById('chat-toggle-btn'),
+           chatModal: document.getElementById('chat-modal'),
+           chatMessages: document.getElementById('chat-messages'),
+           chatInput: document.getElementById('chat-input'),
+           chatSend: document.getElementById('chat-send'),
+           closeChatBtn: document.getElementById('close-chat-btn'),
+
+           customizeToggleBtn: document.getElementById('customize-toggle-btn'),
+           customizeModal: document.getElementById('customize-modal'),
+           customizeTextarea: document.getElementById('customize-textarea'),
+           closeCustomizeBtn: document.getElementById('close-customize-btn'),
+           startCustomTypingBtn: document.getElementById('start-custom-typing-btn'),
+
+           adModal: document.getElementById('ad-modal'),
+           adCloseBtn: document.getElementById('ad-close-btn'),
+           adTimer: document.getElementById('ad-timer'),
+           adIframe: document.getElementById('ad-iframe'),
+           adFooterText: document.getElementById('ad-footer-text')
        };
 
        els.thunderToggleBtn.addEventListener('click', () => {
@@ -397,6 +635,23 @@
            const text = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
            state.rawText = text;
            processTextForDifficulty(text);
+           resetDrill();
+       }
+
+       // Loads a brand new piece of text (from AI chat or a pasted custom
+       // paragraph) and starts a fresh Ghost baseline for it, since any
+       // previously recorded runs were timed against the old text.
+       function loadNewText(text, label) {
+           state.rawText = text;
+           processTextForDifficulty(text);
+           state.runHistory = [];
+           state.activeGhostRun = null;
+           state.ghostIndex = 0;
+           if (state.ghostTimer) clearInterval(state.ghostTimer);
+           els.ghostMetrics.style.display = 'none';
+           els.ghostWpm.textContent = '0';
+           els.ghostProgress.textContent = '0';
+           els.ghostStatus.textContent = `Mode: Initial Solo Run (${label} - Setting your Ghost Baseline)`;
            resetDrill();
        }
 
@@ -749,9 +1004,236 @@
            requestAnimationFrame(thunderLoop);
        })();
 
+       /* ========================================= */
+       /* --- YOUTUBE AD MANAGEMENT LOGIC       --- */
+       /* ========================================= */
+       let adCountdownInterval;
+
+       function updateCreditDisplay() {
+           const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
+           els.creditPill.textContent = text;
+           els.chatCreditPill.textContent = text;
+           if (state.credits === 0) {
+               els.creditPill.classList.add('zero');
+               els.chatCreditPill.classList.add('zero');
+           } else {
+               els.creditPill.classList.remove('zero');
+               els.chatCreditPill.classList.remove('zero');
+           }
+       }
+
+       function showVideoAd() {
+           els.adModal.classList.add('active');
+           els.adCloseBtn.classList.add('hidden');
+           els.adTimer.classList.remove('hidden');
+           els.adTimer.textContent = '5';
+           els.adFooterText.textContent = "Please wait to claim credits...";
+           els.adIframe.src = "https://www.youtube.com/embed/q2Rg8jf4Iu0?si=CJ7iAjDifBIw4Wty&autoplay=1";
+
+           let timeLeft = 5;
+           clearInterval(adCountdownInterval);
+           adCountdownInterval = setInterval(() => {
+               timeLeft--;
+               els.adTimer.textContent = timeLeft;
+               if (timeLeft <= 0) {
+                   clearInterval(adCountdownInterval);
+                   els.adTimer.classList.add('hidden');
+                   els.adCloseBtn.classList.remove('hidden');
+                   els.adFooterText.textContent = "Tap ✕ to claim +3 Credits!";
+               }
+           }, 1000);
+       }
+
+       function useCredit() {
+           if (state.credits <= 0) {
+               showVideoAd();
+               return false;
+           }
+           state.credits--;
+           updateCreditDisplay();
+           return true;
+       }
+
+       function claimAdReward(e) {
+           if (e) e.stopPropagation();
+           state.credits = 3;
+           updateCreditDisplay();
+           els.adModal.classList.remove('active');
+           els.adIframe.src = "";
+           clearInterval(adCountdownInterval);
+       }
+
+       els.adCloseBtn.addEventListener('click', claimAdReward);
+
+       /* ========================================= */
+       /* --- AI CHAT FEATURE                   --- */
+       /* ========================================= */
+       els.chatToggleBtn.addEventListener('click', () => {
+           if (state.credits <= 0) {
+               showVideoAd();
+               return;
+           }
+           els.chatModal.classList.add('active');
+           els.chatInput.focus();
+       });
+
+       els.closeChatBtn.addEventListener('click', () => {
+           els.chatModal.classList.remove('active');
+       });
+
+       function addMessage(text, role) {
+           const bubble = document.createElement('div');
+           bubble.className = `msg-bubble msg-${role}`;
+           if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
+           else bubble.textContent = text;
+           els.chatMessages.appendChild(bubble);
+           els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+       }
+       function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+       function showTypingIndicator() {
+           const id = 'typing-' + Date.now();
+           const div = document.createElement('div');
+           div.id = id; div.className = 'typing-indicator';
+           div.innerHTML = '<div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div>';
+           els.chatMessages.appendChild(div);
+           els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+           return id;
+       }
+       function removeTypingIndicator(id) { const el = document.getElementById(id); if (el) el.remove(); }
+
+       function sanitizeText(text) {
+           if (!text) return '';
+           return text.replace(/[—–]/g, '-').replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/…/g, '...').replace(/[^ -~]/g, '').replace(/\s+/g, ' ').trim();
+       }
+
+       async function sendChatMessage() {
+           const text = els.chatInput.value.trim();
+           if (!text) return;
+           if (!useCredit()) return;
+
+           addMessage(text, 'user');
+           els.chatInput.value = '';
+           els.chatSend.disabled = true;
+           const typingId = showTypingIndicator();
+
+           try {
+               const res = await fetch('/api/chat', {
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
+                   body: JSON.stringify({ message: text, provider: 'gemini' })
+               });
+               removeTypingIndicator(typingId);
+               if (!res.ok) {
+                   const errData = await res.json().catch(() => ({}));
+                   throw new Error(errData.error || 'Server error');
+               }
+               const data = await res.json();
+               const clean = sanitizeText(data.text);
+               addMessage(clean, 'ai');
+
+               const loadBtn = document.createElement('button');
+               loadBtn.className = 'btn-primary mt-2';
+               loadBtn.textContent = 'Practice This';
+               loadBtn.style.fontSize = '0.7rem';
+               loadBtn.style.padding = '8px';
+               loadBtn.onclick = () => {
+                   loadNewText(clean, 'AI Generated');
+                   els.chatModal.classList.remove('active');
+               };
+               const lastBubble = els.chatMessages.lastElementChild;
+               if (lastBubble) lastBubble.appendChild(loadBtn);
+               els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+           } catch (err) {
+               removeTypingIndicator(typingId);
+               addMessage('Error: ' + err.message, 'ai');
+               state.credits++;
+               updateCreditDisplay();
+           } finally {
+               els.chatSend.disabled = false;
+           }
+       }
+
+       els.chatSend.addEventListener('click', sendChatMessage);
+       els.chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
+
+       /* ========================================= */
+       /* --- CUSTOMIZE PARAGRAPH FEATURE       --- */
+       /* ========================================= */
+       els.customizeToggleBtn.addEventListener('click', () => {
+           els.customizeModal.classList.add('active');
+           els.customizeTextarea.focus();
+       });
+
+       els.closeCustomizeBtn.addEventListener('click', () => {
+           els.customizeModal.classList.remove('active');
+       });
+
+       els.startCustomTypingBtn.addEventListener('click', () => {
+           const text = sanitizeText(els.customizeTextarea.value);
+           if (!text) return;
+           loadNewText(text, 'Custom Topic');
+           els.customizeModal.classList.remove('active');
+           els.customizeTextarea.value = '';
+       });
+
+       /* ========================================= */
+       /* --- ONBOARDING SCRIPT LOGIC           --- */
+       /* ========================================= */
+       function initOnboarding() {
+           if (sessionStorage.getItem('ft_ghost_onboarding_done')) return;
+
+           const toastChat = document.getElementById('onb-toast-chat');
+           const toastCustomize = document.getElementById('onb-toast-customize');
+           const toastFeedback = document.getElementById('onb-toast-feedback');
+
+           function showToast(el, durationMs) {
+               return new Promise((resolve) => {
+                   el.classList.add('active');
+                   setTimeout(() => {
+                       el.classList.remove('active');
+                       setTimeout(resolve, 400);
+                   }, durationMs);
+               });
+           }
+
+           (async () => {
+               await new Promise((resolve) => setTimeout(resolve, 500));
+               await showToast(toastChat, 4000);
+               await showToast(toastCustomize, 3000);
+               await showToast(toastFeedback, 3000);
+               sessionStorage.setItem('ft_ghost_onboarding_done', 'true');
+           })();
+       }
+
+       // Feedback Widget Handlers
+       document.getElementById('ftFeedback').addEventListener('click', function(e) {
+           if (!e.target.closest('a')) {
+               e.preventDefault();
+               this.classList.toggle('active');
+           }
+       });
+
+       document.getElementById('ftGmailLink').addEventListener('click', function(e) {
+           e.preventDefault();
+           var email = 'techtrakers@gmail.com';
+           var gmailWeb = 'https://mail.google.com/mail/?view=cm&fs=1&to=' + email;
+           var isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+           if (isMobile) {
+               var fallback = setTimeout(function(){ window.location.href = gmailWeb; }, 800);
+               window.addEventListener('blur', function(){ clearTimeout(fallback); }, { once: true });
+               window.location.href = 'googlegmail://co?to=' + email;
+           } else {
+               window.open(gmailWeb, '_blank');
+           }
+       });
+
        document.addEventListener('DOMContentLoaded', () => {
            loadRandomParagraph();
            updateCaretColor();
+           updateCreditDisplay();
+           initOnboarding();
        });
    </script>
 </body>
