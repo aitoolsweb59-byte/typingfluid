@@ -13,11 +13,11 @@ export default async function handler(req, res) {
     const systemPrompt = 'You are a helpful assistant. Generate concise 2-3 sentence paragraphs suitable for typing practice. Keep it under 280 characters. Topic: ' + message;
     let lastErr = null;
 
-    // 1. Primary: Google AI Studio (Gemini 2.5 Flash)
+    // 1. Primary: Google AI Studio (Gemini 3.8 Flash)
     const geminiKey = process.env.GEMINI_API_KEY;
     if (geminiKey) {
         try {
-            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${geminiKey}`;
+            const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${geminiKey}`;
             const geminiRes = await fetch(geminiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
