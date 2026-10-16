@@ -1,9 +1,14 @@
-<!DOCTYPE html>
+er-btn chat rela<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>FluidType | AI Learning Engine</title>
+    
+    <!-- Favicon & Brand Logo for Google Search Console / Vercel -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2322d3ee'><path d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 11H9v-2h2v2zm0-4H9V9h2v2zm4 4h-2v-2h2v2zm0-4h-2V9h2v2zm4 4h-2v-2h2v2zm0-4h-2V9h2v2z'/></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2322d3ee'><path d='M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-9 11H9v-2h2v2zm0-4H9V9h2v2zm4 4h-2v-2h2v2zm0-4h-2V9h2v2zm4 4h-2v-2h2v2zm0-4h-2V9h2v2z'/></svg>">
+
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
@@ -116,12 +121,10 @@
         .restart-btn { color: var(--text-dim); transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1); padding: 14px; border-radius: 50%; background: transparent; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
         .restart-btn:hover { color: var(--accent); background: rgba(34,211,238,0.08); transform: rotate(-180deg) scale(1.1); }
 
-        /* ========================================= */
-        /* --- SMOOTH & MINIMAL MODAL ANIMATIONS --- */
-        /* ========================================= */
+        /* Modal Styles */
         .modal-overlay {
             position: fixed; inset: 0; z-index: 300;
-            background: rgba(7,10,18,0.6);
+            background: rgba(7,10,18,0.7);
             backdrop-filter: blur(8px);
             -webkit-backdrop-filter: blur(8px);
             display: flex; align-items: center; justify-content: center;
@@ -131,7 +134,7 @@
         .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
         
         .modal-card {
-            background: rgba(15,21,37,0.75);
+            background: rgba(15,21,37,0.85);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border: 1px solid rgba(255,255,255,0.1);
@@ -148,6 +151,7 @@
             opacity: 1;
         }
         .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
+        .modal-card.legal-card { max-width: 650px; max-height: 80vh; overflow-y: auto; }
         
         .chat-messages {
             flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
@@ -174,9 +178,7 @@
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes typingBounce { 0%,80%,100%{transform:scale(0);opacity:0.3;} 40%{transform:scale(1);opacity:1;} }
 
-        /* ========================================= */
-        /* --- YOUTUBE AD VIDEO CARD (UPDATED)   --- */
-        /* ========================================= */
+        /* YouTube Ad Video Card */
         .ad-card-special {
             background: linear-gradient(145deg, #0e1424, #171d33);
             border: 1px solid rgba(34,211,238,0.3);
@@ -201,27 +203,13 @@
             100% { background-position: 200% center; }
         }
 
-        /* 16:9 Aspect Ratio Container for YouTube Iframe */
         .video-container {
-            position: relative;
-            width: 100%;
-            padding-bottom: 56.25%; /* 16:9 ratio */
-            height: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            background: rgba(7,10,18,0.5); 
+            position: relative; width: 100%; padding-bottom: 56.25%; height: 0;
+            overflow: hidden; border-radius: 12px; background: rgba(7,10,18,0.5); 
             border: 1px solid rgba(255,255,255,0.1);
             box-shadow: 0 10px 30px rgba(34,211,238,0.1);
         }
-        
-        .video-container iframe {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            border-radius: 12px;
-        }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
 
         .ad-timer {
             position: absolute; top: 10px; right: 10px;
@@ -229,8 +217,7 @@
             color: var(--accent); width: 32px; height: 32px; border-radius: 50%;
             display: flex; align-items: center; justify-content: center;
             font-size: 14px; font-weight: bold; z-index: 30;
-            font-family: 'Orbitron', sans-serif;
-            box-shadow: 0 0 10px var(--accent-glow);
+            font-family: 'Orbitron', sans-serif; box-shadow: 0 0 10px var(--accent-glow);
         }
         
         .ad-close-x {
@@ -253,8 +240,7 @@
             background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
             border-radius: 14px; padding: 14px; color: var(--text-main);
             font-family: 'Inter', sans-serif; font-size: 0.9rem; line-height: 1.6;
-            resize: vertical; min-height: 160px; outline: none;
-            transition: border-color 0.25s;
+            resize: vertical; min-height: 160px; outline: none; transition: border-color 0.25s;
         }
         .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
         .customize-textarea::placeholder { color: var(--text-dim); }
@@ -265,9 +251,6 @@
         .credit-pill { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); color: var(--accent); padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; font-weight: 700; letter-spacing: 1px; transition: all 0.25s ease; }
         .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
 
-        /* ========================================= */
-        /* --- AUTO-POPUP ONBOARDING TOASTS      --- */
-        /* ========================================= */
         .onb-toast {
             position: fixed; z-index: 9910;
             background: rgba(15, 21, 37, 0.92); backdrop-filter: blur(14px);
@@ -280,30 +263,36 @@
             transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.4s ease;
         }
         .onb-toast.active { opacity: 1; visibility: visible; transform: translateY(0) scale(1); }
-
-        #onb-toast-chat { top: 62px; right: 20px; border: 1px solid rgba(34, 211, 238, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(34, 211, 238, 0.15); }
-        #onb-toast-customize { top: 62px; right: 20px; border: 1px solid rgba(74, 222, 128, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(74, 222, 128, 0.15); }
-        #onb-toast-feedback { bottom: 62px; right: 20px; border: 1px solid rgba(168, 85, 247, 0.35); box-shadow: 0 12px 30px rgba(0,0,0,0.5), 0 0 25px rgba(168, 85, 247, 0.15); }
+        #onb-toast-chat { top: 62px; right: 20px; border: 1px solid rgba(34, 211, 238, 0.35); }
+        #onb-toast-customize { top: 62px; right: 20px; border: 1px solid rgba(74, 222, 128, 0.35); }
+        #onb-toast-feedback { bottom: 62px; right: 20px; border: 1px solid rgba(168, 85, 247, 0.35); }
+        
+        .site-footer {
+            display: flex; justify-content: center; align-items: center; gap: 16px;
+            font-size: 0.75rem; color: var(--text-dim); margin-top: 2rem;
+        }
+        .site-footer button { background: none; border: none; color: var(--text-dim); cursor: pointer; text-decoration: underline; transition: color 0.2s; }
+        .site-footer button:hover { color: var(--accent); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
+<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-8 relative">
     <div class="ambient-bg"></div>
     <div class="dot-grid"></div>
     <div class="scanline"></div>
-    <canvas id="thunder-canvas"></canvas>
+    <canvas id="thunder-canvas" aria-hidden="true"></canvas>
 
     <div class="fixed top-4 left-4 z-50 flex items-center gap-2 flex-wrap">
-        <button id="init-btn" class="corner-btn">INIT</button>
-        <a href="Race.html" class="corner-btn race">RACE</a>
-        <a href="ghost-race.html" class="corner-btn ghost">GHOST</a>
+        <button id="init-btn" class="corner-btn" aria-label="Initialize Random Drill">INIT</button>
+        <a href="Race.html" class="corner-btn race" aria-label="Multiplayer Race Mode">RACE</a>
+        <a href="ghost-race.html" class="corner-btn ghost" aria-label="Ghost Race Mode">GHOST</a>
     </div>
 
     <div class="fixed top-4 right-4 z-50 flex items-center gap-3 bg-[#070a12] p-1 rounded-xl">
         <span id="credit-pill" class="credit-pill">3 Credits</span>
-        <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph">
+        <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph" aria-label="Customize Paragraph">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
         </button>
-        <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Topic Search">
+        <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Topic Search" aria-label="Open AI Chat">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
         </button>
     </div>
@@ -315,8 +304,8 @@
                 <p class="text-xs text-[#475569] tracking-widest uppercase font-bold mt-1" id="topic-label">Random Practice</p>
             </div>
             <div class="flex items-center gap-3">
-                <span class="text-xs text-[#475569] uppercase tracking-widest font-bold">Thunder</span>
-                <select id="thunder-color-select" class="thunder-select">
+                <label for="thunder-color-select" class="text-xs text-[#475569] uppercase tracking-widest font-bold">Thunder</label>
+                <select id="thunder-color-select" class="thunder-select" aria-label="Select Thunder Color Effect">
                     <option value="none">None</option>
                     <option value="purple" selected>Purple</option>
                     <option value="green">Green</option>
@@ -345,12 +334,12 @@
             </div>
         </div>
 
-        <div id="typing-container" class="relative w-full cursor-text select-none" tabindex="0">
-            <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+        <div id="typing-container" class="relative w-full cursor-text select-none" tabindex="0" aria-label="Typing Practice Area">
+            <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-hidden="true"></textarea>
             <div id="text-display" class="flex flex-wrap pointer-events-none"></div>
             <div id="focus-overlay" class="hidden">
                 <div class="focus-pill" id="focus-pill">
-                    <svg class="w-5 h-5 text-[#22d3ee]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
+                    <svg class="w-5 h-5 text-[#22d3ee]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 15l-2 5L9 9l11 4-5 2zm0 0l5 5M7.188 2.239l.777 2.897M5.136 7.965l-2.898-.777M13.95 4.05l-2.122 2.122m-5.657 5.656l-2.12 2.122"></path></svg>
                     Tap to engage
                 </div>
             </div>
@@ -358,10 +347,21 @@
 
         <div class="flex justify-center">
             <button id="restart-btn" class="restart-btn" aria-label="Restart Drill">
-                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
             </button>
         </div>
     </main>
+
+    <!-- FOOTER WITH PRIVACY & TERMS -->
+    <footer class="site-footer z-10 py-4">
+        <span>© FluidType</span>
+        <span>•</span>
+        <button id="privacy-policy-btn">Privacy Policy</button>
+        <span>•</span>
+        <button id="terms-btn">Terms of Service</button>
+        <span>•</span>
+        <a href="mailto:techtrakers@gmail.com" class="hover:text-[#22d3ee] transition-colors">Contact</a>
+    </footer>
 
     <!-- AI CHAT MODAL -->
     <div class="modal-overlay" id="chat-modal">
@@ -370,14 +370,14 @@
                 <h3 class="font-bold text-lg brand">AI <span class="gradient-text">CHAT</span></h3>
                 <div class="flex items-center gap-3">
                     <span class="credit-pill" id="chat-credit-pill">3 Credits</span>
-                    <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-chat-btn">✕</button>
+                    <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-chat-btn" aria-label="Close Chat">✕</button>
                 </div>
             </div>
-            <div class="chat-messages" id="chat-messages">
+            <div class="chat-messages" id="chat-messages" aria-label="Chat Message History">
                 <div class="msg-bubble msg-ai">Welcome to FluidType AI. Ask me anything to generate custom typing drills for you.</div>
             </div>
             <div class="chat-input-wrap">
-                <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off">
+                <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off" aria-label="Chat Input Message">
                 <button class="chat-send" id="chat-send">Send</button>
             </div>
         </div>
@@ -388,27 +388,66 @@
         <div class="modal-card">
             <div class="flex justify-between items-center pb-2 border-b border-white/10">
                 <h3 class="font-bold text-lg brand">CUSTOM <span class="gradient-text">TOPIC</span></h3>
-                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn">✕</button>
+                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn" aria-label="Close Custom Modal">✕</button>
             </div>
             <p class="text-xs text-[#64748b]">Paste any topic or paragraph you want to practice typing on, then hit start.</p>
-            <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..."></textarea>
+            <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..." aria-label="Custom Typing Paragraph Input"></textarea>
             <button class="btn-primary" id="start-custom-typing-btn">Start Typing</button>
         </div>
     </div>
 
-    <!-- TECHTRAKERS NEW AD MODAL (YOUTUBE EMBED) -->
+    <!-- PRIVACY POLICY MODAL -->
+    <div class="modal-overlay" id="privacy-modal">
+        <div class="modal-card legal-card">
+            <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                <h3 class="font-bold text-lg brand">PRIVACY <span class="gradient-text">POLICY</span></h3>
+                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-privacy-btn" aria-label="Close Privacy Modal">✕</button>
+            </div>
+            <div class="text-xs text-[#cbd5e1] space-y-3 leading-relaxed">
+                <p><strong>Effective Date:</strong> October 2026</p>
+                <p>FluidType ("we", "our", or "us") respects your privacy. This policy outlines data collection practices on our website hosted on Vercel.</p>
+                <h4 class="font-bold text-[#22d3ee]">1. Data Collection & Minimization</h4>
+                <p>We practice strict data minimization. We do not collect or store personal user accounts, passwords, or persistent profiling data. Typing metrics (WPM, accuracy) are processed locally in your browser session.</p>
+                <h4 class="font-bold text-[#22d3ee]">2. Third-Party Services & SDKs</h4>
+                <p><strong>Google AI Studio / Gemini API:</strong> When you request AI-generated typing drills through the chat assistant, your prompt text is transmitted securely to Google's API for generation. No sensitive personal data is sent.</p>
+                <p><strong>Vercel Hosting:</strong> Vercel collects standard server logs (IP addresses, user agent strings) for security and performance optimization.</p>
+                <p><strong>YouTube SDK:</strong> Embedded videos used in credit rewards are served via YouTube's iframe API, which may adhere to Google/YouTube cookie and telemetry policies.</p>
+                <h4 class="font-bold text-[#22d3ee]">3. Contact Us</h4>
+                <p>For privacy inquiries, bug reports, or security concerns, contact us via email at <a href="mailto:techtrakers@gmail.com" class="text-[#22d3ee] underline">techtrakers@gmail.com</a>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TERMS OF SERVICE MODAL -->
+    <div class="modal-overlay" id="terms-modal">
+        <div class="modal-card legal-card">
+            <div class="flex justify-between items-center pb-2 border-b border-white/10">
+                <h3 class="font-bold text-lg brand">TERMS OF <span class="gradient-text">SERVICE</span></h3>
+                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-terms-btn" aria-label="Close Terms Modal">✕</button>
+            </div>
+            <div class="text-xs text-[#cbd5e1] space-y-3 leading-relaxed">
+                <p><strong>Effective Date:</strong> October 2026</p>
+                <p>By accessing and using FluidType, you agree to comply with and be bound by the following terms.</p>
+                <h4 class="font-bold text-[#22d3ee]">1. Use of Service</h4>
+                <p>FluidType is a free typing practice web application. You agree to use the platform solely for educational, skill-building, and personal practice purposes.</p>
+                <h4 class="font-bold text-[#22d3ee]">2. Acceptable Use</h4>
+                <p>You agree not to attempt to bypass rate limits, abuse AI generation endpoints, reverse-engineer proprietary code, or interfere with website availability on Vercel.</p>
+                <h4 class="font-bold text-[#22d3ee]">3. Disclaimer</h4>
+                <p>The service is provided "as is" without warranty of any kind. We are not liable for any downtime or inaccuracies in AI-generated content.</p>
+                <h4 class="font-bold text-[#22d3ee]">4. Contact</h4>
+                <p>For questions regarding these terms, reach out at <a href="mailto:techtrakers@gmail.com" class="text-[#22d3ee] underline">techtrakers@gmail.com</a>.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- YOUTUBE AD MODAL -->
     <div class="modal-overlay" id="ad-modal">
         <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
             <div class="ad-motion-text">Watch to earn 3 Credits</div>
             
             <div class="video-container">
-                <!-- 5-Second Timer -->
                 <div id="ad-timer" class="ad-timer">5</div>
-                
-                <!-- X button directly on top right of the video (Hidden initially) -->
-                <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad">✕</button>
-                
-                <!-- Empty src initially, populated via JavaScript to autoplay -->
+                <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad and Claim Credits">✕</button>
                 <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>
             
@@ -416,24 +455,24 @@
         </div>
     </div>
 
-    <!-- AUTO-POPUP ONBOARDING TOASTS -->
+    <!-- AUTO-POPUP TOASTS -->
     <div id="onb-toast-chat" class="onb-toast">Use chatbot for that topic, which you love to type.</div>
     <div id="onb-toast-customize" class="onb-toast">Paste the topic on which you want to type.</div>
     <div id="onb-toast-feedback" class="onb-toast">Give feedback. If you find any bugs...</div>
 
-    <!-- Feedback widget: Gmail + Instagram -->
-    <div class="ft-feedback" id="ftFeedback">
+    <!-- Feedback Widget -->
+    <div class="ft-feedback" id="ftFeedback" role="region" aria-label="Feedback Widget">
         <span class="ft-feedback-label">Feedback</span>
         <div class="ft-feedback-icons">
             <a href="mailto:techtrakers@gmail.com" id="ftGmailLink" aria-label="Email us on Gmail" class="ft-icon">
-                <svg viewBox="0 0 24 24" width="20" height="20">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                     <rect x="2" y="4" width="20" height="16" rx="2" fill="#fff"/>
                     <rect x="2" y="4" width="20" height="16" rx="2" fill="none" stroke="#4285F4" stroke-width="1.4"/>
                     <path d="M2.5 5.5L12 13 21.5 5.5" fill="none" stroke="#EA4335" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
             </a>
             <a href="https://www.instagram.com/techtrakers" target="_blank" rel="noopener noreferrer" aria-label="Message us on Instagram" class="ft-icon">
-                <svg viewBox="0 0 24 24" width="20" height="20">
+                <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">
                     <defs>
                         <linearGradient id="ftIgGrad" x1="0%" y1="100%" x2="100%" y2="0%">
                             <stop offset="0%" stop-color="#feda75"/>
@@ -464,17 +503,13 @@
             border-color: rgba(168, 85, 247, 0.8);
             box-shadow: 0 0 14px rgba(168, 85, 247, 0.45);
         }
-        .ft-feedback-label {
-            color: #d8d0f0; font-size: 12px; font-family: inherit; letter-spacing: .3px; white-space: nowrap;
-        }
+        .ft-feedback-label { color: #d8d0f0; font-size: 12px; font-family: inherit; letter-spacing: .3px; white-space: nowrap; }
         .ft-feedback-icons {
             display: flex; align-items: center; gap: 8px;
             max-width: 0; opacity: 0; overflow: hidden; pointer-events: none;
             transition: max-width .3s cubic-bezier(0.16, 1, 0.3, 1), opacity .25s ease;
         }
-        .ft-feedback.active .ft-feedback-icons {
-            max-width: 100px; opacity: 1; pointer-events: auto;
-        }
+        .ft-feedback.active .ft-feedback-icons { max-width: 100px; opacity: 1; pointer-events: auto; }
         @media (hover: hover) and (pointer: fine) {
             .ft-feedback:hover .ft-feedback-icons { max-width: 100px; opacity: 1; pointer-events: auto; }
         }
@@ -561,8 +596,15 @@
             customizeTextarea: document.getElementById('customize-textarea'),
             closeCustomizeBtn: document.getElementById('close-customize-btn'),
             startCustomTypingBtn: document.getElementById('start-custom-typing-btn'),
+
+            privacyBtn: document.getElementById('privacy-policy-btn'),
+            privacyModal: document.getElementById('privacy-modal'),
+            closePrivacyBtn: document.getElementById('close-privacy-btn'),
+
+            termsBtn: document.getElementById('terms-btn'),
+            termsModal: document.getElementById('terms-modal'),
+            closeTermsBtn: document.getElementById('close-terms-btn'),
             
-            // Ad DOM elements updated
             adModal: document.getElementById('ad-modal'),
             adCloseBtn: document.getElementById('ad-close-btn'),
             adTimer: document.getElementById('ad-timer'),
@@ -679,18 +721,19 @@
             updateCursorUI();
         });
 
-        /* ========================================= */
-        /* --- CUSTOMIZE PARAGRAPH FEATURE       --- */
-        /* ========================================= */
+        // Modal triggers for Privacy & Terms
+        els.privacyBtn.addEventListener('click', () => els.privacyModal.classList.add('active'));
+        els.closePrivacyBtn.addEventListener('click', () => els.privacyModal.classList.remove('active'));
+
+        els.termsBtn.addEventListener('click', () => els.termsModal.classList.add('active'));
+        els.closeTermsBtn.addEventListener('click', () => els.termsModal.classList.remove('active'));
+
+        // Customize Paragraph Modal
         els.customizeToggleBtn.addEventListener('click', () => {
             els.customizeModal.classList.add('active');
             els.customizeTextarea.focus();
         });
-
-        els.closeCustomizeBtn.addEventListener('click', () => {
-            els.customizeModal.classList.remove('active');
-        });
-
+        els.closeCustomizeBtn.addEventListener('click', () => els.customizeModal.classList.remove('active'));
         els.startCustomTypingBtn.addEventListener('click', () => {
             const text = sanitizeText(els.customizeTextarea.value);
             if (!text) return;
@@ -761,7 +804,6 @@
                 state.isTypingStarted = true;
             }
 
-            // Handle Backspacing
             if (inputLength < state.currentIndex) {
                 const diff = state.currentIndex - inputLength;
                 for (let i = 0; i < diff; i++) {
@@ -777,7 +819,6 @@
                 return;
             }
 
-            // Handle Blocked State (Wrong Key)
             if (state.isBlocked) {
                 if (inputLength > state.currentIndex) {
                     const typedChar = inputValue[state.currentIndex];
@@ -805,7 +846,6 @@
                 return;
             }
 
-            // Normal typing progression
             if (state.currentIndex < state.charArray.length && inputLength > state.currentIndex) {
                 const typedChar = inputValue[state.currentIndex];
                 const expectedChar = state.charArray[state.currentIndex];
@@ -867,7 +907,7 @@
             if (state.timerActive) requestAnimationFrame(calculateMetricsLoop);
         }
 
-        // --- Thunder Effect Boilerplate ---
+        // Thunder Canvas & Effects
         const canvas = els.thunderCanvas; const ctx = canvas.getContext('2d'); let particles = []; let charW = 9.6;
         function resizeThunderCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; const fsize = parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4; charW = fsize * 0.601; }
         resizeThunderCanvas(); window.addEventListener('resize', resizeThunderCanvas);
@@ -911,12 +951,8 @@
         function playThunderCrack() { try { const ac = getAudio(); const now = ac.currentTime; const dur = 0.55; const sr = ac.sampleRate; const buf = ac.createBuffer(1, sr * dur, sr); const d = buf.getChannelData(0); for (let i = 0; i < d.length; i++) { const t = i / sr; d[i] = (Math.random() * 2 - 1) * ((t < 0.005 ? 1.0 : Math.exp(-t * 9)) * 0.9 + Math.exp(-t * 2.2) * 0.4); } const noise = ac.createBufferSource(); noise.buffer = buf; const bpLow = ac.createBiquadFilter(); bpLow.type = 'bandpass'; bpLow.frequency.setValueAtTime(120, now); bpLow.frequency.exponentialRampToValueAtTime(60, now + dur); bpLow.Q.value = 0.5; const bpCrack = ac.createBiquadFilter(); bpCrack.type = 'bandpass'; bpCrack.frequency.value = 3500; bpCrack.Q.value = 0.8; const gainCrack = ac.createGain(); gainCrack.gain.setValueAtTime(0.55, now); gainCrack.gain.exponentialRampToValueAtTime(0.001, now + 0.08); const gainRumble = ac.createGain(); gainRumble.gain.setValueAtTime(0.0, now); gainRumble.gain.linearRampToValueAtTime(0.35, now + 0.03); gainRumble.gain.exponentialRampToValueAtTime(0.001, now + dur); const master = ac.createGain(); master.gain.value = 0.7; noise.connect(bpCrack); bpCrack.connect(gainCrack); gainCrack.connect(master); noise.connect(bpLow); bpLow.connect(gainRumble); gainRumble.connect(master); master.connect(ac.destination); noise.start(now); noise.stop(now + dur); } catch(e) {} }
         function playThunderRumble() { try { const ac = getAudio(); const now = ac.currentTime; const dur = 1.1; const sr = ac.sampleRate; const buf = ac.createBuffer(1, sr * dur, sr); const d = buf.getChannelData(0); for (let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.exp(-(j / sr) * 1.8); const noise = ac.createBufferSource(); noise.buffer = buf; const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.setValueAtTime(100, now); lp.frequency.exponentialRampToValueAtTime(40, now + dur); lp.Q.value = 1.5; const bp = ac.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 220; bp.Q.value = 0.6; const gainLP = ac.createGain(); gainLP.gain.setValueAtTime(0.0, now); gainLP.gain.linearRampToValueAtTime(0.5, now + 0.05); gainLP.gain.exponentialRampToValueAtTime(0.001, now + dur); const gainBP = ac.createGain(); gainBP.gain.setValueAtTime(0.0, now); gainBP.gain.linearRampToValueAtTime(0.25, now + 0.04); gainBP.gain.exponentialRampToValueAtTime(0.001, now + 0.7); const master = ac.createGain(); master.gain.value = 0.65; noise.connect(lp); lp.connect(gainLP); gainLP.connect(master); noise.connect(bp); bp.connect(gainBP); gainBP.connect(master); master.connect(ac.destination); noise.start(now); noise.stop(now + dur); } catch(e) {} }
 
-        /* ========================================= */
-        /* --- YOUTUBE AD MANAGEMENT LOGIC       --- */
-        /* ========================================= */
-        
+        // YouTube Ad Management
         let adCountdownInterval;
-        
         function updateCreditDisplay() {
             const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
             els.creditPill.textContent = text;
@@ -931,26 +967,18 @@
         }
         
         function showVideoAd() {
-            // Show the modal
             els.adModal.classList.add('active');
-            
-            // Set the UI for timer countdown
             els.adCloseBtn.classList.add('hidden');
             els.adTimer.classList.remove('hidden');
             els.adTimer.textContent = '5';
             els.adFooterText.textContent = "Please wait to claim credits...";
-            
-            // Inject the YouTube URL (with autoplay enabled)
             els.adIframe.src = "https://www.youtube.com/embed/q2Rg8jf4Iu0?si=CJ7iAjDifBIw4Wty&autoplay=1";
             
             let timeLeft = 5;
             clearInterval(adCountdownInterval);
-            
             adCountdownInterval = setInterval(() => {
                 timeLeft--;
                 els.adTimer.textContent = timeLeft;
-                
-                // When 5 seconds finish
                 if (timeLeft <= 0) {
                     clearInterval(adCountdownInterval);
                     els.adTimer.classList.add('hidden');
@@ -975,13 +1003,10 @@
             state.credits = 3;
             updateCreditDisplay();
             els.adModal.classList.remove('active');
-            
-            // Critical: Remove the iframe source so it stops playing in the background
             els.adIframe.src = "";
             clearInterval(adCountdownInterval);
         }
 
-        // Only clicking the X button claims the reward now
         els.adCloseBtn.addEventListener('click', claimAdReward);
 
         els.chatToggleBtn.addEventListener('click', () => {
@@ -992,10 +1017,7 @@
             els.chatModal.classList.add('active');
             els.chatInput.focus();
         });
-        
-        els.closeChatBtn.addEventListener('click', () => {
-            els.chatModal.classList.remove('active');
-        });
+        els.closeChatBtn.addEventListener('click', () => els.chatModal.classList.remove('active'));
 
         function addMessage(text, role) {
             const bubble = document.createElement('div');
@@ -1076,12 +1098,9 @@
         els.chatSend.addEventListener('click', sendChatMessage);
         els.chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 
-        /* ========================================= */
-        /* --- ONBOARDING SCRIPT LOGIC           --- */
-        /* ========================================= */
+        // Onboarding Toasts
         function initOnboarding() {
             if (sessionStorage.getItem('ft_onboarding_done')) return;
-
             const toastChat = document.getElementById('onb-toast-chat');
             const toastCustomize = document.getElementById('onb-toast-customize');
             const toastFeedback = document.getElementById('onb-toast-feedback');
