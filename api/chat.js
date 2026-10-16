@@ -35,16 +35,20 @@ export default async function handler(req, res) {
             } else {
                 const errData = await geminiRes.json().catch(() => ({}));
                 console.error("Gemini failed, falling back to Groq:", errData);
+                lastErr = errData.error?.message || `Gemini API Error: ${geminiRes.status}`;
             }
         } catch (e) {
             console.error("Gemini network fetch failed:", e.message);
+            lastErr = e.message;
         }
+    } else {
+        lastErr = 'GEMINI_API_KEY is not configured';
     }
 
-    // 2. Fallback: Groq API
+    // 2. Fallback: Groq API (using a valid model)
     const groqKeys = [process.env.GROQ_KEY_1, process.env.GROQ_API_KEY].filter(k => k != null).map(k => k.trim()).filter(k => k.startsWith('gsk_'));
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
-    const groqModel = 'qwen/qwen3.6-27b';
+    const groqModel = 'llama-3.3-70b-versatile';
 
     for (let i = 0; i < groqKeys.length; i++) {
         try {
@@ -61,9 +65,7 @@ export default async function handler(req, res) {
                         { role: 'user', content: message }
                     ],
                     temperature: 0.7,
-                    max_tokens: 1024,
-                    reasoning_effort: 'none',
-                    reasoning_format: 'hidden'
+                    max_tokens: 1024
                 })
             });
 
@@ -85,5 +87,5 @@ export default async function handler(req, res) {
         }
     }
 
-    return res.status(502).json({ error: lastErr || 'All API keys exhausted' });
+    return res.status(502).json({ error: lastErr || 'All API keys exhausted or not configured' });
 }
