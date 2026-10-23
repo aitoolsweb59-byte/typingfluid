@@ -13,97 +13,112 @@ export default async function handler(req, res) {
         }
     }
 
-    const message = body?.message?.trim();
+    const message = body && body.message ? String(body.message).trim() : '';
     if (!message) {
         return res.status(400).json({ error: 'Message required' });
     }
 
     const systemPrompt =
-        'You are a typing practice assistant for FluidType. Generate a single concise, engaging 2 to 3 sentence paragraph suitable for typing practice about the requested topic. Output plain text only without markdown, bullet points, titles, or quotation marks. Keep it under 280 characters. Topic: ' +
+        'You are a helpful assistant for FluidType. Generate a concise 2 to 3 sentence paragraph suitable for typing practice. Output plain text only without markdown or bullet points. Keep it under 280 characters. Topic: ' +
         message;
 
     let lastErr = null;
 
-    // Helper to clean any model output (strips <think> tags, markdown, and extra whitespace)
     function cleanModelText(raw) {
         if (!raw) return '';
-        return raw
+        return String(raw)
             .replace(/<think>[\s\S]*?<\/think>/gi, '')
-            .replace(/[*_#`~>]/g, '')
+            .replace(/[*_#>]/g, '')
             .replace(/\s+/g, ' ')
             .trim();
     }
 
-    // 1. Primary By Default: Groq Free API (keys starting with "gsk_")
-    const groqKeys = [
+    // 1. Primary By Default: Groq Free API
+    // Automatically detects GROQ_API_KEY, GROQ_KEY_1, or any Vercel env variable starting with "gsk_"
+    const rawGroqCandidates = [
         process.env.GROQ_API_KEY,
         process.env.GROQ_KEY_1,
         process.env.GROQ_KEY_2,
-        process.env.GROQ_KEY
-    ]
-        .filter((k) => typeof k === 'string' && k.trim().length > 0)
-        .map((k) => k.trim())
-        .filter((k, idx, arr) => k.startsWith('gsk_') && arr.indexOf(k) === idx);
+        process.env.GROQ_KEY,
+        ...Object.values(process.env || {})
+    ];
 
-    // Active Groq Free Plan models in priority order:
-    // - openai/gpt-oss-120b: Primary flagship production model on Groq Free Tier (replaces llama-3.3-70b-versatile)
-    // - openai/gpt-oss-20b: Ultra-fast 1000 TPS production model on Groq Free Tier (replaces llama-3.1-8b-instant)
-    // - qwen/qwen3.8-27b: Active free-tier general model
-    // - llama-3.3-70b-versatile & llama-3.1-8b-instant: Retained as secondary fallbacks
+    const groqKeys = [];
+    for (let i = 0; i < rawGroqCandidates.length; i++) {
+        const val = rawGroqCandidates[i];
+        if (typeof val === 'string') {
+            const trimmed = val.trim();
+            if (trimmed.startsWith('gsk_') && groqKeys.indexOf(trimmed) === -1) {
+                groqKeys.push(trimmed);
+            }
+        }
+    }
+
     const groqModels = [
-        { id: 'openai/gpt-oss-120b', extra: { include_reasoning: false, reasoning_effort: 'low' } },
-        { id: 'openai/gpt-oss-20b', extra: { include_reasoning: false, reasoning_effort: 'low' } },
-        { id: 'qwen/qwen3.8-27b', extra: { reasoning_format: 'hidden', reasoning_effort: 'none' } },
-        { id: 'llama-3.3-70b-versatile', extra: {} },
-        { id: 'llama-3.1-8b-instant', extra: {} }
+        'llama-3.3-70b-versatile',
+        'llama-3.1-8b-instant',
+        'openai/gpt-oss-120b',
+        'openai/gpt-oss-20b',
+        'qwen/qwen3.8-27b'
     ];
 
     const groqUrl = 'https://api.groq.com/openai/v1/chat/completions';
 
     if (groqKeys.length > 0) {
-        for (const apiKey of groqKeys) {
-            for (const modelConfig of groqModels) {
+        for (let k = 0; k < groqKeys.length; k++) {
+            const apiKey = groqKeys[k];
+            for (let m = 0; m < groqModels.length; m++) {
+                const modelName = groqModels[m];
                 try {
                     const response = await fetch(groqUrl, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${apiKey}`
+                            'Authorization': 'Bearer ' + apiKey
                         },
                         body: JSON.stringify({
-                            model: modelConfig.id,
+                            model: modelName,
                             messages: [
                                 { role: 'system', content: systemPrompt },
-                                { role: 'user', content: `Write a short typing practice paragraph about: ${message}` }
+                                { role: 'user', content: message }
                             ],
-                            temperature: 0.65,
-                            max_completion_tokens: 300,
-                            ...modelConfig.extra
+                            temperature: 0.7,
+                            max_tokens: 300
                         })
                     });
 
                     if (response.ok) {
                         const data = await response.json();
-                        const aiText = cleanModelText(data.choices?.[0]?.message?.content);
+                        const content =
+                            data &&
+                            data.choices &&
+                            data.choices[0] &&
+                            data.choices[0].message &&
+                            data.choices[0].message.content
+                                ? data.choices[0].message.content
+                                : '';
+                        const aiText = cleanModelText(content);
                         if (aiText) {
                             return res.status(200).json({
                                 text: aiText,
                                 provider: 'groq',
-                                model: modelConfig.id
+                                model: modelName
                             });
                         }
                         lastErr = 'Groq model returned empty content';
                         continue;
                     }
 
-                    const errData = await response.json().catch(() => ({}));
-                    lastErr = errData.error?.message || `Groq API Error (${modelConfig.id}): ${response.status}`;
+                    const errData = await response.json().catch(function () {
+                        return {};
+                    });
+                    lastErr =
+                        (errData && errData.error && errData.error.message) ||
+                        'Groq API Error (' + modelName + '): ' + response.status;
 
-                    // If unauthorized/invalid key, break inner model loop and try next key
                     if (response.status === 401 || response.status === 403) {
                         break;
                     }
-                    // If rate-limited (429) or model unavailable/deprecated (400/404), try next Groq model
                     continue;
                 } catch (e) {
                     lastErr = e.message;
@@ -111,17 +126,22 @@ export default async function handler(req, res) {
             }
         }
     } else {
-        lastErr = 'GROQ_API_KEY (gsk_...) is not configured';
+        lastErr = 'No Groq API key (starting with gsk_) found in Vercel Environment Variables';
     }
 
-    // 2. Secondary Fallback: Google AI Studio (Gemini API)
-    const geminiKey = (process.env.GEMINI_API_KEY || '').trim();
-    const geminiModels = ['gemini-2.5-flash', 'gemini-3.8-flash', 'gemini-2.0-flash'];
+    // 2. Secondary Fallback: Google Gemini API
+    const geminiKey = process.env.GEMINI_API_KEY ? String(process.env.GEMINI_API_KEY).trim() : '';
+    const geminiModels = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-3.8-flash'];
 
     if (geminiKey) {
-        for (const geminiModel of geminiModels) {
+        for (let g = 0; g < geminiModels.length; g++) {
+            const gModel = geminiModels[g];
             try {
-                const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/${geminiModel}:generateContent?key=${geminiKey}`;
+                const geminiUrl =
+                    'https://generativelanguage.googleapis.com/v1beta/models/' +
+                    gModel +
+                    ':generateContent?key=' +
+                    geminiKey;
                 const geminiRes = await fetch(geminiUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -134,17 +154,31 @@ export default async function handler(req, res) {
 
                 if (geminiRes.ok) {
                     const data = await geminiRes.json();
-                    const aiText = cleanModelText(data.candidates?.[0]?.content?.parts?.[0]?.text);
+                    const rawText =
+                        data &&
+                        data.candidates &&
+                        data.candidates[0] &&
+                        data.candidates[0].content &&
+                        data.candidates[0].content.parts &&
+                        data.candidates[0].content.parts[0] &&
+                        data.candidates[0].content.parts[0].text
+                            ? data.candidates[0].content.parts[0].text
+                            : '';
+                    const aiText = cleanModelText(rawText);
                     if (aiText) {
                         return res.status(200).json({
                             text: aiText,
                             provider: 'gemini',
-                            model: geminiModel
+                            model: gModel
                         });
                     }
                 } else {
-                    const errData = await geminiRes.json().catch(() => ({}));
-                    lastErr = errData.error?.message || `Gemini API Error (${geminiModel}): ${geminiRes.status}`;
+                    const errData = await geminiRes.json().catch(function () {
+                        return {};
+                    });
+                    lastErr =
+                        (errData && errData.error && errData.error.message) ||
+                        'Gemini API Error (' + gModel + '): ' + geminiRes.status;
                 }
             } catch (e) {
                 lastErr = e.message;
