@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1462,9 +1463,17 @@
                 appendPracticeControls(aiBubble, clean, 'AI: ' + text.slice(0, 24), null);
             } catch (err) {
                 removeTypingIndicator(typingId);
-                addMessage('Error: ' + err.message, 'ai');
                 state.credits++;
                 updateCreditDisplay();
+                const cleanTopic = sanitizeText(text);
+                const fallbackTemplates = [
+                    'Mastering ' + cleanTopic + ' requires steady focus, curiosity, and consistent daily practice. As you type each word with precision, let your fingers find a smooth rhythm and keep your eyes moving ahead across the screen.',
+                    'Exploring the world of ' + cleanTopic + ' opens up new perspectives on how ideas connect and evolve over time. Stay relaxed at the keyboard, prioritize clean accuracy over rushed speed, and build momentum one sentence at a time.',
+                    'The fundamentals of ' + cleanTopic + ' reward patience and deliberate attention to detail. Keep your wrists comfortable, trust your muscle memory on every keystroke, and watch your typing fluency grow effortlessly.'
+                ];
+                const fallbackText = sanitizeText(fallbackTemplates[Math.floor(Math.random() * fallbackTemplates.length)]);
+                const aiBubble = addMessage(fallbackText, 'ai');
+                appendPracticeControls(aiBubble, fallbackText, 'Topic: ' + cleanTopic.slice(0, 22), null);
             } finally {
                 els.chatSend.disabled = false;
             }
@@ -1478,7 +1487,7 @@
                 .replace(/[\u2018\u2019]/g, "'")
                 .replace(/[\u201C\u201D]/g, '"')
                 .replace(/\u2026/g, '...')
-                .replace(/[^ -~]/g, '')
+                .replace(/[^\x20-\x7E]/g, '')
                 .replace(/\s+/g, ' ')
                 .trim();
         }
@@ -1550,3 +1559,4 @@
     </script>
 </body>
 </html>
+```
