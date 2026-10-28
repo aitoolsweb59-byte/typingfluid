@@ -1,29 +1,4 @@
 
-const PREWRITTEN_TOPICS = {
-    'black hole': 'A black hole is a region of spacetime where gravity is so intense that nothing, not even light, can escape its pull. The boundary of no return is called the event horizon, where time itself appears to slow down relative to distant observers.',
-    'ai': 'Artificial intelligence transforms raw data into pattern recognition, enabling machines to learn, reason, and generate human-like text. Modern neural networks process billions of parameters in milliseconds to assist coders, scientists, and creators.',
-    'science': 'The scientific method relies on curiosity, rigorous observation, and repeatable experimentation to uncover how nature works. Every disproven hypothesis brings humanity one step closer to understanding the fundamental laws of matter and energy.',
-    'universe': 'The observable universe stretches roughly ninety-three billion light-years across and contains trillions of galaxies spiraling through cosmic webs. Every heavy atom in our bodies was forged inside the nuclear heart of an ancient dying star.',
-    'quantum': 'Quantum mechanics reveals a subatomic realm where particles exist in superpositions of multiple states until measured. Entangled particles can correlate instantaneously across vast distances, defying classical intuitions about space and time.',
-    'cybersecurity': 'Modern cybersecurity defends digital infrastructure through zero-trust architecture, end-to-end encryption, and continuous threat hunting. A single patched vulnerability can prevent cascading breaches across global cloud networks.'
-};
-
-function getFallbackParagraph(topic) {
-    const lower = String(topic || '').toLowerCase();
-    const keys = Object.keys(PREWRITTEN_TOPICS);
-    for (let i = 0; i < keys.length; i++) {
-        const key = keys[i];
-        if (lower.indexOf(key) !== -1) {
-            return PREWRITTEN_TOPICS[key];
-        }
-    }
-    const sanitizedTopic = String(topic || 'focused practice')
-        .replace(/[^a-zA-Z0-9\s-]/g, '')
-        .trim()
-        .slice(0, 45) || 'focused practice';
-    return 'Mastering ' + sanitizedTopic + ' requires consistent daily curiosity, deep focus, and deliberate execution. Every keystroke sharpens your neural pathways and builds lasting precision as you race against your own personal best.';
-}
-
 function cleanModelText(raw) {
     if (!raw) return '';
     const fenceRegex = new RegExp('\\x60{3}[\\s\\S]*?\\x60{3}', 'g');
@@ -39,12 +14,25 @@ function cleanModelText(raw) {
         .trim();
 }
 
-function normalizeKey(rawVal) {
-    if (typeof rawVal !== 'string') return '';
-    return rawVal
-        .replace(/^["']|["']$/g, '')
-        .replace(/^Bearer\s+/i, '')
-        .trim();
+function extractKeysFromEnv(envObj, prefixRegex) {
+    const found = [];
+    if (!envObj || typeof envObj !== 'object') return found;
+    const values = Object.values(envObj);
+    for (let i = 0; i < values.length; i++) {
+        const val = values[i];
+        if (typeof val === 'string' && val.length > 10) {
+            const matches = val.match(prefixRegex);
+            if (matches) {
+                for (let m = 0; m < matches.length; m++) {
+                    const key = matches[m].trim();
+                    if (key && found.indexOf(key) === -1) {
+                        found.push(key);
+                    }
+                }
+            }
+        }
+    }
+    return found;
 }
 
 export default async function handler(req, res) {
@@ -70,43 +58,20 @@ export default async function handler(req, res) {
 
     const message = body && body.message ? String(body.message).trim() : '';
     if (!message) {
-        return res.status(400).json({ error: 'Message topic is required' });
+        return res.status(400).json({ error: 'Message is required' });
     }
 
     const systemPrompt =
-        'You are a typing drill generator for FluidType. Write a single, engaging 2 to 3 sentence paragraph about the requested topic suitable for typing practice. Output plain English text only: no markdown, no bullet points, no quotes around the paragraph, and keep it between 160 and 280 characters.';
+        'You are FluidType AI, a helpful and knowledgeable assistant. Directly and accurately answer the user question or explain the requested topic in a clear, engaging 2 to 4 sentence paragraph (under 280 characters). Output plain English text only without markdown, bullet points, or special symbols so the user gets a direct answer they can also practice typing.';
 
     const errors = [];
     const envObj = process.env || {};
-    const envEntries = Object.entries(envObj);
 
     // =========================================================================
-    // 1. Collect Groq API Keys (Zero backticks used anywhere)
-    // Recommended env variable name: GROQ_API_KEY
+    // 1. Primary Provider: Groq Free API
+    // Automatically extracts any "gsk_..." key from GROQ_API_KEY or any Vercel env variable
     // =========================================================================
-    const rawGroqCandidates = [
-        envObj.GROQ_API_KEY,
-        envObj.NEXT_PUBLIC_GROQ_API_KEY,
-        envObj.GROQ_KEY,
-        envObj.GROQ_KEY_1,
-        envObj.GROQ_KEY_2
-    ];
-
-    for (let i = 0; i < envEntries.length; i++) {
-        const envName = String(envEntries[i][0] || '').toUpperCase();
-        const envVal = envEntries[i][1];
-        if (envName.indexOf('GROQ') !== -1 || (typeof envVal === 'string' && envVal.indexOf('gsk_') !== -1)) {
-            rawGroqCandidates.push(envVal);
-        }
-    }
-
-    const groqKeys = [];
-    for (let i = 0; i < rawGroqCandidates.length; i++) {
-        const cleaned = normalizeKey(rawGroqCandidates[i]);
-        if (cleaned && cleaned.startsWith('gsk_') && groqKeys.indexOf(cleaned) === -1) {
-            groqKeys.push(cleaned);
-        }
-    }
+    const groqKeys = extractKeysFromEnv(envObj, /gsk_[A-Za-z0-9_-]{20,}/g);
 
     const groqModels = [
         'llama-3.3-70b-versatile',
@@ -133,10 +98,10 @@ export default async function handler(req, res) {
                             model: modelName,
                             messages: [
                                 { role: 'system', content: systemPrompt },
-                                { role: 'user', content: 'Topic: ' + message }
+                                { role: 'user', content: message }
                             ],
                             temperature: 0.7,
-                            max_tokens: 250
+                            max_tokens: 300
                         })
                     });
 
@@ -151,14 +116,14 @@ export default async function handler(req, res) {
                                 ? data.choices[0].message.content
                                 : '';
                         const aiText = cleanModelText(content);
-                        if (aiText && aiText.length >= 20) {
+                        if (aiText) {
                             return res.status(200).json({
                                 text: aiText,
                                 provider: 'groq',
                                 model: modelName
                             });
                         }
-                        errors.push('Groq (' + modelName + '): Returned empty text');
+                        errors.push('Groq (' + modelName + '): Empty response');
                         continue;
                     }
 
@@ -174,48 +139,23 @@ export default async function handler(req, res) {
                         break;
                     }
                 } catch (e) {
-                    errors.push('Groq (' + modelName + '): ' + (e && e.message ? e.message : 'Request failed'));
+                    errors.push('Groq (' + modelName + '): ' + (e && e.message ? e.message : 'Network error'));
                 }
             }
         }
     } else {
-        errors.push('No Groq API key found (set GROQ_API_KEY starting with gsk_)');
+        errors.push('GROQ_API_KEY (starting with gsk_) not found in Vercel Environment Variables');
     }
 
     // =========================================================================
-    // 2. Collect Google Gemini API Keys
-    // Recommended env variable name: GEMINI_API_KEY
+    // 2. Secondary Provider: Google Gemini API
+    // Automatically extracts any "AIza..." key from GEMINI_API_KEY or any Vercel env variable
     // =========================================================================
-    const rawGeminiCandidates = [
-        envObj.GEMINI_API_KEY,
-        envObj.GOOGLE_API_KEY,
-        envObj.NEXT_PUBLIC_GEMINI_API_KEY,
-        envObj.GEMINI_KEY,
-        envObj.GEMINI_KEY_1
-    ];
-
-    for (let i = 0; i < envEntries.length; i++) {
-        const envName = String(envEntries[i][0] || '').toUpperCase();
-        const envVal = envEntries[i][1];
-        if (
-            envName.indexOf('GEMINI') !== -1 ||
-            envName.indexOf('GOOGLE_API') !== -1 ||
-            (typeof envVal === 'string' && envVal.indexOf('AIza') !== -1)
-        ) {
-            rawGeminiCandidates.push(envVal);
-        }
-    }
-
-    const geminiKeys = [];
-    for (let i = 0; i < rawGeminiCandidates.length; i++) {
-        const cleaned = normalizeKey(rawGeminiCandidates[i]);
-        if (cleaned && cleaned.startsWith('AIza') && geminiKeys.indexOf(cleaned) === -1) {
-            geminiKeys.push(cleaned);
-        }
-    }
+    const geminiKeys = extractKeysFromEnv(envObj, /AIza[A-Za-z0-9_-]{25,}/g);
 
     const geminiModels = [
         'gemini-2.5-flash',
+        'gemini-2.5-flash-lite',
         'gemini-2.0-flash',
         'gemini-1.5-flash'
     ];
@@ -239,7 +179,7 @@ export default async function handler(req, res) {
                             contents: [
                                 {
                                     role: 'user',
-                                    parts: [{ text: systemPrompt + '\n\nTopic: ' + message }]
+                                    parts: [{ text: systemPrompt + '\n\nUser Question: ' + message }]
                                 }
                             ],
                             generationConfig: {
@@ -269,14 +209,14 @@ export default async function handler(req, res) {
                         }
 
                         const aiText = cleanModelText(textChunks.join(' '));
-                        if (aiText && aiText.length >= 20) {
+                        if (aiText) {
                             return res.status(200).json({
                                 text: aiText,
                                 provider: 'gemini',
                                 model: gModel
                             });
                         }
-                        errors.push('Gemini (' + gModel + '): Returned empty text');
+                        errors.push('Gemini (' + gModel + '): Empty response');
                     } else {
                         const errData = await geminiRes.json().catch(function () {
                             return {};
@@ -294,22 +234,60 @@ export default async function handler(req, res) {
                         }
                     }
                 } catch (e) {
-                    errors.push('Gemini (' + gModel + '): ' + (e && e.message ? e.message : 'Request failed'));
+                    errors.push('Gemini (' + gModel + '): ' + (e && e.message ? e.message : 'Network error'));
                 }
             }
         }
     } else {
-        errors.push('No Gemini API key found (set GEMINI_API_KEY starting with AIza)');
+        errors.push('GEMINI_API_KEY (starting with AIza) not found in Vercel Environment Variables');
     }
 
     // =========================================================================
-    // 3. Resilient Fallback so the user's typing session never crashes
+    // 3. Keyless Live AI Backup (Pollinations OpenAI-compatible endpoint)
+    // Guarantees a real, dynamic AI answer to the user's exact question even if
+    // Vercel env keys were not redeployed yet or hit rate limits!
     // =========================================================================
-    const fallbackText = getFallbackParagraph(message);
-    return res.status(200).json({
-        text: fallbackText,
-        provider: 'fallback',
-        warning: 'Used built-in topic generator because external API keys failed or were not configured.',
-        diagnostics: errors
+    try {
+        const backupRes = await fetch('https://text.pollinations.ai/openai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                model: 'openai',
+                messages: [
+                    { role: 'system', content: systemPrompt },
+                    { role: 'user', content: message }
+                ],
+                temperature: 0.7
+            })
+        });
+
+        if (backupRes.ok) {
+            const backupData = await backupRes.json();
+            const backupContent =
+                backupData &&
+                backupData.choices &&
+                backupData.choices[0] &&
+                backupData.choices[0].message &&
+                backupData.choices[0].message.content
+                    ? backupData.choices[0].message.content
+                    : '';
+            const cleanedBackup = cleanModelText(backupContent);
+            if (cleanedBackup) {
+                return res.status(200).json({
+                    text: cleanedBackup,
+                    provider: 'live-ai-backup',
+                    diagnostics: errors
+                });
+            }
+        }
+    } catch (e) {
+        errors.push('Live AI backup error: ' + (e && e.message ? e.message : 'Failed'));
+    }
+
+    // =========================================================================
+    // 4. If all providers fail, return 502 so the frontend refunds the credit
+    // =========================================================================
+    return res.status(502).json({
+        error: errors.join(' | ') || 'All AI providers failed. Check GROQ_API_KEY and GEMINI_API_KEY in Vercel and Redeploy.'
     });
 }
