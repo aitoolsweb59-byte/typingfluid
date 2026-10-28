@@ -1,4 +1,4 @@
-```javascript
+
 const PREWRITTEN_TOPICS = {
     'black hole': 'A black hole is a region of spacetime where gravity is so intense that nothing, not even light, can escape its pull. The boundary of no return is called the event horizon, where time itself appears to slow down relative to distant observers.',
     'ai': 'Artificial intelligence transforms raw data into pattern recognition, enabling machines to learn, reason, and generate human-like text. Modern neural networks process billions of parameters in milliseconds to assist coders, scientists, and creators.',
@@ -10,24 +10,28 @@ const PREWRITTEN_TOPICS = {
 
 function getFallbackParagraph(topic) {
     const lower = String(topic || '').toLowerCase();
-    for (const [key, para] of Object.entries(PREWRITTEN_TOPICS)) {
-        if (lower.includes(key)) {
-            return para;
+    const keys = Object.keys(PREWRITTEN_TOPICS);
+    for (let i = 0; i < keys.length; i++) {
+        const key = keys[i];
+        if (lower.indexOf(key) !== -1) {
+            return PREWRITTEN_TOPICS[key];
         }
     }
     const sanitizedTopic = String(topic || 'focused practice')
         .replace(/[^a-zA-Z0-9\s-]/g, '')
         .trim()
         .slice(0, 45) || 'focused practice';
-    return `Mastering ${sanitizedTopic} requires consistent daily curiosity, deep focus, and deliberate execution. Every keystroke sharpens your neural pathways and builds lasting precision as you race against your own personal best.`;
+    return 'Mastering ' + sanitizedTopic + ' requires consistent daily curiosity, deep focus, and deliberate execution. Every keystroke sharpens your neural pathways and builds lasting precision as you race against your own personal best.';
 }
 
 function cleanModelText(raw) {
     if (!raw) return '';
+    const fenceRegex = new RegExp('\\x60{3}[\\s\\S]*?\\x60{3}', 'g');
+    const inlineTickRegex = new RegExp('[\\x60*_#>~]', 'g');
     return String(raw)
         .replace(/<think>[\s\S]*?<\/think>/gi, '')
-        .replace(/```[\s\S]*?```/g, '')
-        .replace(/[*_#>`~]/g, '')
+        .replace(fenceRegex, '')
+        .replace(inlineTickRegex, '')
         .replace(/[—–]/g, '-')
         .replace(/[‘’]/g, "'")
         .replace(/[“”]/g, '"')
@@ -35,8 +39,15 @@ function cleanModelText(raw) {
         .trim();
 }
 
+function normalizeKey(rawVal) {
+    if (typeof rawVal !== 'string') return '';
+    return rawVal
+        .replace(/^["']|["']$/g, '')
+        .replace(/^Bearer\s+/i, '')
+        .trim();
+}
+
 export default async function handler(req, res) {
-    // Allow CORS preflight if needed
     if (req.method === 'OPTIONS') {
         res.setHeader('Access-Control-Allow-Origin', '*');
         res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -66,33 +77,37 @@ export default async function handler(req, res) {
         'You are a typing drill generator for FluidType. Write a single, engaging 2 to 3 sentence paragraph about the requested topic suitable for typing practice. Output plain English text only: no markdown, no bullet points, no quotes around the paragraph, and keep it between 160 and 280 characters.';
 
     const errors = [];
+    const envObj = process.env || {};
+    const envEntries = Object.entries(envObj);
 
     // =========================================================================
-    // 1. Collect Groq API Keys
+    // 1. Collect Groq API Keys (Zero backticks used anywhere)
     // Recommended env variable name: GROQ_API_KEY
-    // Also auto-detects GROQ_KEY, GROQ_KEY_1, or any env value starting with "gsk_"
     // =========================================================================
     const rawGroqCandidates = [
-        process.env.GROQ_API_KEY,
-        process.env.NEXT_PUBLIC_GROQ_API_KEY,
-        process.env.GROQ_KEY,
-        process.env.GROQ_KEY_1,
-        process.env.GROQ_KEY_2,
-        ...Object.values(process.env || {})
+        envObj.GROQ_API_KEY,
+        envObj.NEXT_PUBLIC_GROQ_API_KEY,
+        envObj.GROQ_KEY,
+        envObj.GROQ_KEY_1,
+        envObj.GROQ_KEY_2
     ];
 
-    const groqKeys = [];
-    for (let i = 0; i < rawGroqCandidates.length; i++) {
-        const val = rawGroqCandidates[i];
-        if (typeof val === 'string') {
-            const trimmed = val.replace(/^["']|["']$/g, '').trim();
-            if (trimmed.startsWith('gsk_') && !groqKeys.includes(trimmed)) {
-                groqKeys.push(trimmed);
-            }
+    for (let i = 0; i < envEntries.length; i++) {
+        const envName = String(envEntries[i][0] || '').toUpperCase();
+        const envVal = envEntries[i][1];
+        if (envName.indexOf('GROQ') !== -1 || (typeof envVal === 'string' && envVal.indexOf('gsk_') !== -1)) {
+            rawGroqCandidates.push(envVal);
         }
     }
 
-    // Valid production Groq models
+    const groqKeys = [];
+    for (let i = 0; i < rawGroqCandidates.length; i++) {
+        const cleaned = normalizeKey(rawGroqCandidates[i]);
+        if (cleaned && cleaned.startsWith('gsk_') && groqKeys.indexOf(cleaned) === -1) {
+            groqKeys.push(cleaned);
+        }
+    }
+
     const groqModels = [
         'llama-3.3-70b-versatile',
         'llama-3.1-8b-instant',
@@ -108,9 +123,6 @@ export default async function handler(req, res) {
             for (let m = 0; m < groqModels.length; m++) {
                 const modelName = groqModels[m];
                 try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 8000);
-
                     const response = await fetch(groqUrl, {
                         method: 'POST',
                         headers: {
@@ -125,10 +137,8 @@ export default async function handler(req, res) {
                             ],
                             temperature: 0.7,
                             max_tokens: 250
-                        }),
-                        signal: controller.signal
+                        })
                     });
-                    clearTimeout(timeoutId);
 
                     if (response.ok) {
                         const data = await response.json();
@@ -148,22 +158,23 @@ export default async function handler(req, res) {
                                 model: modelName
                             });
                         }
-                        errors.push(`Groq (${modelName}): Returned empty text`);
+                        errors.push('Groq (' + modelName + '): Returned empty text');
                         continue;
                     }
 
-                    const errData = await response.json().catch(() => ({}));
+                    const errData = await response.json().catch(function () {
+                        return {};
+                    });
                     const errMsg =
                         (errData && errData.error && errData.error.message) ||
-                        `HTTP ${response.status}`;
-                    errors.push(`Groq (${modelName}): ${errMsg}`);
+                        'HTTP ' + response.status;
+                    errors.push('Groq (' + modelName + '): ' + errMsg);
 
-                    // If the API key itself is invalid/unauthorized, skip trying other models with this same key
                     if (response.status === 401 || response.status === 403) {
                         break;
                     }
                 } catch (e) {
-                    errors.push(`Groq (${modelName}): ${e.name === 'AbortError' ? 'Request timed out' : e.message}`);
+                    errors.push('Groq (' + modelName + '): ' + (e && e.message ? e.message : 'Request failed'));
                 }
             }
         }
@@ -174,29 +185,35 @@ export default async function handler(req, res) {
     // =========================================================================
     // 2. Collect Google Gemini API Keys
     // Recommended env variable name: GEMINI_API_KEY
-    // Also auto-detects GOOGLE_API_KEY, GEMINI_KEY, or any env value starting with "AIza"
     // =========================================================================
     const rawGeminiCandidates = [
-        process.env.GEMINI_API_KEY,
-        process.env.GOOGLE_API_KEY,
-        process.env.NEXT_PUBLIC_GEMINI_API_KEY,
-        process.env.GEMINI_KEY,
-        process.env.GEMINI_KEY_1,
-        ...Object.values(process.env || {})
+        envObj.GEMINI_API_KEY,
+        envObj.GOOGLE_API_KEY,
+        envObj.NEXT_PUBLIC_GEMINI_API_KEY,
+        envObj.GEMINI_KEY,
+        envObj.GEMINI_KEY_1
     ];
 
-    const geminiKeys = [];
-    for (let i = 0; i < rawGeminiCandidates.length; i++) {
-        const val = rawGeminiCandidates[i];
-        if (typeof val === 'string') {
-            const trimmed = val.replace(/^["']|["']$/g, '').trim();
-            if (trimmed.startsWith('AIza') && !geminiKeys.includes(trimmed)) {
-                geminiKeys.push(trimmed);
-            }
+    for (let i = 0; i < envEntries.length; i++) {
+        const envName = String(envEntries[i][0] || '').toUpperCase();
+        const envVal = envEntries[i][1];
+        if (
+            envName.indexOf('GEMINI') !== -1 ||
+            envName.indexOf('GOOGLE_API') !== -1 ||
+            (typeof envVal === 'string' && envVal.indexOf('AIza') !== -1)
+        ) {
+            rawGeminiCandidates.push(envVal);
         }
     }
 
-    // Valid production Google Gemini models
+    const geminiKeys = [];
+    for (let i = 0; i < rawGeminiCandidates.length; i++) {
+        const cleaned = normalizeKey(rawGeminiCandidates[i]);
+        if (cleaned && cleaned.startsWith('AIza') && geminiKeys.indexOf(cleaned) === -1) {
+            geminiKeys.push(cleaned);
+        }
+    }
+
     const geminiModels = [
         'gemini-2.5-flash',
         'gemini-2.0-flash',
@@ -209,17 +226,12 @@ export default async function handler(req, res) {
             for (let g = 0; g < geminiModels.length; g++) {
                 const gModel = geminiModels[g];
                 try {
-                    const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 9000);
-
                     const geminiUrl =
                         'https://generativelanguage.googleapis.com/v1beta/models/' +
                         gModel +
                         ':generateContent?key=' +
                         encodeURIComponent(geminiKey);
 
-                    // Combining instruction into user prompt guarantees compatibility across all v1beta Gemini models
-                    // and higher maxOutputTokens prevents Gemini 2.5 thinking tokens from truncating the output
                     const geminiRes = await fetch(geminiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -234,10 +246,8 @@ export default async function handler(req, res) {
                                 temperature: 0.7,
                                 maxOutputTokens: 1024
                             }
-                        }),
-                        signal: controller.signal
+                        })
                     });
-                    clearTimeout(timeoutId);
 
                     if (geminiRes.ok) {
                         const data = await geminiRes.json();
@@ -250,13 +260,15 @@ export default async function handler(req, res) {
                                 ? data.candidates[0].content.parts
                                 : [];
 
-                        // Extract non-thought text parts
-                        const rawText = parts
-                            .filter(p => p && typeof p.text === 'string' && !p.thought)
-                            .map(p => p.text)
-                            .join(' ');
+                        const textChunks = [];
+                        for (let p = 0; p < parts.length; p++) {
+                            const partObj = parts[p];
+                            if (partObj && typeof partObj.text === 'string' && !partObj.thought) {
+                                textChunks.push(partObj.text);
+                            }
+                        }
 
-                        const aiText = cleanModelText(rawText);
+                        const aiText = cleanModelText(textChunks.join(' '));
                         if (aiText && aiText.length >= 20) {
                             return res.status(200).json({
                                 text: aiText,
@@ -264,16 +276,17 @@ export default async function handler(req, res) {
                                 model: gModel
                             });
                         }
-                        errors.push(`Gemini (${gModel}): Returned empty or blocked text`);
+                        errors.push('Gemini (' + gModel + '): Returned empty text');
                     } else {
-                        const errData = await geminiRes.json().catch(() => ({}));
+                        const errData = await geminiRes.json().catch(function () {
+                            return {};
+                        });
                         const errMsg =
                             (errData && errData.error && errData.error.message) ||
-                            `HTTP ${geminiRes.status}`;
-                        errors.push(`Gemini (${gModel}): ${errMsg}`);
+                            'HTTP ' + geminiRes.status;
+                        errors.push('Gemini (' + gModel + '): ' + errMsg);
 
-                        // If API key is invalid, stop trying other models with this key
-                        if (geminiRes.status === 400 && errMsg.toLowerCase().includes('api key not valid')) {
+                        if (geminiRes.status === 400 && errMsg.toLowerCase().indexOf('api key not valid') !== -1) {
                             break;
                         }
                         if (geminiRes.status === 401 || geminiRes.status === 403) {
@@ -281,7 +294,7 @@ export default async function handler(req, res) {
                         }
                     }
                 } catch (e) {
-                    errors.push(`Gemini (${gModel}): ${e.name === 'AbortError' ? 'Request timed out' : e.message}`);
+                    errors.push('Gemini (' + gModel + '): ' + (e && e.message ? e.message : 'Request failed'));
                 }
             }
         }
@@ -300,4 +313,3 @@ export default async function handler(req, res) {
         diagnostics: errors
     });
 }
-```
