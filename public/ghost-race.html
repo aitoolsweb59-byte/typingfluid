@@ -1530,42 +1530,27 @@
 
                removeTypingIndicator(typingId);
 
+               const data = await res.json().catch(function () { return {}; });
+
                if (!res.ok) {
-                   throw new Error('API endpoint returned HTTP ' + res.status);
+                   const serverErr = (data && data.error) ? data.error : ('API returned HTTP ' + res.status);
+                   throw new Error(serverErr);
                }
 
-               const data = await res.json();
                const clean = sanitizeText(data && data.text ? data.text : '');
                if (!clean) {
-                   throw new Error('Empty paragraph received');
+                   throw new Error('AI returned an empty answer.');
                }
 
                addMessage(clean, 'ai');
-               if (data && data.provider === 'fallback') {
-                   state.credits = Math.min(3, state.credits + 1);
-                   updateCreditDisplay();
-                   const diagText = Array.isArray(data.diagnostics) && data.diagnostics.length > 0
-                       ? data.diagnostics.join(' | ')
-                       : 'Check GROQ_API_KEY or GEMINI_API_KEY in Vercel Settings -> Environment Variables and Redeploy.';
-                   const note = document.createElement('div');
-                   note.className = 'text-[0.68rem] text-[#facc15] mt-1';
-                   note.textContent = '⚡ Built-in Topic Generator used (Credit refunded). API Status: ' + diagText;
-                   els.chatMessages.lastElementChild.appendChild(note);
-               }
                appendPracticeButtonToChat(clean, text.slice(0, 28));
            } catch (err) {
                removeTypingIndicator(typingId);
-               // Refund credit when backend is unreachable or errors out, and provide a playable fallback paragraph!
+               // Refund the user's credit whenever an error occurs so credits are NEVER wasted!
                state.credits = Math.min(3, state.credits + 1);
                updateCreditDisplay();
 
-               const fallbackPara = generateLocalTopicFallback(text);
-               addMessage(fallbackPara, 'ai');
-               const note = document.createElement('div');
-               note.className = 'text-[0.68rem] text-[#facc15] mt-1';
-               note.textContent = '⚡ Offline/API Fallback used (Your credit was refunded! Ensure GROQ_API_KEY or GEMINI_API_KEY is set in Vercel).';
-               els.chatMessages.lastElementChild.appendChild(note);
-               appendPracticeButtonToChat(fallbackPara, text.slice(0, 28));
+               addMessage('API Error (Your 1 Credit was refunded!): ' + (err && err.message ? err.message : 'Could not reach /api/chat'), 'ai');
            } finally {
                els.chatSend.disabled = false;
            }
