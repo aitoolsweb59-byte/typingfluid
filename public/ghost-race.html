@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
    <meta charset="UTF-8">
    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-   <title>FluidType | Ghost Race Mode</title>
+   <title>FluidType | Ghost Race Mode — TechTrackers.si</title>
    <link rel="preconnect" href="https://fonts.googleapis.com">
    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
@@ -23,6 +24,8 @@
            --caret-glow: rgba(192,132,252,0.45);
            --ghost-cursor-color: #f472b6;
            --ghost-cursor-glow: rgba(244,114,182,0.45);
+           --gold-highlight: #facc15;
+           --gold-glow: rgba(250, 204, 21, 0.35);
        }
        * { box-sizing: border-box; }
        html { scroll-behavior: smooth; }
@@ -163,110 +166,216 @@
            transition: all 0.3s;
        }
 
+       /* SUGGESTED PREWRITTEN TOPIC CHIPS */
+       .topic-chips-wrap {
+           display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+       }
+       .topic-chip {
+           background: rgba(34,211,238,0.08);
+           border: 1px solid rgba(34,211,238,0.25);
+           color: #e2e8f0;
+           padding: 5px 11px;
+           border-radius: 999px;
+           font-size: 0.72rem;
+           font-weight: 600;
+           cursor: pointer;
+           transition: all 0.2s ease;
+           display: inline-flex; align-items: center; gap: 5px;
+       }
+       .topic-chip:hover {
+           background: rgba(192,132,252,0.2);
+           border-color: var(--accent);
+           color: #fff;
+           box-shadow: 0 0 12px rgba(192,132,252,0.3);
+           transform: translateY(-1px);
+       }
+       .topic-chip.active-topic {
+           background: rgba(250,204,21,0.16);
+           border-color: var(--gold-highlight);
+           color: var(--gold-highlight);
+       }
+
        /* MODALS */
        .modal-overlay {
            position: fixed; inset: 0; z-index: 300;
-           background: rgba(7,10,18,0.6); backdrop-filter: blur(8px);
+           background: rgba(7,10,18,0.68); backdrop-filter: blur(8px);
            display: flex; align-items: center; justify-content: center;
            padding: 16px; opacity: 0; visibility: hidden; pointer-events: none;
            transition: opacity 0.35s ease, visibility 0.35s ease;
        }
        .modal-overlay.active { opacity: 1; visibility: visible; pointer-events: auto; }
        .modal-card {
-           background: rgba(15,21,37,0.95);
+           background: rgba(15,21,37,0.96);
            border: 1px solid rgba(255,255,255,0.1); border-radius: 20px;
-           padding: 24px; width: 100%; max-width: 480px;
-           box-shadow: 0 20px 50px rgba(0,0,0,0.5);
-           display: flex; flex-direction: column; gap: 16px;
+           padding: 24px; width: 100%; max-width: 500px;
+           box-shadow: 0 20px 50px rgba(0,0,0,0.55);
+           display: flex; flex-direction: column; gap: 14px;
            transform: scale(0.9) translateY(15px); opacity: 0;
            transition: transform 0.4s ease, opacity 0.4s ease;
+           max-height: 90vh; overflow-y: auto;
        }
        .modal-overlay.active .modal-card { transform: scale(1) translateY(0); opacity: 1; }
-       .modal-card.chat-card { max-width: 600px; height: 80vh; max-height: 700px; }
-       
+       .modal-card.chat-card { max-width: 620px; height: 84vh; max-height: 740px; overflow: hidden; }
+       .modal-card.legal-card { max-width: 680px; max-height: 85vh; }
+
        .chat-messages {
            flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; padding: 8px;
            scrollbar-width: thin; scrollbar-color: var(--accent) transparent;
        }
        .chat-messages::-webkit-scrollbar { width: 5px; }
        .chat-messages::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-       .msg-bubble { max-width: 82%; padding: 14px 18px; border-radius: 16px; font-size: 0.95rem; line-height: 1.6; word-break: break-word; }
+       .msg-bubble { max-width: 85%; padding: 14px 18px; border-radius: 16px; font-size: 0.92rem; line-height: 1.6; word-break: break-word; }
        .msg-user { align-self: flex-end; background: rgba(34,211,238,0.08); border: 1px solid rgba(34,211,238,0.15); border-bottom-right-radius: 4px; }
        .msg-ai { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-bottom-left-radius: 4px; }
-       .chat-input-wrap { display: flex; gap: 10px; padding: 12px; background: rgba(7,10,18,0.8); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
-       .chat-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 0.95rem; padding: 8px 12px; }
-       .chat-send { background: var(--accent); color: var(--bg-base); border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; }
+       .chat-input-wrap { display: flex; gap: 10px; padding: 10px; background: rgba(7,10,18,0.85); border-radius: 14px; border: 1px solid rgba(255,255,255,0.08); }
+       .chat-input { flex: 1; background: transparent; border: none; outline: none; color: var(--text-main); font-size: 0.95rem; padding: 6px 10px; }
+       .chat-send { background: var(--accent); color: var(--bg-base); border: none; border-radius: 10px; padding: 10px 20px; font-weight: 700; font-size: 0.8rem; cursor: pointer; text-transform: uppercase; transition: all 0.2s; }
+       .chat-send:hover { box-shadow: 0 0 15px var(--accent-glow); }
 
        /* TYPING INDICATOR */
-       .typing-indicator { 
-           display: flex; align-items: center; gap: 6px; padding: 14px 18px; 
-           align-self: flex-start; background: rgba(255,255,255,0.03); 
-           border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; 
-           border-bottom-left-radius: 4px; color: var(--text-dim); 
-           font-size: 0.9rem; font-style: italic; 
+       .typing-indicator {
+           display: flex; align-items: center; gap: 6px; padding: 14px 18px;
+           align-self: flex-start; background: rgba(255,255,255,0.03);
+           border: 1px solid rgba(255,255,255,0.06); border-radius: 16px;
+           border-bottom-left-radius: 4px; color: var(--text-dim);
+           font-size: 0.9rem; font-style: italic;
        }
-       .typing-dot { 
-           width: 5px; height: 5px; background: var(--accent); 
-           border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both; 
+       .typing-dot {
+           width: 5px; height: 5px; background: var(--accent);
+           border-radius: 50%; animation: typingBounce 1.4s infinite ease-in-out both;
        }
        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
-       @keyframes typingBounce { 
-           0%,80%,100% { transform: scale(0); opacity: 0.3; } 
-           40% { transform: scale(1); opacity: 1; } 
+       @keyframes typingBounce {
+           0%,80%,100% { transform: scale(0); opacity: 0.3; }
+           40% { transform: scale(1); opacity: 1; }
        }
 
        .btn-primary {
            background: var(--accent); color: var(--bg-base);
            font-family: 'Orbitron', sans-serif; font-weight: 700;
-           padding: 12px; border-radius: 12px; border: none;
+           padding: 12px 16px; border-radius: 12px; border: none;
            cursor: pointer; transition: all 0.25s; text-transform: uppercase; width: 100%;
+           font-size: 0.82rem; letter-spacing: 0.5px;
        }
-       .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.02); }
-       
+       .btn-primary:hover { box-shadow: 0 0 20px var(--accent-glow); transform: scale(1.01); }
+
        .customize-textarea {
            background: rgba(7,10,18,0.8); border: 1px solid rgba(255,255,255,0.08);
            border-radius: 14px; padding: 14px; color: var(--text-main); font-size: 0.9rem;
-           resize: vertical; min-height: 160px; outline: none; transition: border-color 0.25s;
+           resize: vertical; min-height: 130px; outline: none; transition: border-color 0.25s;
        }
        .customize-textarea:focus { border-color: rgba(74,222,128,0.4); }
 
        .credit-pill { background: rgba(34,211,238,0.1); border: 1px solid rgba(34,211,238,0.2); color: #22d3ee; padding: 4px 10px; border-radius: 999px; font-size: 0.65rem; font-family: 'Orbitron', sans-serif; font-weight: 700; transition: all 0.25s ease; }
        .credit-pill.zero { background: rgba(248,113,113,0.1); border-color: rgba(248,113,113,0.2); color: #f87171; }
 
+       /* AD MODAL & NON-CLICKABLE VIDEO SHIELD */
        .ad-card-special { background: linear-gradient(145deg, #0e1424, #171d33); border: 1px solid rgba(34,211,238,0.3); border-radius: 20px; box-shadow: 0 15px 40px rgba(0,0,0,0.6); text-align: center; }
-       .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: rgba(7,10,18,0.5); }
-       .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; }
-       .ad-timer, .ad-close-x { position: absolute; top: 10px; right: 10px; background: rgba(7,10,18,0.9); border: 2px solid var(--accent); color: var(--accent); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; font-weight: bold; z-index: 30; }
-       .ad-close-x { color: #fff; cursor: pointer; border-color: rgba(255,255,255,0.3); }
+       .video-container { position: relative; width: 100%; padding-bottom: 56.25%; height: 0; overflow: hidden; border-radius: 12px; background: rgba(7,10,18,0.8); user-select: none; }
+       .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border-radius: 12px; pointer-events: none !important; }
+       .ad-click-shield {
+           position: absolute; inset: 0; z-index: 25;
+           background: transparent;
+           cursor: not-allowed;
+       }
+       .ad-click-shield.closable {
+           cursor: pointer;
+       }
+       .ad-timer, .ad-close-x {
+           position: absolute; top: 10px; right: 10px;
+           background: rgba(7,10,18,0.92); border: 2px solid var(--accent);
+           color: var(--accent); width: 34px; height: 34px; border-radius: 50%;
+           display: flex; align-items: center; justify-content: center;
+           font-size: 14px; font-weight: bold; z-index: 35;
+       }
+       .ad-close-x { color: #facc15; cursor: pointer; border-color: #facc15; box-shadow: 0 0 12px rgba(250,204,21,0.4); }
 
+       /* GHOST SELECTION BUTTONS & YELLOW HIGHEST WPM HIGHLIGHT */
        .btn-ghost-select {
            background: rgba(255,255,255,0.03);
-           border: 1px solid rgba(255,255,255,0.1);
-           padding: 14px; border-radius: 14px;
+           border: 1.5px solid rgba(255,255,255,0.1);
+           padding: 14px 16px; border-radius: 14px;
            display: flex; justify-content: space-between; align-items: center;
            cursor: pointer; transition: all 0.25s;
            color: var(--text-main);
+           width: 100%; text-align: left;
        }
        .btn-ghost-select:hover {
            border-color: var(--ghost-cursor-color);
            background: rgba(244,114,182,0.08);
-           transform: translateX(4px);
+           transform: translateX(3px);
        }
+       .btn-ghost-select.highest-yellow {
+           background: rgba(250, 204, 21, 0.14);
+           border: 2px solid var(--gold-highlight);
+           box-shadow: 0 0 22px var(--gold-glow), inset 0 0 12px rgba(250, 204, 21, 0.08);
+       }
+       .btn-ghost-select.selected-ghost {
+           outline: 2px solid var(--gold-highlight);
+           outline-offset: 2px;
+       }
+       .badge-yellow {
+           background: var(--gold-highlight);
+           color: #070a12;
+           font-family: 'Orbitron', sans-serif;
+           font-size: 0.62rem;
+           font-weight: 900;
+           padding: 2px 8px;
+           border-radius: 999px;
+           letter-spacing: 0.5px;
+           text-transform: uppercase;
+           display: inline-block;
+       }
+
+       /* FOOTER & LEGAL LINKS */
+       .site-footer {
+           width: 100%; max-width: 56rem;
+           margin-top: auto; padding-top: 24px; padding-bottom: 8px;
+           border-top: 1px solid rgba(255,255,255,0.07);
+           z-index: 10;
+           display: flex; flex-col; gap: 10px;
+       }
+       .legal-link {
+           font-size: 0.73rem;
+           color: var(--text-dim);
+           transition: color 0.2s;
+           cursor: pointer;
+           background: none; border: none; padding: 2px 6px;
+       }
+       .legal-link:hover { color: #22d3ee; text-decoration: underline; }
+       .legal-tab-btn {
+           padding: 6px 12px;
+           border-radius: 8px;
+           font-size: 0.72rem;
+           font-weight: 600;
+           background: rgba(255,255,255,0.04);
+           border: 1px solid rgba(255,255,255,0.08);
+           color: var(--text-dim);
+           cursor: pointer;
+           transition: all 0.2s;
+       }
+       .legal-tab-btn.active {
+           background: rgba(34,211,238,0.15);
+           border-color: #22d3ee;
+           color: #22d3ee;
+       }
+
        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
    </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
+<body class="min-h-screen flex flex-col items-center justify-between p-4 sm:p-8 relative">
    <div class="ambient-bg"></div>
    <div class="dot-grid"></div>
    <div class="scanline"></div>
    <canvas id="thunder-canvas"></canvas>
 
-   <div class="fixed top-4 left-4 z-50 flex items-center gap-2">
+   <!-- TOP LEFT CONTROLS -->
+   <div class="fixed top-4 left-4 z-50 flex items-center gap-2 flex-wrap">
        <button id="thunder-toggle-btn" class="corner-btn">
            <span>⚡ THUNDER: ON</span>
        </button>
-       <select id="thunder-color-select" class="corner-btn bg-[#0f1525] text-xs outline-none">
+       <select id="thunder-color-select" class="corner-btn bg-[#0f1525] text-xs outline-none" aria-label="Thunder Color">
            <option value="purple">Color: Purple</option>
            <option value="green">Color: Green</option>
            <option value="blue">Color: Blue</option>
@@ -277,20 +386,21 @@
        </select>
    </div>
 
-   <div class="fixed top-4 right-4 z-50 flex items-center gap-3 bg-[#070a12] p-1 rounded-xl">
+   <!-- TOP RIGHT CONTROLS -->
+   <div class="fixed top-4 right-4 z-50 flex items-center gap-3 bg-[#070a12]/90 p-1.5 rounded-xl border border-white/5">
        <span id="credit-pill" class="credit-pill">3 Credits</span>
-       <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph">
+       <button id="customize-toggle-btn" class="corner-btn custom-topic relative" title="Customize Paragraph & Prewritten Topics">
            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
        </button>
-       <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Topic Search">
+       <button id="chat-toggle-btn" class="corner-btn chat relative" title="AI Chat & Instant Practice Topics">
            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path></svg>
        </button>
-       <a href="index.html" class="corner-btn hover:border-red-400">
-           <span>✕ EXIT</span>
-       </a>
+       <button id="reset-all-btn" class="corner-btn hover:border-red-400" title="Reset All Runs & Baseline">
+           <span>↺ RESET</span>
+       </button>
    </div>
 
-   <main class="w-full max-w-4xl flex flex-col gap-6 z-10 my-auto pt-16">
+   <main class="w-full max-w-4xl flex flex-col gap-5 z-10 my-auto pt-16">
        <div class="flex flex-col sm:flex-row items-center justify-between gap-4 border-b border-white/10 pb-4">
            <div>
                <h1 class="text-3xl font-black tracking-tight brand">FLUID<span class="gradient-text">GHOST</span></h1>
@@ -305,6 +415,16 @@
            </div>
        </div>
 
+       <!-- INSTANT PREWRITTEN TOPICS BAR ABOVE MAIN TYPING BOX (NO API KEY / NO CREDITS USED) -->
+       <div class="flex flex-col gap-1.5 bg-[#0f1525]/70 border border-white/5 rounded-2xl p-3">
+           <div class="flex items-center justify-between">
+               <span class="text-[0.68rem] uppercase tracking-widest font-bold text-[#94a3b8]">⚡ Instant Practice Topics (Pre-written • No API Key Used)</span>
+               <span class="text-[0.68rem] text-[#22d3ee] font-semibold" id="active-topic-label">Topic: Motivational Baseline</span>
+           </div>
+           <div class="topic-chips-wrap" id="main-topic-chips"></div>
+       </div>
+
+       <!-- LIVE RACE METRICS -->
        <div class="flex justify-between items-end px-2 flex-wrap gap-4">
            <div class="flex gap-6 sm:gap-10">
                <div class="flex flex-col"><span class="metric-label">WPM</span><span class="metric-value" id="wpm">0</span></div>
@@ -312,13 +432,14 @@
                <div class="flex flex-col"><span class="metric-label">Progress</span><span class="metric-value"><span id="progress">0</span><span class="metric-suffix">%</span></span></div>
            </div>
            <div class="flex gap-6 border-l border-white/10 pl-6" id="ghost-metrics" style="display: none;">
-               <div class="flex flex-col"><span class="metric-label text-[#f472b6]">Ghost WPM</span><span class="metric-value text-[#f472b6]" id="ghost-wpm">0</span></div>
+               <div class="flex flex-col"><span class="metric-label text-[#facc15]">Target Ghost WPM</span><span class="metric-value text-[#facc15]" id="ghost-wpm">0</span></div>
                <div class="flex flex-col"><span class="metric-label text-[#f472b6]">Ghost Prog</span><span class="metric-value text-[#f472b6]"><span id="ghost-progress">0</span><span class="metric-suffix">%</span></span></div>
            </div>
        </div>
 
+       <!-- MAIN TYPING CONTAINER -->
        <div id="typing-container" class="relative w-full text-[1.65rem] leading-[2.2] cursor-text select-none" tabindex="0">
-           <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"></textarea>
+           <textarea id="mobile-input-target" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" aria-label="Typing Input"></textarea>
            <div id="text-display" class="flex flex-wrap pointer-events-none"></div>
            <div id="focus-overlay" class="hidden">
                <div class="focus-pill" id="focus-pill">
@@ -328,23 +449,52 @@
            </div>
        </div>
 
-       <div class="flex justify-center">
-           <button id="restart-btn" class="p-3 text-[#64748b] hover:text-[#c084fc] transition-all transform hover:-rotate-180" title="Restart Drill">
+       <div class="flex justify-center items-center gap-4">
+           <button id="restart-btn" class="p-3 text-[#64748b] hover:text-[#c084fc] transition-all transform hover:-rotate-180" title="Restart Current Drill">
                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
            </button>
        </div>
    </main>
 
+   <!-- FOOTER WITH REQUIRED POLICIES & CONTACT -->
+   <footer class="site-footer">
+       <div class="flex flex-wrap justify-center items-center gap-x-4 gap-y-2">
+           <button class="legal-link" data-policy="privacy">Privacy Policy</button>
+           <span class="text-white/10">•</span>
+           <button class="legal-link" data-policy="terms">Terms &amp; Conditions</button>
+           <span class="text-white/10">•</span>
+           <button class="legal-link" data-policy="disclaimer">Disclaimer</button>
+           <span class="text-white/10">•</span>
+           <button class="legal-link" data-policy="copyright">Copyright Policy</button>
+           <span class="text-white/10">•</span>
+           <button class="legal-link" data-policy="cookie">Cookie Policy</button>
+           <span class="text-white/10">•</span>
+           <button class="legal-link" data-policy="contact">Contact Us</button>
+       </div>
+       <div class="text-center text-[0.68rem] text-[#475569] mt-2">
+           © 2026 FluidType • Powered by <a href="https://www.instagram.com/techtrackers.si" target="_blank" rel="noopener noreferrer" class="text-[#22d3ee] hover:underline">@techtrackers.si</a>
+       </div>
+   </footer>
+
    <!-- GHOST SELECT MODAL -->
    <div class="modal-overlay" id="ghost-select-modal">
        <div class="modal-card">
            <div class="flex justify-between items-center">
-               <h3 class="font-bold text-lg brand text-[#f472b6]">SELECT YOUR GHOST</h3>
-               <button class="text-sm text-[#64748b] hover:text-white" onclick="closeGhostModal()">✕</button>
+               <h3 class="font-bold text-lg brand text-[#facc15]">RACE SUMMARY &amp; GHOST SELECT</h3>
+               <button class="text-sm text-[#64748b] hover:text-white" id="close-ghost-modal-x" title="Play against selected Ghost">✕</button>
            </div>
-           <p class="text-xs text-[#64748b]">Which of your past selves do you want to race?</p>
-           <div id="ghost-options-list" class="flex flex-col gap-3 my-2"></div>
-           <button class="btn-primary" style="background:#f472b6" onclick="closeGhostModal()">Continue Solo Run</button>
+           <p class="text-xs text-[#94a3b8]" id="ghost-modal-subtitle">
+               Your highest WPM speed is automatically selected and highlighted in yellow. Click any run below or press the bottom button to race!
+           </p>
+           <div id="ghost-options-list" class="flex flex-col gap-3 my-1"></div>
+           <div class="flex flex-col sm:flex-row gap-2 pt-1">
+               <button id="race-second-btn" class="btn-primary" style="background: rgba(244,114,182,0.18); color: #f472b6; border: 1px solid rgba(244,114,182,0.4);">
+                   Race with Second
+               </button>
+               <button id="race-highest-btn" class="btn-primary" style="background: #facc15; color: #070a12; box-shadow: 0 0 18px rgba(250,204,21,0.35);">
+                   Play against Highest WPM Ghost
+               </button>
+           </div>
        </div>
    </div>
 
@@ -358,11 +508,21 @@
                    <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-chat-btn">✕</button>
                </div>
            </div>
+
            <div class="chat-messages" id="chat-messages">
-               <div class="msg-bubble msg-ai">Welcome to FluidType AI. Ask me anything to generate custom Ghost Race typing drills for you.</div>
+               <div class="msg-bubble msg-ai">
+                   Welcome to FluidType AI! Pick any instant topic below to practice immediately for free (no API key or credit needed), or type a custom prompt in the box to generate an AI paragraph.
+               </div>
            </div>
+
+           <!-- SUGGESTED PREWRITTEN TOPICS ABOVE CHAT TYPING BOX (NO API KEY USED) -->
+           <div class="flex flex-col gap-1.5 pt-2 border-t border-white/10">
+               <span class="text-[0.65rem] uppercase tracking-wider font-bold text-[#94a3b8]">Suggested Default Topics (Click to Load Directly • No API Key Used):</span>
+               <div class="topic-chips-wrap" id="chat-topic-chips"></div>
+           </div>
+
            <div class="chat-input-wrap">
-               <input type="text" class="chat-input" id="chat-input" placeholder="Ask about space, tech, history..." autocomplete="off">
+               <input type="text" class="chat-input" id="chat-input" placeholder="Or ask AI about any custom topic (1 Credit)..." autocomplete="off">
                <button class="chat-send" id="chat-send">Send</button>
            </div>
        </div>
@@ -375,26 +535,110 @@
                <h3 class="font-bold text-lg brand">CUSTOM <span class="text-[#4ade80]">TOPIC</span></h3>
                <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-customize-btn">✕</button>
            </div>
-           <p class="text-xs text-[#64748b]">Paste any topic to practice typing on. (Note: New text resets your ghost history!)</p>
-           <textarea id="customize-textarea" class="customize-textarea" rows="8" placeholder="Paste your topic or paragraph here..."></textarea>
+           <p class="text-xs text-[#94a3b8]">Click a pre-written topic below to practice right away (no API key used), or paste your own custom text. (New text resets your ghost history!)</p>
+
+           <!-- SUGGESTED PREWRITTEN TOPICS ABOVE CUSTOM TYPING BOX (NO API KEY USED) -->
+           <div class="flex flex-col gap-1.5 bg-[#070a12]/60 p-2.5 rounded-xl border border-white/5">
+               <span class="text-[0.65rem] uppercase tracking-wider font-bold text-[#4ade80]">Default Pre-written Topics (Click to Practice Instantly):</span>
+               <div class="topic-chips-wrap" id="custom-modal-topic-chips"></div>
+           </div>
+
+           <textarea id="customize-textarea" class="customize-textarea" rows="6" placeholder="Paste your topic or custom paragraph here..."></textarea>
            <button class="btn-primary" style="background:#4ade80" id="start-custom-typing-btn">Start Typing</button>
        </div>
    </div>
 
-   <!-- TECHTRAKERS AD MODAL -->
+   <!-- TECHTRACKERS.SI AD MODAL -->
    <div class="modal-overlay" id="ad-modal">
-       <div class="modal-card ad-card-special p-6 max-w-md w-full relative">
-           <div class="font-bold text-[#22d3ee] mb-4 uppercase tracking-widest text-lg">Watch to earn 3 Credits</div>
-           <div class="video-container">
+       <div class="modal-card ad-card-special p-6 max-w-md w-full relative" id="ad-modal-card">
+           <div class="flex items-center justify-between mb-1">
+               <span class="text-[0.65rem] font-bold uppercase tracking-widest text-[#c084fc] bg-[#c084fc]/10 px-2.5 py-1 rounded-full border border-[#c084fc]/30">
+                   TechTrackers.si Promo
+               </span>
+               <span class="text-[0.65rem] font-bold uppercase tracking-widest text-[#22d3ee]">
+                   +3 Credits Reward
+               </span>
+           </div>
+           <div class="font-bold text-[#22d3ee] mb-2 uppercase tracking-widest text-base">Watch 5s to Earn 3 Credits</div>
+           <div class="video-container" id="ad-video-container">
                <div id="ad-timer" class="ad-timer">5</div>
                <button class="ad-close-x hidden" id="ad-close-btn" aria-label="Close Ad">✕</button>
-               <iframe id="ad-iframe" src="" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+               <!-- Transparent non-clickable shield blocks all clicks/redirects to YouTube -->
+               <div id="ad-click-shield" class="ad-click-shield" title="Sponsored by TechTrackers.si"></div>
+               <iframe id="ad-iframe" src="" title="TechTrackers.si Promotion Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" referrerpolicy="strict-origin-when-cross-origin"></iframe>
            </div>
-           <p class="text-[0.7rem] text-[#64748b] text-center mt-4 uppercase tracking-widest font-bold" id="ad-footer-text">Video is playing...</p>
+           <p class="text-xs text-[#94a3b8] text-center mt-3 font-semibold" id="ad-brand-caption">
+               Follow <span class="text-[#facc15] font-bold">@techtrackers.si</span> on Instagram for daily AI, Tech &amp; Startup reels!
+           </p>
+           <p class="text-[0.72rem] text-[#64748b] text-center mt-1 uppercase tracking-widest font-bold" id="ad-footer-text">
+               Ad playing... Please wait 5 seconds
+           </p>
+       </div>
+   </div>
+
+   <!-- LEGAL & POLICIES MODAL -->
+   <div class="modal-overlay" id="legal-modal">
+       <div class="modal-card legal-card">
+           <div class="flex justify-between items-center pb-2 border-b border-white/10">
+               <h3 class="font-bold text-lg brand text-[#22d3ee]" id="legal-modal-title">PRIVACY POLICY</h3>
+               <button class="text-sm text-[#64748b] hover:text-white transition-colors p-1" id="close-legal-btn">✕</button>
+           </div>
+           <div class="flex flex-wrap gap-1.5 pb-2 border-b border-white/5" id="legal-tabs">
+               <button class="legal-tab-btn active" data-policy-tab="privacy">Privacy Policy</button>
+               <button class="legal-tab-btn" data-policy-tab="terms">Terms &amp; Conditions</button>
+               <button class="legal-tab-btn" data-policy-tab="disclaimer">Disclaimer</button>
+               <button class="legal-tab-btn" data-policy-tab="copyright">Copyright Policy</button>
+               <button class="legal-tab-btn" data-policy-tab="cookie">Cookie Policy</button>
+               <button class="legal-tab-btn" data-policy-tab="contact">Contact Us</button>
+           </div>
+           <div id="legal-modal-body" class="text-sm text-[#cbd5e1] leading-relaxed space-y-3 overflow-y-auto max-h-[55vh] pr-1"></div>
+           <button class="btn-primary mt-2" id="legal-done-btn">Close</button>
        </div>
    </div>
 
    <script>
+       /* =====================================================================
+          1. PRE-WRITTEN DEFAULT TOPICS (NO API KEY / NO CREDITS USED)
+          ===================================================================== */
+       const PREWRITTEN_TOPICS_LIST = [
+           {
+               id: 'black-hole',
+               label: '🕳️ Black Hole',
+               title: 'Black Holes & Event Horizons',
+               text: 'A black hole is a region of spacetime where gravity is so intense that nothing, not even light, can escape its pull. Crossing the event horizon warps time and stretches matter into a cosmic stream around a spinning singularity.'
+           },
+           {
+               id: 'ai',
+               label: '🤖 About AI',
+               title: 'Artificial Intelligence',
+               text: 'Artificial intelligence transforms raw data into deep pattern recognition, enabling neural networks to write code, solve scientific puzzles, and converse naturally. Careful human alignment ensures intelligent systems amplify creativity.'
+           },
+           {
+               id: 'science',
+               label: '🔬 About Science',
+               title: 'The Scientific Method',
+               text: 'Science advances through relentless curiosity, controlled experiments, and testable hypotheses. Every measurement refines our understanding of nature, turning yesterday mysteries into tomorrow breakthroughs in medicine and physics.'
+           },
+           {
+               id: 'universe',
+               label: '🌌 About Universe',
+               title: 'The Expanding Universe',
+               text: 'The observable universe spans ninety-three billion light-years, weaving trillions of galaxies along vast filaments of dark matter. Every heavy atom in your hands was forged inside the fiery core of an ancient exploding star.'
+           },
+           {
+               id: 'quantum',
+               label: '⚛️ Quantum Physics',
+               title: 'Quantum Superposition',
+               text: 'In the quantum realm, subatomic particles exist in wave-like superpositions until observed. Quantum computers harness entanglement and interference to explore vast computational spaces far beyond classical silicon processors.'
+           },
+           {
+               id: 'techtrackers',
+               label: '🚀 Emerging Tech',
+               title: 'Emerging Tech & Startups',
+               text: 'Breakthrough startups move fast by pairing sharp engineering with relentless user focus. From autonomous robotics to next-generation silicon, small teams build the tools that reshape how billions of people work and create.'
+           }
+       ];
+
        const DEFAULT_TOPICS = [
            "Every expert was once a beginner who refused to give up. Your fingers are learning a language of their own through repetition and patience.",
            "Speed is a byproduct of accuracy and countless hours of intentional practice. Do not rush the process of becoming great at something new.",
@@ -402,9 +646,72 @@
            "Your past self set the baseline and your present self is breaking that barrier. Racing against who you were yesterday is the purest form of growth."
        ];
 
+       /* =====================================================================
+          2. LEGAL & POLICY CONTENT DICTIONARY
+          ===================================================================== */
+       const LEGAL_POLICIES = {
+           privacy: {
+               title: 'PRIVACY POLICY',
+               html: `
+                   <p><strong>Effective Date:</strong> October 2026</p>
+                   <p>Welcome to <strong>FluidType (Ghost Race Mode)</strong>, operated in partnership with <strong>TechTrackers.si</strong>. We respect your privacy and are committed to keeping your personal typing data transparent and secure.</p>
+                   <h4 class="font-bold text-white mt-2">1. Information We Process</h4>
+                   <p>Your typing speed (WPM), keystroke timing intervals, accuracy metrics, and Ghost Race history are processed locally inside your browser memory during your active session. When you use the optional AI Chat feature, only the topic text you submit is sent to our serverless API endpoint (powered by Groq and Google Gemini) to generate a practice paragraph.</p>
+                   <h4 class="font-bold text-white mt-2">2. No Sale of Personal Data</h4>
+                   <p>We do not sell, rent, or trade personal user data to third parties. Sponsored promotional videos shown in the credit reward popup promote our official creator page (<strong>@techtrackers.si</strong>) without harvesting personal profiles.</p>
+               `
+           },
+           terms: {
+               title: 'TERMS & CONDITIONS',
+               html: `
+                   <p>By accessing and using <strong>FluidType</strong>, you agree to abide by these Terms &amp; Conditions.</p>
+                   <h4 class="font-bold text-white mt-2">1. Acceptable Use</h4>
+                   <p>You agree to use FluidType and its AI topic generator for lawful educational and typing-practice purposes. Automated scraping, rate-limit abuse, or attempting to bypass API protections is prohibited.</p>
+                   <h4 class="font-bold text-white mt-2">2. Credits &amp; Promotional Videos</h4>
+                   <p>Pre-written practice topics are completely free and unlimited. Custom AI-generated paragraphs use in-app credits, which can be replenished for free by watching a 5-second promotional preview from <strong>TechTrackers.si</strong>.</p>
+               `
+           },
+           disclaimer: {
+               title: 'DISCLAIMER',
+               html: `
+                   <p>All typing drills, WPM metrics, and AI-generated practice paragraphs on <strong>FluidType</strong> are provided on an "as-is" basis for skill-building and entertainment purposes.</p>
+                   <p>Paragraphs generated dynamically via third-party large language models (Groq / Google Gemini) or pre-written science/tech summaries are intended strictly as typing exercises and do not constitute professional, legal, medical, or financial advice.</p>
+               `
+           },
+           copyright: {
+               title: 'COPYRIGHT POLICY',
+               html: `
+                   <p>© 2026 <strong>FluidType &amp; TechTrackers.si</strong>. All rights reserved.</p>
+                   <p>The FluidType Ghost Race interface, custom lightning particle engine, visual design, and original pre-written practice modules are protected by applicable copyright laws. Promotional video content belongs to <strong>TechTrackers.si (@techtrackers.si)</strong>. You may not copy, redistribute, or re-host the source code commercially without prior written permission.</p>
+               `
+           },
+           cookie: {
+               title: 'COOKIE POLICY',
+               html: `
+                   <p><strong>FluidType</strong> uses minimal local browser storage and essential session state to keep track of your typing settings, Ghost Race WPM history, and earned AI credits.</p>
+                   <p>When a promotional video from YouTube is embedded to replenish credits, YouTube may set standard media playback cookies in accordance with Google's Privacy &amp; Cookie policies. You can clear browser storage at any time via your browser settings.</p>
+               `
+           },
+           contact: {
+               title: 'CONTACT US',
+               html: `
+                   <p>Have feedback, bug reports, or collaboration inquiries for <strong>FluidType</strong> or <strong>TechTrackers.si</strong>? Reach out to us directly:</p>
+                   <ul class="list-disc pl-5 space-y-1 mt-2">
+                       <li><strong>Instagram:</strong> <a href="https://www.instagram.com/techtrackers.si" target="_blank" rel="noopener noreferrer" class="text-[#22d3ee] underline">@techtrackers.si</a></li>
+                       <li><strong>YouTube Promo Channel:</strong> <a href="https://youtu.be/al4gVacz0AE" target="_blank" rel="noopener noreferrer" class="text-[#22d3ee] underline">TechTrackers Official Video</a></li>
+                       <li><strong>Support &amp; Inquiries:</strong> Direct message us on Instagram at <strong>@techtrackers.si</strong> for rapid support.</li>
+                   </ul>
+               `
+           }
+       };
+
+       /* =====================================================================
+          3. APPLICATION STATE & ELEMENT REFERENCES
+          ===================================================================== */
        const state = {
            targetDifficulty: 1,
            rawText: "",
+           activeTopicTitle: "Motivational Baseline",
            charArray: [],
            typedArray: [],
            currentIndex: 0,
@@ -418,10 +725,13 @@
            runHistory: [],
            currentRecording: [],
            activeGhostRun: null,
+           selectedModalGhost: null,
            ghostIndex: 0,
            ghostTimer: null,
+           metricsRafId: null,
            isCoolingDown: false,
-           credits: 3
+           credits: 3,
+           adClosable: false
        };
 
        const els = {
@@ -436,13 +746,22 @@
            ghostProgress: document.getElementById('ghost-progress'),
            ghostMetrics: document.getElementById('ghost-metrics'),
            ghostStatus: document.getElementById('ghost-status'),
+           activeTopicLabel: document.getElementById('active-topic-label'),
            thunderCanvas: document.getElementById('thunder-canvas'),
            thunderToggleBtn: document.getElementById('thunder-toggle-btn'),
            thunderColorSelect: document.getElementById('thunder-color-select'),
            diffButtons: document.querySelectorAll('.diff-btn'),
            ghostSelectModal: document.getElementById('ghost-select-modal'),
            ghostOptionsList: document.getElementById('ghost-options-list'),
+           closeGhostModalX: document.getElementById('close-ghost-modal-x'),
+           raceSecondBtn: document.getElementById('race-second-btn'),
+           raceHighestBtn: document.getElementById('race-highest-btn'),
            restartBtn: document.getElementById('restart-btn'),
+           resetAllBtn: document.getElementById('reset-all-btn'),
+
+           mainTopicChips: document.getElementById('main-topic-chips'),
+           chatTopicChips: document.getElementById('chat-topic-chips'),
+           customModalTopicChips: document.getElementById('custom-modal-topic-chips'),
 
            chatToggleBtn: document.getElementById('chat-toggle-btn'),
            chatModal: document.getElementById('chat-modal'),
@@ -460,12 +779,96 @@
            startCustomTypingBtn: document.getElementById('start-custom-typing-btn'),
 
            adModal: document.getElementById('ad-modal'),
+           adModalCard: document.getElementById('ad-modal-card'),
            adCloseBtn: document.getElementById('ad-close-btn'),
+           adClickShield: document.getElementById('ad-click-shield'),
            adTimer: document.getElementById('ad-timer'),
            adIframe: document.getElementById('ad-iframe'),
-           adFooterText: document.getElementById('ad-footer-text')
+           adFooterText: document.getElementById('ad-footer-text'),
+
+           legalModal: document.getElementById('legal-modal'),
+           legalModalTitle: document.getElementById('legal-modal-title'),
+           legalModalBody: document.getElementById('legal-modal-body'),
+           closeLegalBtn: document.getElementById('close-legal-btn'),
+           legalDoneBtn: document.getElementById('legal-done-btn'),
+           legalTabs: document.querySelectorAll('.legal-tab-btn'),
+           legalLinks: document.querySelectorAll('.legal-link')
        };
 
+       /* =====================================================================
+          4. RENDER PRE-WRITTEN DEFAULT TOPIC CHIPS ABOVE ALL TYPING BOXES
+          ===================================================================== */
+       function loadPrewrittenTopic(topicObj, sourceModal) {
+           const clean = sanitizeText(topicObj.text);
+           state.rawText = clean;
+           state.activeTopicTitle = topicObj.title;
+           els.activeTopicLabel.textContent = `Topic: ${topicObj.title}`;
+
+           // Highlight active chip across all chip bars
+           document.querySelectorAll('.topic-chip').forEach(btn => {
+               btn.classList.toggle('active-topic', btn.getAttribute('data-topic-id') === topicObj.id);
+           });
+
+           processTextForDifficulty(clean);
+
+           // Reset ghost run history since track paragraph changed
+           state.runHistory = [];
+           state.activeGhostRun = null;
+           state.selectedModalGhost = null;
+           els.ghostMetrics.style.display = 'none';
+           els.ghostStatus.textContent = `Mode: Initial Solo Run (${topicObj.title} Baseline)`;
+
+           if (sourceModal === 'chat') {
+               addMessage(`Selected Instant Topic: ${topicObj.title}`, 'user');
+               addMessage(clean, 'ai');
+               const infoTag = document.createElement('div');
+               infoTag.className = 'text-[0.7rem] text-[#4ade80] font-semibold mt-1';
+               infoTag.textContent = '✓ Loaded directly into Ghost Race! (0 Credits used)';
+               els.chatMessages.lastElementChild.appendChild(infoTag);
+
+               const practiceNowBtn = document.createElement('button');
+               practiceNowBtn.className = 'btn-primary mt-2';
+               practiceNowBtn.textContent = 'Start Typing This Now';
+               practiceNowBtn.style.fontSize = '0.72rem';
+               practiceNowBtn.style.padding = '8px';
+               practiceNowBtn.addEventListener('click', () => {
+                   els.chatModal.classList.remove('active');
+                   resetDrill();
+               });
+               els.chatMessages.lastElementChild.appendChild(practiceNowBtn);
+               els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+           } else if (sourceModal === 'customize') {
+               els.customizeTextarea.value = clean;
+               els.customizeModal.classList.remove('active');
+           }
+
+           resetDrill();
+       }
+
+       function renderTopicChips() {
+           const containers = [
+               { el: els.mainTopicChips, source: 'main' },
+               { el: els.chatTopicChips, source: 'chat' },
+               { el: els.customModalTopicChips, source: 'customize' }
+           ];
+           containers.forEach(({ el, source }) => {
+               if (!el) return;
+               el.innerHTML = '';
+               PREWRITTEN_TOPICS_LIST.forEach(topic => {
+                   const btn = document.createElement('button');
+                   btn.type = 'button';
+                   btn.className = 'topic-chip';
+                   btn.setAttribute('data-topic-id', topic.id);
+                   btn.textContent = topic.label;
+                   btn.addEventListener('click', () => loadPrewrittenTopic(topic, source));
+                   el.appendChild(btn);
+               });
+           });
+       }
+
+       /* =====================================================================
+          5. THUNDER & DIFFICULTY CONTROLS
+          ===================================================================== */
        els.thunderToggleBtn.addEventListener('click', () => {
            state.thunderEnabled = !state.thunderEnabled;
            els.thunderToggleBtn.innerHTML = `<span>⚡ THUNDER: ${state.thunderEnabled ? 'ON' : 'OFF'}</span>`;
@@ -494,7 +897,7 @@
            btn.addEventListener('click', (e) => {
                els.diffButtons.forEach(b => b.classList.remove('active'));
                e.target.classList.add('active');
-               state.targetDifficulty = parseInt(e.target.getAttribute('data-level'));
+               state.targetDifficulty = parseInt(e.target.getAttribute('data-level'), 10);
                if (state.rawText) {
                    processTextForDifficulty(state.rawText);
                    resetDrill();
@@ -522,42 +925,155 @@
        function loadRandomParagraph() {
            const text = DEFAULT_TOPICS[Math.floor(Math.random() * DEFAULT_TOPICS.length)];
            state.rawText = text;
+           state.activeTopicTitle = "Motivational Baseline";
+           els.activeTopicLabel.textContent = "Topic: Motivational Baseline";
            processTextForDifficulty(text);
            resetDrill();
        }
 
+       /* =====================================================================
+          6. GHOST SELECTION MODAL & HIGHEST WPM AUTO-HIGHLIGHT IN YELLOW
+          ===================================================================== */
+       function getOrdinalRunLabel(runId) {
+           if (runId === 1) return 'First Time Speed (Run #1)';
+           if (runId === 2) return 'Second Time Speed (Run #2)';
+           if (runId === 3) return 'Third Time Speed (Run #3)';
+           return `Race Run #${runId}`;
+       }
+
+       function getHighestWpmRun() {
+           if (!state.runHistory || state.runHistory.length === 0) return null;
+           let best = state.runHistory[0];
+           for (let i = 1; i < state.runHistory.length; i++) {
+               if (state.runHistory[i].wpm >= best.wpm) {
+                   best = state.runHistory[i];
+               }
+           }
+           return best;
+       }
+
+       function updateModalGhostButtons(highestRun) {
+           const chosen = state.selectedModalGhost || highestRun;
+           if (chosen) {
+               els.raceHighestBtn.textContent = `Play against ${chosen.wpm} WPM Ghost`;
+           }
+           const secondRun = state.runHistory.length >= 2 ? state.runHistory[state.runHistory.length - 1] : null;
+           if (secondRun && highestRun && secondRun.id !== highestRun.id) {
+               els.raceSecondBtn.style.display = 'block';
+               els.raceSecondBtn.textContent = `Race with Run #${secondRun.id} (${secondRun.wpm} WPM)`;
+           } else if (state.runHistory.length >= 2) {
+               const prevRun = state.runHistory[state.runHistory.length - 2];
+               els.raceSecondBtn.style.display = 'block';
+               els.raceSecondBtn.textContent = `Race with Run #${prevRun.id} (${prevRun.wpm} WPM)`;
+           } else {
+               els.raceSecondBtn.style.display = 'none';
+           }
+       }
+
        function triggerGhostSelectionModal() {
            els.ghostOptionsList.innerHTML = '';
-           const runsToShow = state.runHistory.slice(-3);
+           const highestRun = getHighestWpmRun();
+           state.selectedModalGhost = highestRun;
+
+           const latestRun = state.runHistory[state.runHistory.length - 1];
+           if (latestRun && highestRun && latestRun.id !== highestRun.id) {
+               els.ghostModalsubtitle = document.getElementById('ghost-modal-subtitle');
+               els.ghostModalsubtitle.textContent = `Run #${latestRun.id} finished at ${latestRun.wpm} WPM. Since that was slower than your record, your Highest Speed (${highestRun.wpm} WPM) is automatically selected & highlighted in yellow!`;
+           } else if (highestRun) {
+               document.getElementById('ghost-modal-subtitle').textContent = `New Best or Matched Record! Your Highest Speed (${highestRun.wpm} WPM) is automatically selected & highlighted in yellow.`;
+           }
+
+           const runsToShow = state.runHistory.slice(-4);
            runsToShow.forEach((run) => {
+               const isHighest = highestRun && run.id === highestRun.id;
                const btn = document.createElement('button');
-               btn.className = 'btn-ghost-select';
+               btn.type = 'button';
+               btn.className = 'btn-ghost-select' + (isHighest ? ' highest-yellow selected-ghost' : '');
                btn.innerHTML = `
-                   <div>
-                       <div class="font-bold text-sm">Race Run #${run.id}</div>
-                       <div class="text-xs text-[#64748b]">Accuracy: ${run.accuracy}%</div>
+                   <div class="flex flex-col gap-1">
+                       <div class="flex items-center gap-2 flex-wrap">
+                           <span class="font-bold text-sm ${isHighest ? 'text-[#facc15]' : 'text-white'}">${getOrdinalRunLabel(run.id)}</span>
+                           ${isHighest ? '<span class="badge-yellow">★ Highest WPM • Auto-Selected</span>' : ''}
+                       </div>
+                       <div class="text-xs ${isHighest ? 'text-[#fef08a]' : 'text-[#94a3b8]'}">
+                           Accuracy: ${run.accuracy}% • ${isHighest ? 'Race with the highest WPM speed' : `Click to race against Run #${run.id}`}
+                       </div>
                    </div>
-                   <div class="text-xl font-black text-[#f472b6] font-['Orbitron']">${run.wpm} WPM</div>
+                   <div class="text-right">
+                       <div class="text-xl font-black ${isHighest ? 'text-[#facc15]' : 'text-[#f472b6]'} font-['Orbitron']">${run.wpm} WPM</div>
+                       <div class="text-[0.65rem] uppercase tracking-wider ${isHighest ? 'text-[#facc15]' : 'text-[#64748b]'} font-bold">
+                           ${isHighest ? 'Best Ghost' : `Run #${run.id} Ghost`}
+                       </div>
+                   </div>
                `;
                btn.addEventListener('click', () => {
+                   state.selectedModalGhost = run;
                    selectGhostRun(run);
-                   closeGhostModal();
+                   els.ghostSelectModal.classList.remove('active');
                });
                els.ghostOptionsList.appendChild(btn);
            });
+
+           updateModalGhostButtons(highestRun);
            els.ghostSelectModal.classList.add('active');
        }
 
-       function closeGhostModal() { els.ghostSelectModal.classList.remove('active'); }
+       // Bottom primary button: "Play against [Highest WPM] WPM Ghost"
+       els.raceHighestBtn.addEventListener('click', () => {
+           const highestRun = getHighestWpmRun();
+           const targetGhost = state.selectedModalGhost || highestRun;
+           if (targetGhost) {
+               selectGhostRun(targetGhost);
+           } else {
+               resetDrill();
+           }
+           els.ghostSelectModal.classList.remove('active');
+       });
+
+       // Secondary button: "Race with Second / Other Run"
+       els.raceSecondBtn.addEventListener('click', () => {
+           const highestRun = getHighestWpmRun();
+           const latestRun = state.runHistory[state.runHistory.length - 1];
+           let target = latestRun;
+           if (latestRun && highestRun && latestRun.id === highestRun.id && state.runHistory.length >= 2) {
+               target = state.runHistory[state.runHistory.length - 2];
+           }
+           if (target) {
+               selectGhostRun(target);
+           } else {
+               resetDrill();
+           }
+           els.ghostSelectModal.classList.remove('active');
+       });
+
+       // Closing with ✕ ALWAYS selects the highest WPM ghost and resets the drill so WPM never bugs out!
+       els.closeGhostModalX.addEventListener('click', () => {
+           const highestRun = getHighestWpmRun();
+           if (highestRun) {
+               selectGhostRun(highestRun);
+           } else {
+               resetDrill();
+           }
+           els.ghostSelectModal.classList.remove('active');
+       });
 
        function selectGhostRun(run) {
+           if (!run) {
+               resetDrill();
+               return;
+           }
            state.activeGhostRun = run;
            els.ghostMetrics.style.display = 'flex';
            els.ghostWpm.textContent = run.wpm;
-           els.ghostStatus.textContent = `Mode: Racing against Past Self (Run #${run.id} - ${run.wpm} WPM)`;
+           const highestRun = getHighestWpmRun();
+           const isBest = highestRun && highestRun.id === run.id;
+           els.ghostStatus.textContent = `Mode: Playing against ${run.wpm} WPM Ghost (Run #${run.id}${isBest ? ' ★ Highest Speed' : ''})`;
            resetDrill();
        }
 
+       /* =====================================================================
+          7. CORE TYPING ENGINE & BULLETPROOF WPM CALCULATION
+          ===================================================================== */
        function renderTextUI() {
            els.display.innerHTML = '';
            state.charArray.forEach((char, idx) => {
@@ -593,7 +1109,15 @@
            state.isTypingStarted = false;
            state.currentRecording = [];
            state.ghostIndex = 0;
-           if (state.ghostTimer) clearInterval(state.ghostTimer);
+
+           if (state.ghostTimer) {
+               clearInterval(state.ghostTimer);
+               state.ghostTimer = null;
+           }
+           if (state.metricsRafId) {
+               cancelAnimationFrame(state.metricsRafId);
+               state.metricsRafId = null;
+           }
 
            els.mobileInput.value = '';
            els.wpm.textContent = '0';
@@ -604,10 +1128,22 @@
            renderTextUI();
            els.mobileInput.focus();
 
-           setTimeout(() => { state.isCoolingDown = false; els.mobileInput.value = ''; }, 250);
+           setTimeout(() => {
+               state.isCoolingDown = false;
+               els.mobileInput.value = '';
+           }, 200);
        }
 
        els.restartBtn.addEventListener('click', resetDrill);
+       els.resetAllBtn.addEventListener('click', () => {
+           state.runHistory = [];
+           state.activeGhostRun = null;
+           state.selectedModalGhost = null;
+           els.ghostMetrics.style.display = 'none';
+           els.ghostStatus.textContent = 'Mode: Initial Solo Run (Setting your Ghost Baseline)';
+           resetDrill();
+       });
+
        els.container.addEventListener('click', () => els.mobileInput.focus());
        els.mobileInput.addEventListener('focus', () => els.focusOverlay.classList.add('hidden'));
        els.mobileInput.addEventListener('blur', () => els.focusOverlay.classList.remove('hidden'));
@@ -642,6 +1178,7 @@
 
        function startGhostReplay() {
            if (!state.activeGhostRun || !state.activeGhostRun.timing || state.activeGhostRun.timing.length === 0) return;
+           if (state.ghostTimer) clearInterval(state.ghostTimer);
            const startTime = performance.now();
            state.ghostTimer = setInterval(() => {
                const elapsed = performance.now() - startTime;
@@ -651,19 +1188,44 @@
                    els.ghostProgress.textContent = Math.round((state.ghostIndex / state.charArray.length) * 100);
                    updateCursorUI();
                }
-               if (state.ghostIndex >= record.length) clearInterval(state.ghostTimer);
+               if (state.ghostIndex >= record.length) {
+                   clearInterval(state.ghostTimer);
+                   state.ghostTimer = null;
+               }
            }, 16);
        }
 
+       function computeSafeWpm(correctChars, startTimeMs) {
+           if (!startTimeMs || correctChars <= 0) return 0;
+           const elapsedMs = performance.now() - startTimeMs;
+           // Guard against sub-300ms division spikes on the very first keystroke
+           const safeElapsedMs = Math.max(elapsedMs, 350);
+           const timeElapsedMin = safeElapsedMs / 60000;
+           const rawWpm = (correctChars / 5) / timeElapsedMin;
+           if (!isFinite(rawWpm) || isNaN(rawWpm) || rawWpm < 0) return 0;
+           // Cap instantaneous display to prevent hypothetical astronomical numbers
+           return Math.min(Math.round(rawWpm), 350);
+       }
+
        els.mobileInput.addEventListener('input', () => {
-           if (state.isCoolingDown) return;
+           if (state.isCoolingDown) {
+               els.mobileInput.value = state.typedArray.join('');
+               return;
+           }
+
+           // Safety guard: if a previous run already reached the end without resetting, force reset first
+           if (state.currentIndex >= state.charArray.length && state.charArray.length > 0) {
+               resetDrill();
+               return;
+           }
+
            const inputValue = els.mobileInput.value;
            const inputLength = inputValue.length;
 
            if (!state.timerActive && inputLength > 0) {
                state.timerActive = true;
                state.startTime = performance.now();
-               requestAnimationFrame(calculateMetricsLoop);
+               state.metricsRafId = requestAnimationFrame(calculateMetricsLoop);
                startGhostReplay();
            }
            if (!state.isTypingStarted && inputLength > 0) state.isTypingStarted = true;
@@ -699,15 +1261,40 @@
                    spawnThunderBolt(state.currentIndex - 1, 'correct');
 
                    if (state.currentIndex >= state.charArray.length) {
+                       // Run complete! Lock input immediately and compute final WPM safely
                        state.timerActive = false;
+                       state.isCoolingDown = true;
                        els.mobileInput.blur();
-                       if (state.ghostTimer) clearInterval(state.ghostTimer);
-                       const finalWpm = Math.round((state.correctKeystrokes / 5) / ((performance.now() - state.startTime) / 60000));
-                       const finalAcc = Math.round((state.correctKeystrokes / state.totalKeystrokes) * 100);
-                       state.runHistory.push({ id: state.runHistory.length + 1, wpm: finalWpm, accuracy: finalAcc, timing: [...state.currentRecording] });
-                       
+                       if (state.ghostTimer) {
+                           clearInterval(state.ghostTimer);
+                           state.ghostTimer = null;
+                       }
+                       if (state.metricsRafId) {
+                           cancelAnimationFrame(state.metricsRafId);
+                           state.metricsRafId = null;
+                       }
+
+                       const finalWpm = computeSafeWpm(state.correctKeystrokes, state.startTime);
+                       const finalAcc = state.totalKeystrokes > 0
+                           ? Math.min(100, Math.max(0, Math.round((state.correctKeystrokes / state.totalKeystrokes) * 100)))
+                           : 100;
+
+                       els.wpm.innerText = finalWpm;
+                       els.accuracy.innerText = finalAcc;
+
+                       const completedRun = {
+                           id: state.runHistory.length + 1,
+                           wpm: finalWpm,
+                           accuracy: finalAcc,
+                           timing: [...state.currentRecording]
+                       };
+                       state.runHistory.push(completedRun);
+
                        if (state.runHistory.length >= 2) {
-                           setTimeout(() => triggerGhostSelectionModal(), 600);
+                           // Pre-select highest WPM ghost and reset the board underneath so stale state never persists
+                           const highestRun = getHighestWpmRun();
+                           selectGhostRun(highestRun);
+                           setTimeout(() => triggerGhostSelectionModal(), 450);
                        } else {
                            selectGhostRun(state.runHistory[0]);
                        }
@@ -728,86 +1315,161 @@
        }
 
        function calculateMetricsLoop() {
-           if (!state.timerActive && state.currentIndex === 0) return;
-           const timeElapsedMin = (performance.now() - state.startTime) / 60000;
-           let wpmVal = (state.correctKeystrokes / 5) / timeElapsedMin;
+           if (!state.timerActive || state.currentIndex === 0 || !state.startTime) return;
+           const wpmVal = computeSafeWpm(state.correctKeystrokes, state.startTime);
            let accVal = state.totalKeystrokes > 0 ? (state.correctKeystrokes / state.totalKeystrokes) * 100 : 100;
-           if (!isFinite(wpmVal) || isNaN(wpmVal)) wpmVal = 0;
            if (accVal < 0 || isNaN(accVal)) accVal = 100;
-           els.wpm.innerText = Math.round(wpmVal);
+           els.wpm.innerText = wpmVal;
            els.accuracy.innerText = Math.round(accVal);
-           if (state.timerActive) requestAnimationFrame(calculateMetricsLoop);
+           if (state.timerActive) {
+               state.metricsRafId = requestAnimationFrame(calculateMetricsLoop);
+           }
        }
 
-       /* CUSTOMIZE TOPIC LOGIC */
-       els.customizeToggleBtn.addEventListener('click', () => { els.customizeModal.classList.add('active'); els.customizeTextarea.focus(); });
+       /* =====================================================================
+          8. CUSTOMIZE TOPIC MODAL LOGIC
+          ===================================================================== */
+       els.customizeToggleBtn.addEventListener('click', () => {
+           els.customizeModal.classList.add('active');
+           els.customizeTextarea.focus();
+       });
        els.closeCustomizeBtn.addEventListener('click', () => els.customizeModal.classList.remove('active'));
-       
+
        els.startCustomTypingBtn.addEventListener('click', () => {
            const text = sanitizeText(els.customizeTextarea.value);
            if (!text) return;
            state.rawText = text;
+           state.activeTopicTitle = "Custom User Paragraph";
+           els.activeTopicLabel.textContent = "Topic: Custom User Paragraph";
            processTextForDifficulty(text);
-           
-           // CRITICAL: Flush ghost run history! You can't race ghosts on a different track shape!
+
            state.runHistory = [];
            state.activeGhostRun = null;
+           state.selectedModalGhost = null;
            els.ghostMetrics.style.display = 'none';
            els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
-           
+
            resetDrill();
            els.customizeModal.classList.remove('active');
            els.customizeTextarea.value = '';
        });
 
-       /* AD AND CREDITS LOGIC */
-       let adCountdownInterval;
+       /* =====================================================================
+          9. TECHTRACKERS.SI VIDEO AD & 5-SECOND CLICK-ANYWHERE-TO-CLOSE LOGIC
+          ===================================================================== */
+       let adCountdownInterval = null;
+
        function updateCreditDisplay() {
            const text = state.credits + ' Credit' + (state.credits !== 1 ? 's' : '');
            els.creditPill.textContent = text;
            els.chatCreditPill.textContent = text;
            if (state.credits === 0) {
-               els.creditPill.classList.add('zero'); els.chatCreditPill.classList.add('zero');
+               els.creditPill.classList.add('zero');
+               els.chatCreditPill.classList.add('zero');
            } else {
-               els.creditPill.classList.remove('zero'); els.chatCreditPill.classList.remove('zero');
+               els.creditPill.classList.remove('zero');
+               els.chatCreditPill.classList.remove('zero');
            }
        }
+
        function showVideoAd() {
+           state.adClosable = false;
            els.adModal.classList.add('active');
-           els.adCloseBtn.classList.add('hidden'); els.adTimer.classList.remove('hidden');
-           els.adTimer.textContent = '5'; els.adFooterText.textContent = "Please wait to claim credits...";
-           els.adIframe.src = "https://www.youtube.com/embed/q2Rg8jf4Iu0?si=CJ7iAjDifBIw4Wty&autoplay=1";
-           
-           let timeLeft = 5; clearInterval(adCountdownInterval);
+           els.adCloseBtn.classList.add('hidden');
+           els.adClickShield.classList.remove('closable');
+           els.adTimer.classList.remove('hidden');
+           els.adTimer.textContent = '5';
+           els.adFooterText.textContent = "Ad playing... Wait 5 seconds to claim +3 Credits";
+           els.adFooterText.style.color = '#64748b';
+
+           // TechTrackers.si YouTube Promo Video (al4gVacz0AE) — non-clickable iframe with shield
+           els.adIframe.src = "https://www.youtube.com/embed/al4gVacz0AE?si=fwP2xdp64H2SNE2W&autoplay=1&controls=0&modestbranding=1&rel=0&fs=0&disablekb=1&playsinline=1";
+
+           let timeLeft = 5;
+           if (adCountdownInterval) clearInterval(adCountdownInterval);
            adCountdownInterval = setInterval(() => {
-               timeLeft--; els.adTimer.textContent = timeLeft;
-               if (timeLeft <= 0) {
+               timeLeft--;
+               if (timeLeft > 0) {
+                   els.adTimer.textContent = String(timeLeft);
+               } else {
                    clearInterval(adCountdownInterval);
-                   els.adTimer.classList.add('hidden'); els.adCloseBtn.classList.remove('hidden');
-                   els.adFooterText.textContent = "Tap ✕ to claim +3 Credits!";
+                   adCountdownInterval = null;
+                   state.adClosable = true;
+                   els.adTimer.classList.add('hidden');
+                   els.adCloseBtn.classList.remove('hidden');
+                   els.adClickShield.classList.add('closable');
+                   els.adFooterText.textContent = "✓ 5s Complete! Click ANYWHERE to close & get +3 Credits!";
+                   els.adFooterText.style.color = '#4ade80';
                }
            }, 1000);
        }
-       function useCredit() {
-           if (state.credits <= 0) { showVideoAd(); return false; }
-           state.credits--; updateCreditDisplay(); return true;
+
+       function claimAdCreditsAndClose() {
+           if (!state.adClosable) return;
+           state.adClosable = false;
+           if (adCountdownInterval) {
+               clearInterval(adCountdownInterval);
+               adCountdownInterval = null;
+           }
+           state.credits = 3;
+           updateCreditDisplay();
+           els.adModal.classList.remove('active');
+           els.adIframe.src = "";
        }
-       els.adCloseBtn.addEventListener('click', () => {
-           state.credits = 3; updateCreditDisplay();
-           els.adModal.classList.remove('active'); els.adIframe.src = "";
+
+       // After 5 seconds, clicking ANYWHERE on the ad modal (backdrop, card, video shield, or X button) closes the ad and grants +3 credits!
+       els.adModal.addEventListener('click', () => {
+           if (state.adClosable) {
+               claimAdCreditsAndClose();
+           }
+       });
+       els.adClickShield.addEventListener('click', (e) => {
+           e.stopPropagation();
+           if (state.adClosable) {
+               claimAdCreditsAndClose();
+           }
+       });
+       els.adCloseBtn.addEventListener('click', (e) => {
+           e.stopPropagation();
+           if (state.adClosable) {
+               claimAdCreditsAndClose();
+           }
        });
 
-       /* CHAT LOGIC */
-       els.chatToggleBtn.addEventListener('click', () => { if (state.credits <= 0) showVideoAd(); else { els.chatModal.classList.add('active'); els.chatInput.focus(); } });
+       function useCredit() {
+           if (state.credits <= 0) {
+               showVideoAd();
+               return false;
+           }
+           state.credits--;
+           updateCreditDisplay();
+           return true;
+       }
+
+       /* =====================================================================
+          10. AI CHATBOT & CLIENT-SIDE FALLBACK ERROR HANDLING
+          ===================================================================== */
+       els.chatToggleBtn.addEventListener('click', () => {
+           // Always allow opening the chat modal so the user can click the pre-written default topics for free!
+           els.chatModal.classList.add('active');
+           els.chatInput.focus();
+       });
        els.closeChatBtn.addEventListener('click', () => els.chatModal.classList.remove('active'));
-       
+
        function addMessage(text, role) {
            const bubble = document.createElement('div');
            bubble.className = `msg-bubble msg-${role}`;
-           if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`; else bubble.textContent = text;
-           els.chatMessages.appendChild(bubble); els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+           if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
+           else bubble.textContent = text;
+           els.chatMessages.appendChild(bubble);
+           els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
        }
-       function escapeHtml(str) { const d = document.createElement('div'); d.textContent = str; return d.innerHTML; }
+
+       function escapeHtml(str) {
+           const d = document.createElement('div');
+           d.textContent = str;
+           return d.innerHTML;
+       }
 
        function showTypingIndicator() {
            const id = 'typing-' + Date.now();
@@ -819,118 +1481,264 @@
            els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
            return id;
        }
+
        function removeTypingIndicator(id) {
            const el = document.getElementById(id);
            if (el) el.remove();
        }
 
+       function generateLocalTopicFallback(query) {
+           const q = String(query || '').toLowerCase();
+           for (const item of PREWRITTEN_TOPICS_LIST) {
+               if (q.includes(item.id.replace('-', ' ')) || q.includes(item.title.toLowerCase())) {
+                   return item.text;
+               }
+           }
+           const cleanTopic = sanitizeText(query).slice(0, 40) || 'advanced technology';
+           return `Exploring ${cleanTopic} challenges our minds to connect theory with real-world practice. Every focused session builds sharper instincts, faster execution, and deeper mastery as you race past your previous limits.`;
+       }
+
+       function appendPracticeButtonToChat(cleanParagraph, topicLabel) {
+           const loadBtn = document.createElement('button');
+           loadBtn.className = 'btn-primary mt-2';
+           loadBtn.textContent = 'Practice This in Ghost Mode';
+           loadBtn.style.fontSize = '0.72rem';
+           loadBtn.style.padding = '8px';
+           loadBtn.addEventListener('click', () => {
+               state.rawText = cleanParagraph;
+               state.activeTopicTitle = topicLabel || 'AI Custom Topic';
+               els.activeTopicLabel.textContent = `Topic: ${state.activeTopicTitle}`;
+               processTextForDifficulty(cleanParagraph);
+
+               state.runHistory = [];
+               state.activeGhostRun = null;
+               state.selectedModalGhost = null;
+               els.ghostMetrics.style.display = 'none';
+               els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
+
+               resetDrill();
+               els.chatModal.classList.remove('active');
+           });
+           els.chatMessages.lastElementChild.appendChild(loadBtn);
+           els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+       }
+
        async function sendChatMessage() {
            const text = els.chatInput.value.trim();
-           if (!text || !useCredit()) return;
-           
-           addMessage(text, 'user'); 
-           els.chatInput.value = ''; 
+           if (!text) return;
+           if (!useCredit()) return;
+
+           addMessage(text, 'user');
+           els.chatInput.value = '';
            els.chatSend.disabled = true;
 
-           // Show the "Thinking..." bubble
            const typingId = showTypingIndicator();
 
            try {
                const res = await fetch('/api/chat', {
-                   method: 'POST', headers: { 'Content-Type': 'application/json' },
+                   method: 'POST',
+                   headers: { 'Content-Type': 'application/json' },
                    body: JSON.stringify({ message: text })
                });
-               
-               // Remove the "Thinking..." bubble once we get a response
+
                removeTypingIndicator(typingId);
-               
-               if (!res.ok) throw new Error('Server error');
-               
-               const data = await res.json(); 
-               const clean = sanitizeText(data.text);
+
+               if (!res.ok) {
+                   throw new Error('API endpoint returned HTTP ' + res.status);
+               }
+
+               const data = await res.json();
+               const clean = sanitizeText(data && data.text ? data.text : '');
+               if (!clean) {
+                   throw new Error('Empty paragraph received');
+               }
+
                addMessage(clean, 'ai');
-
-               const loadBtn = document.createElement('button');
-               loadBtn.className = 'btn-primary mt-2'; 
-               loadBtn.textContent = 'Practice This in Ghost Mode';
-               loadBtn.style.fontSize = '0.7rem'; 
-               loadBtn.style.padding = '8px';
-               loadBtn.onclick = () => {
-                   state.rawText = clean;
-                   processTextForDifficulty(clean);
-                   
-                   state.runHistory = [];
-                   state.activeGhostRun = null;
-                   els.ghostMetrics.style.display = 'none';
-                   els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
-
-                   resetDrill();
-                   els.chatModal.classList.remove('active');
-               };
-               els.chatMessages.lastElementChild.appendChild(loadBtn);
-               els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
+               appendPracticeButtonToChat(clean, text.slice(0, 28));
            } catch (err) {
                removeTypingIndicator(typingId);
-               addMessage('Error communicating with API.', 'ai');
-               state.credits++; 
+               // Refund credit when backend is unreachable or errors out, and provide a playable fallback paragraph!
+               state.credits = Math.min(3, state.credits + 1);
                updateCreditDisplay();
-           } finally { 
-               els.chatSend.disabled = false; 
+
+               const fallbackPara = generateLocalTopicFallback(text);
+               addMessage(fallbackPara, 'ai');
+               const note = document.createElement('div');
+               note.className = 'text-[0.68rem] text-[#facc15] mt-1';
+               note.textContent = '⚡ Offline/API Fallback used (Your credit was refunded! Ensure GROQ_API_KEY or GEMINI_API_KEY is set in Vercel).';
+               els.chatMessages.lastElementChild.appendChild(note);
+               appendPracticeButtonToChat(fallbackPara, text.slice(0, 28));
+           } finally {
+               els.chatSend.disabled = false;
            }
        }
 
        els.chatSend.addEventListener('click', sendChatMessage);
        els.chatInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendChatMessage(); });
 
-       /* THUNDER RENDERER */
-       const canvas = els.thunderCanvas; const ctx = canvas.getContext('2d');
-       let particles = []; let charW = 9.6;
-       function resizeThunderCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; charW = (parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4) * 0.601; }
-       resizeThunderCanvas(); window.addEventListener('resize', resizeThunderCanvas);
+       /* =====================================================================
+          11. LEGAL POLICIES & CONTACT US MODAL LOGIC
+          ===================================================================== */
+       function openLegalModal(policyKey) {
+           const key = LEGAL_POLICIES[policyKey] ? policyKey : 'privacy';
+           const policy = LEGAL_POLICIES[key];
+           els.legalModalTitle.textContent = policy.title;
+           els.legalModalBody.innerHTML = policy.html;
+           els.legalTabs.forEach(tab => {
+               tab.classList.toggle('active', tab.getAttribute('data-policy-tab') === key);
+           });
+           els.legalModal.classList.add('active');
+       }
 
-       const COLOR_MAP = { purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' }, green: { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' }, blue: { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' }, yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' }, red: { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' }, orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' } };
-       function getDiscoColors() { const h = ['purple', 'green', 'blue', 'yellow', 'red', 'orange']; return COLOR_MAP[h[Math.floor(Math.random() * h.length)]]; }
+       els.legalLinks.forEach(link => {
+           link.addEventListener('click', () => {
+               openLegalModal(link.getAttribute('data-policy'));
+           });
+       });
+
+       els.legalTabs.forEach(tab => {
+           tab.addEventListener('click', () => {
+               openLegalModal(tab.getAttribute('data-policy-tab'));
+           });
+       });
+
+       els.closeLegalBtn.addEventListener('click', () => els.legalModal.classList.remove('active'));
+       els.legalDoneBtn.addEventListener('click', () => els.legalModal.classList.remove('active'));
+
+       /* =====================================================================
+          12. THUNDER LIGHTNING RENDERER
+          ===================================================================== */
+       const canvas = els.thunderCanvas;
+       const ctx = canvas.getContext('2d');
+       let particles = [];
+       let charW = 9.6;
+
+       function resizeThunderCanvas() {
+           canvas.width = window.innerWidth;
+           canvas.height = window.innerHeight;
+           charW = (parseFloat(window.getComputedStyle(els.display).fontSize) || 26.4) * 0.601;
+       }
+       resizeThunderCanvas();
+       window.addEventListener('resize', resizeThunderCanvas);
+
+       const COLOR_MAP = {
+           purple: { tip: '#e9d5ff', mid: '#c084fc', glow: '#9333ea' },
+           green: { tip: '#dcfce7', mid: '#4ade80', glow: '#16a34a' },
+           blue: { tip: '#e0f7ff', mid: '#4dcfff', glow: '#22d3ee' },
+           yellow: { tip: '#fef9c3', mid: '#facc15', glow: '#ca8a04' },
+           red: { tip: '#fee2e2', mid: '#f87171', glow: '#dc2626' },
+           orange: { tip: '#ffedd5', mid: '#fb923c', glow: '#ea580c' }
+       };
+
+       function getDiscoColors() {
+           const h = ['purple', 'green', 'blue', 'yellow', 'red', 'orange'];
+           return COLOR_MAP[h[Math.floor(Math.random() * h.length)]];
+       }
 
        class LightningBolt {
            constructor(x, y, type) {
-               this.startX = x; this.y = y + (Math.random() - 0.5) * 10; this.life = 1; this.totalLen = charW; this.decay = 0.055 + Math.random() * 0.03;
+               this.startX = x;
+               this.y = y + (Math.random() - 0.5) * 10;
+               this.life = 1;
+               this.totalLen = charW;
+               this.decay = 0.055 + Math.random() * 0.03;
                let t = state.thunderColor === 'disco' ? getDiscoColors() : COLOR_MAP[state.thunderColor];
-               if (type === 'wrong') { this.dir = -1; this.colTip = COLOR_MAP.red.tip; this.colMid = COLOR_MAP.red.mid; this.colGlow = COLOR_MAP.red.glow; this.w = 3.0 + Math.random() * 1.5; } 
-               else { this.dir = 1; this.colTip = t.tip; this.colMid = t.mid; this.colGlow = t.glow; this.w = 2.6 + Math.random() * 1.2; }
+               if (type === 'wrong') {
+                   this.dir = -1;
+                   this.colTip = COLOR_MAP.red.tip;
+                   this.colMid = COLOR_MAP.red.mid;
+                   this.colGlow = COLOR_MAP.red.glow;
+                   this.w = 3.0 + Math.random() * 1.5;
+               } else {
+                   this.dir = 1;
+                   this.colTip = t.tip;
+                   this.colMid = t.mid;
+                   this.colGlow = t.glow;
+                   this.w = 2.6 + Math.random() * 1.2;
+               }
                this.buildPath();
            }
            buildPath() {
-               const segs = Math.max(3, Math.round(this.totalLen / 3)); const segLen = this.totalLen / segs; this.pts = [{ x: 0, y: 0 }]; let cx = 0, cy = 0; this.branches = [];
+               const segs = Math.max(3, Math.round(this.totalLen / 3));
+               const segLen = this.totalLen / segs;
+               this.pts = [{ x: 0, y: 0 }];
+               let cx = 0, cy = 0;
+               this.branches = [];
                for (let i = 1; i <= segs; i++) {
-                   cx += segLen + (Math.random() - 0.3) * segLen * 0.3; cy += (Math.random() - 0.5) * 6; this.pts.push({ x: cx, y: cy });
+                   cx += segLen + (Math.random() - 0.3) * segLen * 0.3;
+                   cy += (Math.random() - 0.5) * 6;
+                   this.pts.push({ x: cx, y: cy });
                    if (i > 0 && i < segs && Math.random() < 0.45) {
-                       const bLen = charW * (0.2 + Math.random() * 0.4); const bDir = Math.random() < 0.5 ? -1 : 1; const bAngle = bDir * (0.3 + Math.random() * 0.5); const bSegs = 2 + Math.floor(Math.random() * 2);
-                       const branch = [{ x: cx, y: cy }]; let bx = cx, by = cy;
-                       for (let j = 1; j <= bSegs; j++) { bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4; by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4; branch.push({ x: bx, y: by }); }
+                       const bLen = charW * (0.2 + Math.random() * 0.4);
+                       const bDir = Math.random() < 0.5 ? -1 : 1;
+                       const bAngle = bDir * (0.3 + Math.random() * 0.5);
+                       const bSegs = 2 + Math.floor(Math.random() * 2);
+                       const branch = [{ x: cx, y: cy }];
+                       let bx = cx, by = cy;
+                       for (let j = 1; j <= bSegs; j++) {
+                           bx += Math.cos(bAngle) * (bLen / bSegs) + (Math.random() - 0.3) * 4;
+                           by += Math.sin(bAngle) * (bLen / bSegs) + (Math.random() - 0.5) * 4;
+                           branch.push({ x: bx, y: by });
+                       }
                        this.branches.push(branch);
                    }
                }
            }
-           strokePath(pts, offX, offY, color, width, blur, alpha) { if (pts.length < 2) return; ctx.save(); ctx.globalAlpha = alpha; ctx.shadowBlur = blur; ctx.shadowColor = color; ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.translate(offX, offY); ctx.beginPath(); ctx.moveTo(pts[0].x * this.dir, pts[0].y); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y); ctx.stroke(); ctx.restore(); }
-           drawPoly(pts, ox, oy, a) { this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28); this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9); this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a); }
+           strokePath(pts, offX, offY, color, width, blur, alpha) {
+               if (pts.length < 2) return;
+               ctx.save();
+               ctx.globalAlpha = alpha;
+               ctx.shadowBlur = blur;
+               ctx.shadowColor = color;
+               ctx.strokeStyle = color;
+               ctx.lineWidth = width;
+               ctx.lineCap = 'round';
+               ctx.lineJoin = 'round';
+               ctx.translate(offX, offY);
+               ctx.beginPath();
+               ctx.moveTo(pts[0].x * this.dir, pts[0].y);
+               for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x * this.dir, pts[i].y);
+               ctx.stroke();
+               ctx.restore();
+           }
+           drawPoly(pts, ox, oy, a) {
+               this.strokePath(pts, ox, oy, this.colGlow, this.w + 5, 28, a * 0.28);
+               this.strokePath(pts, ox, oy, this.colMid, this.w, 12, a * 0.9);
+               this.strokePath(pts, ox, oy, this.colTip, this.w * 0.3, 4, a);
+           }
            update() { this.life -= this.decay; }
-           draw() { const a = Math.max(0, this.life); this.drawPoly(this.pts, this.startX, this.y, a); for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55); }
+           draw() {
+               const a = Math.max(0, this.life);
+               this.drawPoly(this.pts, this.startX, this.y, a);
+               for (const b of this.branches) this.drawPoly(b, this.startX, this.y, a * 0.55);
+           }
        }
 
        function spawnThunderBolt(charIndex, type) {
            if (!state.thunderEnabled || !state.isTypingStarted || type === 'ghost') return;
-           const span = document.getElementById(`char-${charIndex}`); if (!span) return;
-           const rect = span.getBoundingClientRect(); const x = rect.left + rect.width / 2; const y = rect.top + rect.height / 2;
-           for (let i = 0; i < (type === 'correct' ? 2 : 3); i++) particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
+           const span = document.getElementById(`char-${charIndex}`);
+           if (!span) return;
+           const rect = span.getBoundingClientRect();
+           const x = rect.left + rect.width / 2;
+           const y = rect.top + rect.height / 2;
+           for (let i = 0; i < (type === 'correct' ? 2 : 3); i++) {
+               particles.push(new LightningBolt(x, y + (Math.random() - 0.5) * 10, type));
+           }
        }
 
        (function thunderLoop() {
            ctx.clearRect(0, 0, canvas.width, canvas.height);
-           particles = particles.filter(p => p.life > 0); particles.forEach(p => { p.update(); p.draw(); });
+           particles = particles.filter(p => p.life > 0);
+           particles.forEach(p => { p.update(); p.draw(); });
            requestAnimationFrame(thunderLoop);
        })();
 
-       document.addEventListener('DOMContentLoaded', () => { loadRandomParagraph(); updateCaretColor(); updateCreditDisplay(); });
+       window.addEventListener('load', () => {
+           renderTopicChips();
+           loadRandomParagraph();
+           updateCaretColor();
+           updateCreditDisplay();
+       });
    </script>
 </body>
 </html>
