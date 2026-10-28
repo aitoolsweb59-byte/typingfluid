@@ -652,56 +652,44 @@
        const LEGAL_POLICIES = {
            privacy: {
                title: 'PRIVACY POLICY',
-               html: `
-                   <p><strong>Effective Date:</strong> October 2026</p>
-                   <p>Welcome to <strong>FluidType (Ghost Race Mode)</strong>, operated in partnership with <strong>TechTrackers.si</strong>. We respect your privacy and are committed to keeping your personal typing data transparent and secure.</p>
-                   <h4 class="font-bold text-white mt-2">1. Information We Process</h4>
-                   <p>Your typing speed (WPM), keystroke timing intervals, accuracy metrics, and Ghost Race history are processed locally inside your browser memory during your active session. When you use the optional AI Chat feature, only the topic text you submit is sent to our serverless API endpoint (powered by Groq and Google Gemini) to generate a practice paragraph.</p>
-                   <h4 class="font-bold text-white mt-2">2. No Sale of Personal Data</h4>
-                   <p>We do not sell, rent, or trade personal user data to third parties. Sponsored promotional videos shown in the credit reward popup promote our official creator page (<strong>@techtrackers.si</strong>) without harvesting personal profiles.</p>
-               `
+               html: '<p><strong>Effective Date:</strong> October 2026</p>' +
+                   '<p>Welcome to <strong>FluidType (Ghost Race Mode)</strong>, operated in partnership with <strong>TechTrackers.si</strong>. We respect your privacy and are committed to keeping your personal typing data transparent and secure.</p>' +
+                   '<h4 class="font-bold text-white mt-2">1. Information We Process</h4>' +
+                   '<p>Your typing speed (WPM), keystroke timing intervals, accuracy metrics, and Ghost Race history are processed locally inside your browser memory during your active session. When you use the optional AI Chat feature, only the topic text you submit is sent to our serverless API endpoint (powered by Groq and Google Gemini) to generate a practice paragraph.</p>' +
+                   '<h4 class="font-bold text-white mt-2">2. No Sale of Personal Data</h4>' +
+                   '<p>We do not sell, rent, or trade personal user data to third parties. Sponsored promotional videos shown in the credit reward popup promote our official creator page (<strong>@techtrackers.si</strong>) without harvesting personal profiles.</p>'
            },
            terms: {
                title: 'TERMS & CONDITIONS',
-               html: `
-                   <p>By accessing and using <strong>FluidType</strong>, you agree to abide by these Terms &amp; Conditions.</p>
-                   <h4 class="font-bold text-white mt-2">1. Acceptable Use</h4>
-                   <p>You agree to use FluidType and its AI topic generator for lawful educational and typing-practice purposes. Automated scraping, rate-limit abuse, or attempting to bypass API protections is prohibited.</p>
-                   <h4 class="font-bold text-white mt-2">2. Credits &amp; Promotional Videos</h4>
-                   <p>Pre-written practice topics are completely free and unlimited. Custom AI-generated paragraphs use in-app credits, which can be replenished for free by watching a 5-second promotional preview from <strong>TechTrackers.si</strong>.</p>
-               `
+               html: '<p>By accessing and using <strong>FluidType</strong>, you agree to abide by these Terms &amp; Conditions.</p>' +
+                   '<h4 class="font-bold text-white mt-2">1. Acceptable Use</h4>' +
+                   '<p>You agree to use FluidType and its AI topic generator for lawful educational and typing-practice purposes. Automated scraping, rate-limit abuse, or attempting to bypass API protections is prohibited.</p>' +
+                   '<h4 class="font-bold text-white mt-2">2. Credits &amp; Promotional Videos</h4>' +
+                   '<p>Pre-written practice topics are completely free and unlimited. Custom AI-generated paragraphs use in-app credits, which can be replenished for free by watching a 5-second promotional preview from <strong>TechTrackers.si</strong>.</p>'
            },
            disclaimer: {
                title: 'DISCLAIMER',
-               html: `
-                   <p>All typing drills, WPM metrics, and AI-generated practice paragraphs on <strong>FluidType</strong> are provided on an "as-is" basis for skill-building and entertainment purposes.</p>
-                   <p>Paragraphs generated dynamically via third-party large language models (Groq / Google Gemini) or pre-written science/tech summaries are intended strictly as typing exercises and do not constitute professional, legal, medical, or financial advice.</p>
-               `
+               html: '<p>All typing drills, WPM metrics, and AI-generated practice paragraphs on <strong>FluidType</strong> are provided on an "as-is" basis for skill-building and entertainment purposes.</p>' +
+                   '<p>Paragraphs generated dynamically via third-party large language models (Groq / Google Gemini) or pre-written science/tech summaries are intended strictly as typing exercises and do not constitute professional, legal, medical, or financial advice.</p>'
            },
            copyright: {
                title: 'COPYRIGHT POLICY',
-               html: `
-                   <p>© 2026 <strong>FluidType &amp; TechTrackers.si</strong>. All rights reserved.</p>
-                   <p>The FluidType Ghost Race interface, custom lightning particle engine, visual design, and original pre-written practice modules are protected by applicable copyright laws. Promotional video content belongs to <strong>TechTrackers.si (@techtrackers.si)</strong>. You may not copy, redistribute, or re-host the source code commercially without prior written permission.</p>
-               `
+               html: '<p>© 2026 <strong>FluidType &amp; TechTrackers.si</strong>. All rights reserved.</p>' +
+                   '<p>The FluidType Ghost Race interface, custom lightning particle engine, visual design, and original pre-written practice modules are protected by applicable copyright laws. Promotional video content belongs to <strong>TechTrackers.si (@techtrackers.si)</strong>. You may not copy, redistribute, or re-host the source code commercially without prior written permission.</p>'
            },
            cookie: {
                title: 'COOKIE POLICY',
-               html: `
-                   <p><strong>FluidType</strong> uses minimal local browser storage and essential session state to keep track of your typing settings, Ghost Race WPM history, and earned AI credits.</p>
-                   <p>When a promotional video from YouTube is embedded to replenish credits, YouTube may set standard media playback cookies in accordance with Google's Privacy &amp; Cookie policies. You can clear browser storage at any time via your browser settings.</p>
-               `
+               html: '<p><strong>FluidType</strong> uses minimal local browser storage and essential session state to keep track of your typing settings, Ghost Race WPM history, and earned AI credits.</p>' +
+                   '<p>When a promotional video from YouTube is embedded to replenish credits, YouTube may set standard media playback cookies in accordance with Google\'s Privacy &amp; Cookie policies. You can clear browser storage at any time via your browser settings.</p>'
            },
            contact: {
                title: 'CONTACT US',
-               html: `
-                   <p>Have feedback, bug reports, or collaboration inquiries for <strong>FluidType</strong> or <strong>TechTrackers.si</strong>? Reach out to us directly:</p>
-                   <ul class="list-disc pl-5 space-y-1 mt-2">
-                       <li><strong>Instagram:</strong> <a href="https://www.instagram.com/techtrackers.si" target="_blank" rel="noopener noreferrer" class="text-[#22d3ee] underline">@techtrackers.si</a></li>
-                       <li><strong>YouTube Promo Channel:</strong> <a href="https://youtu.be/al4gVacz0AE" target="_blank" rel="noopener noreferrer" class="text-[#22d3ee] underline">TechTrackers Official Video</a></li>
-                       <li><strong>Support &amp; Inquiries:</strong> Direct message us on Instagram at <strong>@techtrackers.si</strong> for rapid support.</li>
-                   </ul>
-               `
+               html: '<p>Have feedback, bug reports, or collaboration inquiries for <strong>FluidType</strong> or <strong>TechTrackers.si</strong>? Reach out to us directly:</p>' +
+                   '<ul class="list-disc pl-5 space-y-1 mt-2">' +
+                   '<li><strong>Instagram:</strong> <a href="https://www.instagram.com/techtrackers.si" target="_blank" rel="noopener noreferrer" class="text-[#22d3ee] underline">@techtrackers.si</a></li>' +
+                   '<li><strong>YouTube Promo Channel:</strong> <a href="https://youtu.be/al4gVacz0AE" target="_blank" rel="noopener noreferrer" class="text-[#22d3ee] underline">TechTrackers Official Video</a></li>' +
+                   '<li><strong>Support &amp; Inquiries:</strong> Direct message us on Instagram at <strong>@techtrackers.si</strong> for rapid support.</li>' +
+                   '</ul>'
            }
        };
 
@@ -802,7 +790,7 @@
            const clean = sanitizeText(topicObj.text);
            state.rawText = clean;
            state.activeTopicTitle = topicObj.title;
-           els.activeTopicLabel.textContent = `Topic: ${topicObj.title}`;
+           els.activeTopicLabel.textContent = 'Topic: ' + topicObj.title;
 
            // Highlight active chip across all chip bars
            document.querySelectorAll('.topic-chip').forEach(btn => {
@@ -816,10 +804,10 @@
            state.activeGhostRun = null;
            state.selectedModalGhost = null;
            els.ghostMetrics.style.display = 'none';
-           els.ghostStatus.textContent = `Mode: Initial Solo Run (${topicObj.title} Baseline)`;
+           els.ghostStatus.textContent = 'Mode: Initial Solo Run (' + topicObj.title + ' Baseline)';
 
            if (sourceModal === 'chat') {
-               addMessage(`Selected Instant Topic: ${topicObj.title}`, 'user');
+               addMessage('Selected Instant Topic: ' + topicObj.title, 'user');
                addMessage(clean, 'ai');
                const infoTag = document.createElement('div');
                infoTag.className = 'text-[0.7rem] text-[#4ade80] font-semibold mt-1';
@@ -871,7 +859,7 @@
           ===================================================================== */
        els.thunderToggleBtn.addEventListener('click', () => {
            state.thunderEnabled = !state.thunderEnabled;
-           els.thunderToggleBtn.innerHTML = `<span>⚡ THUNDER: ${state.thunderEnabled ? 'ON' : 'OFF'}</span>`;
+           els.thunderToggleBtn.innerHTML = '<span>⚡ THUNDER: ' + (state.thunderEnabled ? 'ON' : 'OFF') + '</span>';
        });
 
        els.thunderColorSelect.addEventListener('change', (e) => {
@@ -938,7 +926,7 @@
            if (runId === 1) return 'First Time Speed (Run #1)';
            if (runId === 2) return 'Second Time Speed (Run #2)';
            if (runId === 3) return 'Third Time Speed (Run #3)';
-           return `Race Run #${runId}`;
+           return 'Race Run #' + runId;
        }
 
        function getHighestWpmRun() {
@@ -955,16 +943,16 @@
        function updateModalGhostButtons(highestRun) {
            const chosen = state.selectedModalGhost || highestRun;
            if (chosen) {
-               els.raceHighestBtn.textContent = `Play against ${chosen.wpm} WPM Ghost`;
+               els.raceHighestBtn.textContent = 'Play against ' + chosen.wpm + ' WPM Ghost';
            }
            const secondRun = state.runHistory.length >= 2 ? state.runHistory[state.runHistory.length - 1] : null;
            if (secondRun && highestRun && secondRun.id !== highestRun.id) {
                els.raceSecondBtn.style.display = 'block';
-               els.raceSecondBtn.textContent = `Race with Run #${secondRun.id} (${secondRun.wpm} WPM)`;
+               els.raceSecondBtn.textContent = 'Race with Run #' + secondRun.id + ' (' + secondRun.wpm + ' WPM)';
            } else if (state.runHistory.length >= 2) {
                const prevRun = state.runHistory[state.runHistory.length - 2];
                els.raceSecondBtn.style.display = 'block';
-               els.raceSecondBtn.textContent = `Race with Run #${prevRun.id} (${prevRun.wpm} WPM)`;
+               els.raceSecondBtn.textContent = 'Race with Run #' + prevRun.id + ' (' + prevRun.wpm + ' WPM)';
            } else {
                els.raceSecondBtn.style.display = 'none';
            }
@@ -978,9 +966,9 @@
            const latestRun = state.runHistory[state.runHistory.length - 1];
            if (latestRun && highestRun && latestRun.id !== highestRun.id) {
                els.ghostModalsubtitle = document.getElementById('ghost-modal-subtitle');
-               els.ghostModalsubtitle.textContent = `Run #${latestRun.id} finished at ${latestRun.wpm} WPM. Since that was slower than your record, your Highest Speed (${highestRun.wpm} WPM) is automatically selected & highlighted in yellow!`;
+               els.ghostModalsubtitle.textContent = 'Run #' + latestRun.id + ' finished at ' + latestRun.wpm + ' WPM. Since that was slower than your record, your Highest Speed (' + highestRun.wpm + ' WPM) is automatically selected & highlighted in yellow!';
            } else if (highestRun) {
-               document.getElementById('ghost-modal-subtitle').textContent = `New Best or Matched Record! Your Highest Speed (${highestRun.wpm} WPM) is automatically selected & highlighted in yellow.`;
+               document.getElementById('ghost-modal-subtitle').textContent = 'New Best or Matched Record! Your Highest Speed (' + highestRun.wpm + ' WPM) is automatically selected & highlighted in yellow.';
            }
 
            const runsToShow = state.runHistory.slice(-4);
@@ -989,23 +977,22 @@
                const btn = document.createElement('button');
                btn.type = 'button';
                btn.className = 'btn-ghost-select' + (isHighest ? ' highest-yellow selected-ghost' : '');
-               btn.innerHTML = `
-                   <div class="flex flex-col gap-1">
-                       <div class="flex items-center gap-2 flex-wrap">
-                           <span class="font-bold text-sm ${isHighest ? 'text-[#facc15]' : 'text-white'}">${getOrdinalRunLabel(run.id)}</span>
-                           ${isHighest ? '<span class="badge-yellow">★ Highest WPM • Auto-Selected</span>' : ''}
-                       </div>
-                       <div class="text-xs ${isHighest ? 'text-[#fef08a]' : 'text-[#94a3b8]'}">
-                           Accuracy: ${run.accuracy}% • ${isHighest ? 'Race with the highest WPM speed' : `Click to race against Run #${run.id}`}
-                       </div>
-                   </div>
-                   <div class="text-right">
-                       <div class="text-xl font-black ${isHighest ? 'text-[#facc15]' : 'text-[#f472b6]'} font-['Orbitron']">${run.wpm} WPM</div>
-                       <div class="text-[0.65rem] uppercase tracking-wider ${isHighest ? 'text-[#facc15]' : 'text-[#64748b]'} font-bold">
-                           ${isHighest ? 'Best Ghost' : `Run #${run.id} Ghost`}
-                       </div>
-                   </div>
-               `;
+               btn.innerHTML =
+                   '<div class="flex flex-col gap-1">' +
+                       '<div class="flex items-center gap-2 flex-wrap">' +
+                           '<span class="font-bold text-sm ' + (isHighest ? 'text-[#facc15]' : 'text-white') + '">' + getOrdinalRunLabel(run.id) + '</span>' +
+                           (isHighest ? '<span class="badge-yellow">★ Highest WPM • Auto-Selected</span>' : '') +
+                       '</div>' +
+                       '<div class="text-xs ' + (isHighest ? 'text-[#fef08a]' : 'text-[#94a3b8]') + '">' +
+                           'Accuracy: ' + run.accuracy + '% • ' + (isHighest ? 'Race with the highest WPM speed' : 'Click to race against Run #' + run.id) +
+                       '</div>' +
+                   '</div>' +
+                   '<div class="text-right">' +
+                       '<div class="text-xl font-black ' + (isHighest ? 'text-[#facc15]' : 'text-[#f472b6]') + ' font-[\'Orbitron\']">' + run.wpm + ' WPM</div>' +
+                       '<div class="text-[0.65rem] uppercase tracking-wider ' + (isHighest ? 'text-[#facc15]' : 'text-[#64748b]') + ' font-bold">' +
+                           (isHighest ? 'Best Ghost' : 'Run #' + run.id + ' Ghost') +
+                       '</div>' +
+                   '</div>';
                btn.addEventListener('click', () => {
                    state.selectedModalGhost = run;
                    selectGhostRun(run);
@@ -1067,7 +1054,7 @@
            els.ghostWpm.textContent = run.wpm;
            const highestRun = getHighestWpmRun();
            const isBest = highestRun && highestRun.id === run.id;
-           els.ghostStatus.textContent = `Mode: Playing against ${run.wpm} WPM Ghost (Run #${run.id}${isBest ? ' ★ Highest Speed' : ''})`;
+           els.ghostStatus.textContent = 'Mode: Playing against ' + run.wpm + ' WPM Ghost (Run #' + run.id + (isBest ? ' ★ Highest Speed' : '') + ')';
            resetDrill();
        }
 
@@ -1080,7 +1067,7 @@
                const span = document.createElement('span');
                span.innerText = char;
                span.className = 'char untyped';
-               span.id = `char-${idx}`;
+               span.id = 'char-' + idx;
                els.display.appendChild(span);
            });
            updateCursorUI();
@@ -1089,11 +1076,11 @@
        function updateCursorUI() {
            document.querySelectorAll('.char').forEach(el => el.classList.remove('caret', 'caret-static', 'ghost-caret'));
            if (state.currentIndex < state.charArray.length) {
-               const active = document.getElementById(`char-${state.currentIndex}`);
+               const active = document.getElementById('char-' + state.currentIndex);
                if (active) active.classList.add(state.timerActive ? 'caret-static' : 'caret');
            }
            if (state.activeGhostRun && state.ghostIndex < state.charArray.length) {
-               const ghostEl = document.getElementById(`char-${state.ghostIndex}`);
+               const ghostEl = document.getElementById('char-' + state.ghostIndex);
                if (ghostEl) ghostEl.classList.add('ghost-caret');
            }
        }
@@ -1152,7 +1139,7 @@
            const c0 = document.getElementById('char-0');
            if (!c0) return 58;
            for (let i = 1; i < state.charArray.length; i++) {
-               const c = document.getElementById(`char-${i}`);
+               const c = document.getElementById('char-' + i);
                if (c && c.offsetTop > c0.offsetTop + 2) return c.offsetTop - c0.offsetTop;
            }
            return 58;
@@ -1160,7 +1147,7 @@
 
        function autoScroll() {
            if (!state.isTypingStarted || state.charArray.length === 0) return;
-           const activeChar = document.getElementById(`char-${state.currentIndex}`);
+           const activeChar = document.getElementById('char-' + state.currentIndex);
            if (!activeChar) return;
            const container = els.container;
            const charTop = activeChar.offsetTop;
@@ -1236,7 +1223,7 @@
                    if (state.currentIndex > 0) {
                        state.currentIndex--;
                        state.typedArray.pop();
-                       const span = document.getElementById(`char-${state.currentIndex}`);
+                       const span = document.getElementById('char-' + state.currentIndex);
                        if (span) span.className = 'char untyped';
                    }
                }
@@ -1247,7 +1234,7 @@
            while (state.currentIndex < state.charArray.length && inputLength > state.currentIndex) {
                const typedChar = inputValue[state.currentIndex];
                const expectedChar = state.charArray[state.currentIndex];
-               const span = document.getElementById(`char-${state.currentIndex}`);
+               const span = document.getElementById('char-' + state.currentIndex);
                state.totalKeystrokes++;
 
                if (typedChar === expectedChar) {
@@ -1347,7 +1334,7 @@
            state.activeGhostRun = null;
            state.selectedModalGhost = null;
            els.ghostMetrics.style.display = 'none';
-           els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
+           els.ghostStatus.textContent = 'Mode: Initial Solo Run (Setting your Ghost Baseline)';
 
            resetDrill();
            els.customizeModal.classList.remove('active');
@@ -1458,8 +1445,8 @@
 
        function addMessage(text, role) {
            const bubble = document.createElement('div');
-           bubble.className = `msg-bubble msg-${role}`;
-           if (role === 'ai') bubble.innerHTML = `<div>${escapeHtml(text)}</div>`;
+           bubble.className = 'msg-bubble msg-' + role;
+           if (role === 'ai') bubble.innerHTML = '<div>' + escapeHtml(text) + '</div>';
            else bubble.textContent = text;
            els.chatMessages.appendChild(bubble);
            els.chatMessages.scrollTop = els.chatMessages.scrollHeight;
@@ -1495,7 +1482,7 @@
                }
            }
            const cleanTopic = sanitizeText(query).slice(0, 40) || 'advanced technology';
-           return `Exploring ${cleanTopic} challenges our minds to connect theory with real-world practice. Every focused session builds sharper instincts, faster execution, and deeper mastery as you race past your previous limits.`;
+           return 'Exploring ' + cleanTopic + ' challenges our minds to connect theory with real-world practice. Every focused session builds sharper instincts, faster execution, and deeper mastery as you race past your previous limits.';
        }
 
        function appendPracticeButtonToChat(cleanParagraph, topicLabel) {
@@ -1507,14 +1494,14 @@
            loadBtn.addEventListener('click', () => {
                state.rawText = cleanParagraph;
                state.activeTopicTitle = topicLabel || 'AI Custom Topic';
-               els.activeTopicLabel.textContent = `Topic: ${state.activeTopicTitle}`;
+               els.activeTopicLabel.textContent = 'Topic: ' + state.activeTopicTitle;
                processTextForDifficulty(cleanParagraph);
 
                state.runHistory = [];
                state.activeGhostRun = null;
                state.selectedModalGhost = null;
                els.ghostMetrics.style.display = 'none';
-               els.ghostStatus.textContent = `Mode: Initial Solo Run (Setting your Ghost Baseline)`;
+               els.ghostStatus.textContent = 'Mode: Initial Solo Run (Setting your Ghost Baseline)';
 
                resetDrill();
                els.chatModal.classList.remove('active');
@@ -1554,6 +1541,17 @@
                }
 
                addMessage(clean, 'ai');
+               if (data && data.provider === 'fallback') {
+                   state.credits = Math.min(3, state.credits + 1);
+                   updateCreditDisplay();
+                   const diagText = Array.isArray(data.diagnostics) && data.diagnostics.length > 0
+                       ? data.diagnostics.join(' | ')
+                       : 'Check GROQ_API_KEY or GEMINI_API_KEY in Vercel Settings -> Environment Variables and Redeploy.';
+                   const note = document.createElement('div');
+                   note.className = 'text-[0.68rem] text-[#facc15] mt-1';
+                   note.textContent = '⚡ Built-in Topic Generator used (Credit refunded). API Status: ' + diagText;
+                   els.chatMessages.lastElementChild.appendChild(note);
+               }
                appendPracticeButtonToChat(clean, text.slice(0, 28));
            } catch (err) {
                removeTypingIndicator(typingId);
@@ -1716,7 +1714,7 @@
 
        function spawnThunderBolt(charIndex, type) {
            if (!state.thunderEnabled || !state.isTypingStarted || type === 'ghost') return;
-           const span = document.getElementById(`char-${charIndex}`);
+           const span = document.getElementById('char-' + charIndex);
            if (!span) return;
            const rect = span.getBoundingClientRect();
            const x = rect.left + rect.width / 2;
